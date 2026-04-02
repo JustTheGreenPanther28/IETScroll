@@ -1,6 +1,12 @@
 package com.ietscroll.service.impl;
 
+import java.util.ArrayList;
+
 import org.modelmapper.ModelMapper;
+import org.springframework.security.core.userdetails.User;
+import org.springframework.security.core.userdetails.UserDetails;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 //import org.springframework.security.core.userdetails.UserDetails;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
@@ -11,17 +17,24 @@ import com.ietscroll.repository.UserRepository;
 import com.ietscroll.service.OTPService;
 import com.ietscroll.service.UserService;
 
+import jakarta.validation.constraints.Email;
+import jakarta.validation.constraints.NotBlank;
+import jakarta.validation.constraints.NotNull;
+
 @Service
 public class UserServiceImpl implements UserService {
 
 	private UserRepository userRepo;
 	private OTPService otpService;
 	private ModelMapper modelMapper;
+	private BCryptPasswordEncoder encoder;
 
-	public UserServiceImpl(UserRepository userRepo, ModelMapper modelMapper, OTPService otpService) {
+	public UserServiceImpl(UserRepository userRepo, ModelMapper modelMapper, OTPService otpService,
+			BCryptPasswordEncoder encoder) {
 		this.userRepo = userRepo;
 		this.modelMapper = modelMapper;
 		this.otpService = otpService;
+		this.encoder = encoder;
 	}
 
 	@Override
@@ -40,7 +53,7 @@ public class UserServiceImpl implements UserService {
 		UserEntity user = new UserEntity();
 
 		user.setEmail(userDTO.getEmail());
-		user.setEncryptedPassword(userDTO.getPassword());
+		user.setEncryptedPassword(encoder.encode(userDTO.getPassword()));
 		user.setUsername(userDTO.getUsername());
 		user.setFullName(userDTO.getFullName());
 		user.setBranch(userDTO.getBranch());
@@ -52,16 +65,30 @@ public class UserServiceImpl implements UserService {
 		return modelMapper.map(createdUser, UserDTO.class);
 	}
 
-//	@Override
-//	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-//		
-//		if(username.endsWith(CollegeDefaults.COLLEGE_EMAIL_ENDS_WITH.name())) {
-//			new UsernameNotFoundException("Enter IET DAVV college email");
-//		}
-//		
-//		
-//		
-//		return null;
-//	}
+	@Override
+	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+		if(username==null || !username.endsWith("@ietdavv.edu.in")) {
+			throw new UsernameNotFoundException("Incorrect email");
+		}
+		UserEntity user = userRepo.findByEmail(username);
+		if(user==null || !user.isVerified()) {
+			throw new UsernameNotFoundException("Inccorect email");
+		}
+		
+		return new User(user.getEmail(),user.getEncryptedPassword(),new ArrayList<>());
+	}
+
+	@Override
+	public UserDTO getUserByEmail(@NotNull @Email @NotBlank String email) {
+		if(email==null || !email.endsWith("@ietdavv.edu.in")) {
+			throw new UsernameNotFoundException("Incorrect email");
+		}
+		UserEntity user = userRepo.findByEmail(email);
+		if(user==null) {
+			throw new UsernameNotFoundException("User doesn't exist");
+		}
+		return modelMapper.map(user, UserDTO.class);
+	}
 
 }

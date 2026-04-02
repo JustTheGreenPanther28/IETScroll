@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import com.ietscroll.entity.Branch;
 import com.ietscroll.entity.Course;
+import com.ietscroll.security.Role;
 
 public class UserDTO {
 
@@ -18,6 +19,8 @@ public class UserDTO {
 	private Branch branch;
 	private String password;
 	private String encryptedPassword;
+	private Role role;
+	
 	public int getUserId() {
 		return userId;
 	}
@@ -77,6 +80,12 @@ public class UserDTO {
 	}
 	public void setPassword(String password) {
 		this.password = password;
+	}
+	public Role getRole() {
+		return role;
+	}
+	public void setRole(Role role) {
+		this.role = role;
 	}
 	
 	

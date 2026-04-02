@@ -3,6 +3,8 @@ package com.ietscroll.entity;
 import java.time.Year;
 import java.util.UUID;
 
+import com.ietscroll.security.Role;
+
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.EnumType;
@@ -30,7 +32,7 @@ public class UserEntity {
 	private String fullName;
 
 	@Email
-	@Column(unique = true , nullable = false, length = 50)
+	@Column(unique = true, nullable = false, length = 50)
 	private String email;
 
 	@Column(nullable = true)
@@ -46,8 +48,12 @@ public class UserEntity {
 
 	@Column(nullable = false)
 	private String encryptedPassword;
-	
-	private boolean isVerified=false;
+
+	private boolean isVerified = false;
+
+	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
+	private Role role = Role.STUDENT;
 
 	@PrePersist
 	protected void onCreate() {
@@ -128,5 +134,13 @@ public class UserEntity {
 
 	public void setVerified(boolean isVerified) {
 		this.isVerified = isVerified;
+	}
+
+	public Role getRole() {
+		return role;
+	}
+
+	public void setRole(Role role) {
+		this.role = role;
 	}
 }
