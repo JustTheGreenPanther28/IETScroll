@@ -22,13 +22,13 @@ public class UserEntity {
 	private UUID publicUserId;
 
 	@Column(nullable = false, unique = true, length = 35)
-	private String userName;
+	private String username;
 
 	@Column(nullable = true, unique = false, length = 55)
 	private String fullName;
 
 	@Email
-	@Column(nullable = false, length = 50)
+	@Column(unique = true , nullable = false, length = 50)
 	private String email;
 
 	@Column(nullable = true)
@@ -42,6 +42,8 @@ public class UserEntity {
 
 	@Column(nullable = false)
 	private String encryptedPassword;
+	
+	private boolean isVerified=false;
 
 	@PrePersist
 	protected void onCreate() {
@@ -60,12 +62,12 @@ public class UserEntity {
 		return publicUserId;
 	}
 
-	public String getUserName() {
-		return userName;
+	public String getUsername() {
+		return username;
 	}
 
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUsername(String userName) {
+		this.username = userName;
 	}
 
 	public String getFullName() {
@@ -116,4 +118,11 @@ public class UserEntity {
 		this.encryptedPassword = encryptedPassword;
 	}
 
+	public boolean isVerified() {
+		return isVerified;
+	}
+
+	public void setVerified(boolean isVerified) {
+		this.isVerified = isVerified;
+	}
 }
