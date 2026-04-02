@@ -4,20 +4,27 @@ import java.security.SecureRandom;
 import java.time.LocalDateTime;
 import java.util.List;
 
+import org.springframework.stereotype.Service;
+
 import com.ietscroll.entity.OTPEntity;
 import com.ietscroll.entity.UserEntity;
 import com.ietscroll.repository.OTPRepository;
 import com.ietscroll.repository.UserRepository;
+import com.ietscroll.response.OTPVerificationResult;
+import com.ietscroll.service.EmailService;
 import com.ietscroll.service.OTPService;
 
+@Service
 public class OTPServiceImpl implements OTPService {
 
 	private UserRepository userRepo;
 	private OTPRepository otpRepo;
+	private EmailService emailService;
 
-	public OTPServiceImpl(UserRepository userRepo, OTPRepository otpRepo) {
+	public OTPServiceImpl(EmailService emailService, UserRepository userRepo, OTPRepository otpRepo) {
 		this.otpRepo = otpRepo;
 		this.userRepo = userRepo;
+		this.emailService = emailService;
 	}
 
 	@Override
@@ -30,25 +37,32 @@ public class OTPServiceImpl implements OTPService {
 		otpEntity.setEmail(email);
 		otpEntity.setOtp(otp);
 
+		emailService.sendEmail(email, String.valueOf(otp));
+
 		otpRepo.save(otpEntity);
 
 	}
 
 	@Override
-	public boolean verifyOTP(int otpGivenByUser, String email) {
-		
-		List<OTPEntity> otps =  otpRepo.findByEmail(email);
-				
-		int originalOTP = otps.get(otps.size()-1).getOtp();
-		
-		if(otpGivenByUser==originalOTP) {
+	public OTPVerificationResult verifyOTP(int otpGivenByUser, String email) {
+
+		otpRepo.deleteOldOTPs();
+		List<OTPEntity> otps = otpRepo.findByEmail(email);
+
+		if (otps == null) {
+			throw new RuntimeException("Incorrect email or OTP expired!");
+		}
+
+		int originalOTP = otps.get(otps.size() - 1).getOtp();
+
+		if (otpGivenByUser == originalOTP) {
 			UserEntity user = userRepo.findByEmail(email);
 			user.setVerified(true);
 			userRepo.save(user);
-			return true;
+			return OTPVerificationResult.SCCUESS;
 		}
-		
-		return false;
+
+		return OTPVerificationResult.FAILED;
 	}
 
 }

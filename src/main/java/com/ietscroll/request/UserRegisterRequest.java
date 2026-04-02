@@ -9,7 +9,7 @@ import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
 
-public record UserRegisterRequest(@NotBlank String userName, String fullName, @Email @NotNull @NotBlank String email,
+public record UserRegisterRequest(@NotBlank String username, String fullName, @Email @NotNull @NotBlank String email,
 		Year yearOfPassout, @NotNull @NotBlank Course course, @NotNull @NotBlank Branch branch,
 		@NotNull @NotBlank String password) {
 

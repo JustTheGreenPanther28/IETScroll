@@ -27,11 +27,11 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO register(UserDTO userDTO) {
 
-		if (!userDTO.getEmail().endsWith(CollegeDefaults.COLLEGE_EMAIL_ENDS_WITH.name())) {
+		if (!userDTO.getEmail().endsWith("@ietdavv.edu.in")) {
 			throw new RuntimeException("Kindly enter college email");
 		}
 		UserEntity found = userRepo.findByEmail(userDTO.getEmail());
-		UserEntity found1 = userRepo.findByUsername(userDTO.getUserName());
+		UserEntity found1 = userRepo.findByUsername(userDTO.getUsername());
 
 		if (found != null || found1 != null) {
 			throw new RuntimeException("User with the email/username already exist");
@@ -40,17 +40,16 @@ public class UserServiceImpl implements UserService {
 		UserEntity user = new UserEntity();
 
 		user.setEmail(userDTO.getEmail());
-		user.setEncryptedPassword(userDTO.getEncryptedPassword());
-		user.setUserName(userDTO.getUserName());
+		user.setEncryptedPassword(userDTO.getPassword());
+		user.setUsername(userDTO.getUsername());
 		user.setFullName(userDTO.getFullName());
 		user.setBranch(userDTO.getBranch());
 		user.setCourse(userDTO.getCourse());
 		user.setYearOfPassout(userDTO.getYearOfPassout());
 
-		user = userRepo.save(user);
-
+		UserEntity createdUser = userRepo.save(user);
 		otpService.GenerateOTP(user.getEmail());
-		return modelMapper.map(user, UserDTO.class);
+		return modelMapper.map(createdUser, UserDTO.class);
 	}
 
 //	@Override

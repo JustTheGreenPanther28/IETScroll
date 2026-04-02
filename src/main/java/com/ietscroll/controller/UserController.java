@@ -26,12 +26,18 @@ public class UserController {
 	@PostMapping("/register")
 	public UserResponse register(@RequestBody UserRegisterRequest userDetail) {
 
-		UserDTO userDetailDTO = modelMapper.map(userDetail, UserDTO.class);
+		UserDTO userDetailDTO = new UserDTO();
+		userDetailDTO.setBranch(userDetail.branch());
+		userDetailDTO.setCourse(userDetail.course());
+		userDetailDTO.setEmail(userDetail.email());
+		userDetailDTO.setFullName(userDetail.fullName());
+		userDetailDTO.setPassword(userDetail.password());
+		userDetailDTO.setUsername(userDetail.username());
+		userDetailDTO.setYearOfPassout(userDetail.yearOfPassout());
 		UserDTO createdUserDetailDTO = userService.register(userDetailDTO);
-		return new UserResponse(createdUserDetailDTO.getPublicUserId(), createdUserDetailDTO.getUserName(),
-				createdUserDetailDTO.getEmail(), createdUserDetailDTO.getUserName(),
-				createdUserDetailDTO.getYearOfPassout(), createdUserDetailDTO.getCourse(),
-				createdUserDetailDTO.getBranch());
+		return new UserResponse(createdUserDetailDTO.getPublicUserId(), createdUserDetailDTO.getUsername(),
+				createdUserDetailDTO.getEmail(), createdUserDetailDTO.getFullName(), createdUserDetailDTO.getYearOfPassout(),
+				createdUserDetailDTO.getCourse(), createdUserDetailDTO.getBranch());
 	}
 
 }

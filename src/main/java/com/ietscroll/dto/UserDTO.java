@@ -6,19 +6,17 @@ import java.util.UUID;
 import com.ietscroll.entity.Branch;
 import com.ietscroll.entity.Course;
 
-import jakarta.persistence.Column;
-import jakarta.validation.constraints.Email;
-
 public class UserDTO {
 
 	private int userId;
 	private UUID publicUserId;
-	private String userName;
+	private String username;
 	private String fullName;
 	private String email;
 	private Year yearOfPassout;
 	private Course course;
 	private Branch branch;
+	private String password;
 	private String encryptedPassword;
 	public int getUserId() {
 		return userId;
@@ -32,11 +30,11 @@ public class UserDTO {
 	public void setPublicUserId(UUID publicUserId) {
 		this.publicUserId = publicUserId;
 	}
-	public String getUserName() {
-		return userName;
+	public String getUsername() {
+		return username;
 	}
-	public void setUserName(String userName) {
-		this.userName = userName;
+	public void setUsername(String userName) {
+		this.username = userName;
 	}
 	public String getFullName() {
 		return fullName;
@@ -73,6 +71,12 @@ public class UserDTO {
 	}
 	public void setEncryptedPassword(String encryptedPassword) {
 		this.encryptedPassword = encryptedPassword;
+	}
+	public String getPassword() {
+		return password;
+	}
+	public void setPassword(String password) {
+		this.password = password;
 	}
 	
 	

@@ -5,6 +5,8 @@ import java.util.UUID;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
+import jakarta.persistence.EnumType;
+import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
@@ -35,9 +37,11 @@ public class UserEntity {
 	private Year yearOfPassout;
 
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private Course course;
 
 	@Column(nullable = false)
+	@Enumerated(EnumType.STRING)
 	private Branch branch;
 
 	@Column(nullable = false)
