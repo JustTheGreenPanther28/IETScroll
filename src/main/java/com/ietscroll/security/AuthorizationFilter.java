@@ -25,7 +25,7 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 			throws IOException, jakarta.servlet.ServletException {
 
 		String path = request.getServletPath();
-		if (path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui") || path.equals("/swagger-ui.html")) {
+		if (path.endsWith("/login") || path.startsWith("/v3/api-docs") || path.startsWith("/swagger-ui") || path.equals("/swagger-ui.html")) {
 			chain.doFilter(request, response);
 			return;
 		}

@@ -9,6 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -58,31 +59,29 @@ public class WebSecurity {
 	 * context.
 	 */
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authManager, JwtUtil jwtUtil,
-			UserService userService) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authManager, 
+	        JwtUtil jwtUtil, UserService userService) throws Exception {
 
-		AuthenticationFilter authFilter = new AuthenticationFilter(authManager, jwtUtil, userService);
+	    AuthenticationFilter authFilter = new AuthenticationFilter(authManager, jwtUtil, userService);
 
-		http.csrf(csrf -> csrf.disable());
+	    http.csrf(csrf -> csrf.disable());
+	    http.cors(Customizer.withDefaults());
 
-		http.cors(Customizer.withDefaults());
+//	    http.sessionManagement(session ->
+//	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-		http.authorizeHttpRequests(auth -> auth
-				// Swagger (public)
-				.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-				// Public endpoints
-				.requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
-				.requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
-				.requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
-				.requestMatchers(HttpMethod.POST, SecurityConstaints.LOGIN).permitAll()
-				.requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString()).anyRequest()
-				.authenticated());
+	    http.authorizeHttpRequests(auth -> auth
+	            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+	            .requestMatchers(HttpMethod.POST,SecurityConstaints.LOGIN).permitAll()
+	            .requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
+	            .requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
+	            .requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
+	            .requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString())
+	            .anyRequest().authenticated());
 
-		http.addFilter(authFilter).addFilterBefore(new AuthorizationFilter(jwtUtil),
-				UsernamePasswordAuthenticationFilter.class);
-//		form login is session based , but we are doing token based with JWT
-//		http.formLogin(Customizer.withDefaults());
+	    http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+	        .addFilterAfter(new AuthorizationFilter(jwtUtil), AuthenticationFilter.class);
 
-		return http.build();
+	    return http.build();
 	}
 }
