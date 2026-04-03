@@ -3,6 +3,8 @@ package com.ietscroll.entity;
 import java.time.Year;
 import java.util.UUID;
 
+import com.ietscroll.general.enums.Branch;
+import com.ietscroll.general.enums.Course;
 import com.ietscroll.security.Role;
 
 import jakarta.persistence.Column;

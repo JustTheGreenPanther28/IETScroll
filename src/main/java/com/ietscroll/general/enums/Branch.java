@@ -1,4 +1,4 @@
-package com.ietscroll.entity;
+package com.ietscroll.general.enums;
 
 public enum Branch {
 	COMPUTER_SCIENCE_AND_BUISNESS_SYSTEM,

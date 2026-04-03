@@ -3,8 +3,8 @@ package com.ietscroll.response;
 import java.time.Year;
 import java.util.UUID;
 
-import com.ietscroll.entity.Branch;
-import com.ietscroll.entity.Course;
+import com.ietscroll.general.enums.Branch;
+import com.ietscroll.general.enums.Course;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotBlank;

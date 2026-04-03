@@ -3,8 +3,8 @@ package com.ietscroll.dto;
 import java.time.Year;
 import java.util.UUID;
 
-import com.ietscroll.entity.Branch;
-import com.ietscroll.entity.Course;
+import com.ietscroll.general.enums.Branch;
+import com.ietscroll.general.enums.Course;
 import com.ietscroll.security.Role;
 
 public class UserDTO {
