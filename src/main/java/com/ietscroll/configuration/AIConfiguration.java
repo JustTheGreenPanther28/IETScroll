@@ -16,8 +16,7 @@ import org.springframework.core.io.Resource;
 @Configuration
 public class AIConfiguration {
 
-	private final List<String> badWords = List.of("damn", "hell", "shit", "fuck", "bitch", "asshole", "idiot", "stupid",
-			"moron", "bastard", "mc", "bkl", "bc", "bkc");
+	private final List<String> badWords = List.of("badwords");
 
 	@Bean
 	ChatClient chatClient(ChatModel chatModel, ChatMemory chatMemory,
