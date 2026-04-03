@@ -1,6 +1,6 @@
 package com.ietscroll.response;
 
-public enum OTPVerificationResult {
+public enum Result {
 	FAILED,
 	SCCUESS
 }

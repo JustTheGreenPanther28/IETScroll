@@ -1,10 +1,10 @@
 package com.ietscroll.service;
 
-import com.ietscroll.response.OTPVerificationResult;
+import com.ietscroll.response.Result;
 
 public interface OTPService {
 	
 	void GenerateOTP(String email);
-	OTPVerificationResult verifyOTP(int otp,String email);
+	Result verifyOTP(int otp,String email);
 
 }

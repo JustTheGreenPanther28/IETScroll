@@ -14,6 +14,7 @@ import org.springframework.stereotype.Service;
 import com.ietscroll.dto.UserDTO;
 import com.ietscroll.entity.UserEntity;
 import com.ietscroll.repository.UserRepository;
+import com.ietscroll.response.Result;
 import com.ietscroll.service.OTPService;
 import com.ietscroll.service.UserService;
 
@@ -67,28 +68,60 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		
-		if(username==null || !username.endsWith("@ietdavv.edu.in")) {
+
+		if (username == null || !username.endsWith("@ietdavv.edu.in")) {
 			throw new UsernameNotFoundException("Incorrect email");
 		}
 		UserEntity user = userRepo.findByEmail(username);
-		if(user==null || !user.isVerified()) {
+		if (user == null || !user.isVerified()) {
 			throw new UsernameNotFoundException("Inccorect email");
 		}
-		
-		return new User(user.getEmail(),user.getEncryptedPassword(),new ArrayList<>());
+
+		return new User(user.getEmail(), user.getEncryptedPassword(), new ArrayList<>());
 	}
 
 	@Override
 	public UserDTO getUserByEmail(@NotNull @Email @NotBlank String email) {
-		if(email==null || !email.endsWith("@ietdavv.edu.in")) {
+		if (email == null || !email.endsWith("@ietdavv.edu.in")) {
 			throw new UsernameNotFoundException("Incorrect email");
 		}
 		UserEntity user = userRepo.findByEmail(email);
-		if(user==null) {
+		if (user == null) {
 			throw new UsernameNotFoundException("User doesn't exist");
 		}
 		return modelMapper.map(user, UserDTO.class);
+	}
+
+	@Override
+	public Result updateUsername(String email, String newUsername) {
+		UserEntity user = userRepo.findByEmail(email);
+		var userFound = userRepo.findByUsername(newUsername);
+
+		if (userFound != null) {
+			throw new RuntimeException(newUsername + " Already exist, kindly try another username");
+		}
+		if (user == null) {
+			throw new UsernameNotFoundException("User doesn't exist");
+		}
+
+		user.setUsername(newUsername);
+		userRepo.save(user);
+
+		return Result.SCCUESS;
+	}
+
+	@Override
+	public Result updateFullName(String email, String newFullName) {
+		UserEntity user = userRepo.findByEmail(email);
+
+		if (user == null) {
+			throw new UsernameNotFoundException("User doesn't exist");
+		}
+
+		user.setFullName(newFullName);
+		userRepo.save(user);
+
+		return Result.SCCUESS;
 	}
 
 }

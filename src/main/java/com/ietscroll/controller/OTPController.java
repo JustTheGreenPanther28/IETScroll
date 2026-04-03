@@ -6,7 +6,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
 import com.ietscroll.request.AccountVerificationRequest;
-import com.ietscroll.response.OTPVerificationResult;
+import com.ietscroll.response.Result;
 import com.ietscroll.service.OTPService;
 
 @RestController
@@ -20,7 +20,7 @@ public class OTPController {
 	}
 	
 	@GetMapping("/verify")
-	public OTPVerificationResult verifyAccount(@RequestBody AccountVerificationRequest otpAndEmail) {
+	public Result verifyAccount(@RequestBody AccountVerificationRequest otpAndEmail) {
 		return otpService.verifyOTP(otpAndEmail.otp(), otpAndEmail.email());
 	}
 	

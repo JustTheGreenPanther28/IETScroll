@@ -10,7 +10,7 @@ import com.ietscroll.entity.OTPEntity;
 import com.ietscroll.entity.UserEntity;
 import com.ietscroll.repository.OTPRepository;
 import com.ietscroll.repository.UserRepository;
-import com.ietscroll.response.OTPVerificationResult;
+import com.ietscroll.response.Result;
 import com.ietscroll.service.EmailService;
 import com.ietscroll.service.OTPService;
 
@@ -44,7 +44,7 @@ public class OTPServiceImpl implements OTPService {
 	}
 
 	@Override
-	public OTPVerificationResult verifyOTP(int otpGivenByUser, String email) {
+	public Result verifyOTP(int otpGivenByUser, String email) {
 
 		otpRepo.deleteOldOTPs();
 		List<OTPEntity> otps = otpRepo.findByEmail(email);
@@ -59,10 +59,10 @@ public class OTPServiceImpl implements OTPService {
 			UserEntity user = userRepo.findByEmail(email);
 			user.setVerified(true);
 			userRepo.save(user);
-			return OTPVerificationResult.SCCUESS;
+			return Result.SCCUESS;
 		}
 
-		return OTPVerificationResult.FAILED;
+		return Result.FAILED;
 	}
 
 }
