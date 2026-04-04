@@ -59,7 +59,7 @@ public class OTPServiceImpl implements OTPService {
 			UserEntity user = userRepo.findByEmail(email);
 			user.setVerified(true);
 			userRepo.save(user);
-			return Result.SCCUESS;
+			return Result.SUCCUESS;
 		}
 
 		return Result.FAILED;

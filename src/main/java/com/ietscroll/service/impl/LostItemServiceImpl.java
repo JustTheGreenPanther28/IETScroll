@@ -1,19 +1,27 @@
 package com.ietscroll.service.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
+import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.dto.LostItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.entity.LostItemEntity;
+import com.ietscroll.general.enums.LostItemStatus;
 import com.ietscroll.repository.LostItemRepository;
 import com.ietscroll.repository.UserRepository;
+import com.ietscroll.response.LostItemResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.CloudinaryService;
 import com.ietscroll.service.LostItemService;
@@ -64,7 +72,6 @@ public class LostItemServiceImpl implements LostItemService {
 		// Getting url from it
 		String url = (String) uploadedDetail.get("secure_url");
 
-		System.out.println(lostItemDTO);
 		LostItemEntity lostItem = new LostItemEntity();
 		lostItem.setImageURL(url);
 		lostItem.setDescription(lostItemDTO.getDescription());
@@ -72,10 +79,11 @@ public class LostItemServiceImpl implements LostItemService {
 		lostItem.setOwnerEmail(email);
 		lostItem.setPredictedLocation(lostItemDTO.getPredictedLocation());
 		lostItem.setPrize(lostItemDTO.getPrize());
+		lostItem.setCreatedAt(LocalDateTime.now());
 
 		lostItemRepo.save(lostItem);
 
-		return Result.SCCUESS;
+		return Result.SUCCUESS;
 	}
 
 	@Override
@@ -92,20 +100,50 @@ public class LostItemServiceImpl implements LostItemService {
 			lostItemDTO.setLostItemname(lostItem.getLostItemname());
 			lostItemDTO.setPublicIdOfLostRequest(lostItem.getPublicIdOfLostRequest());
 			lostItemDTO.setPrize(lostItem.getPrize());
+			lostItemDTO.setCreatedAt(lostItem.getCreatedAt());
+
+			lostItemsDTOs.add(lostItemDTO);
 		}
 
 		return lostItemsDTOs;
 	}
 
 	@Override
-	public Result closeLostItem(String email, UUID publicId) {
-		// TODO Auto-generated method stub
-		return null;
+	public Result closeLostItem(String email, String publicId) {
+		if (email == null || publicId == null) {
+			throw new RuntimeException("Invalid credentials");
+		}
+
+		// Converting String -> UUID -> Byte Array (Because MYSQL store UUID in form of
+		UUID publicUUId = UUID.fromString(publicId);
+
+		ByteBuffer bb = ByteBuffer.allocate(16);
+		bb.putLong(publicUUId.getMostSignificantBits());
+		bb.putLong(publicUUId.getLeastSignificantBits());
+
+		int rowsChanged = lostItemRepo.closeRequest(email, bb.array());
+		if (rowsChanged == 0) {
+			return Result.FAILED;
+		}
+		return Result.SUCCUESS;
 	}
 
 	@Override
-	public PagedResponseDTO<LostItemDTO> getAllLostItems(int page, int size, String sortBy, String order) {
-		return null;
+	public PagedResponseDTO<LostItemResponse> getAllLostItems(int page, int size) {
+	    Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+	    Page<LostItemResponse> mapped = lostItemRepo.findByStatus(LostItemStatus.OPEN, pageable)
+	            .map(lostItem -> {
+	                LostItemResponse response = new LostItemResponse();
+	                response.setPublicIdOfLostRequest(lostItem.getPublicIdOfLostRequest());
+	                response.setLostItemname(lostItem.getLostItemname());
+	                response.setImageURLOfItem(lostItem.getImageURL());
+	                response.setPredictedLocation(lostItem.getPredictedLocation());
+	                response.setDescription(lostItem.getDescription());
+	                response.setPrize(lostItem.getPrize());
+	                response.setCreatedAt(lostItem.getCreatedAt());
+	                return response;
+	            });
+	    return PagedResponseDTO.from(mapped);
 	}
 
 }

@@ -1,5 +1,6 @@
 package com.ietscroll.dto;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
@@ -18,6 +19,7 @@ public class LostItemDTO {
 	private LostItemStatus status;
 	private int prize;
 	private String ownerEmail;
+	private LocalDateTime createdAt;
 
 	public int getId() {
 		return id;
@@ -105,6 +107,14 @@ public class LostItemDTO {
 				+ lostItemname + ", image=" + image + ", immageURL=" + immageURL + ", predictedLocation="
 				+ predictedLocation + ", description=" + description + ", status=" + status + ", prize=" + prize
 				+ ", ownerEmail=" + ownerEmail + "]";
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 
 }

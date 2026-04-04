@@ -1,5 +1,6 @@
 package com.ietscroll.response;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 public class LostItemResponse {
@@ -14,6 +15,8 @@ public class LostItemResponse {
 	private String description;
 
 	private int prize;
+	
+	private LocalDateTime createdAt;
 
 	public UUID getPublicIdOfLostRequest() {
 		return publicIdOfLostRequest;
@@ -61,6 +64,21 @@ public class LostItemResponse {
 
 	public void setPrize(int prize) {
 		this.prize = prize;
+	}
+
+	@Override
+	public String toString() {
+		return "LostItemResponse [publicIdOfLostRequest=" + publicIdOfLostRequest + ", lostItemname=" + lostItemname
+				+ ", imageURLOfItem=" + imageURLOfItem + ", predictedLocation=" + predictedLocation + ", description="
+				+ description + ", prize=" + prize + "]";
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 
 }

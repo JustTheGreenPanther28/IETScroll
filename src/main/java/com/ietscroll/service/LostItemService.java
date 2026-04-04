@@ -8,15 +8,16 @@ import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.dto.LostItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
+import com.ietscroll.response.LostItemResponse;
 import com.ietscroll.response.Result;
 
 public interface LostItemService { 
 	
-	PagedResponseDTO<LostItemDTO> getAllLostItems(int page, int size, String sortBy, String order);
+	PagedResponseDTO<LostItemResponse> getAllLostItems(int page, int size);
 	List<LostItemDTO> getMyLostItems(String email);
 	
 	Result uploadLostItem(String email,LostItemDTO listItemDTO,MultipartFile image) throws IOException;
-	Result closeLostItem(String email,UUID publicId);
+	Result closeLostItem(String email,String publicId);
 	
 
 }

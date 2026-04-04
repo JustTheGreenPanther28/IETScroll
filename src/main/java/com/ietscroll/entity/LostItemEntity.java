@@ -1,5 +1,6 @@
 package com.ietscroll.entity;
 
+import java.time.LocalDateTime;
 import java.util.UUID;
 
 import com.ietscroll.general.enums.LostItemStatus;
@@ -42,6 +43,8 @@ public class LostItemEntity {
 
 	@Column(nullable = false)
 	private String ownerEmail;
+	
+	private LocalDateTime createdAt=LocalDateTime.now();
 
 	@PrePersist
 	public void onCreate() {
@@ -110,6 +113,14 @@ public class LostItemEntity {
 
 	public UUID getPublicIdOfLostRequest() {
 		return publicIdOfLostRequest;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 
 }

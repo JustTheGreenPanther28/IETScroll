@@ -10,14 +10,17 @@ import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PatchMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.ietscroll.dto.LostItemDTO;
+import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.request.LostItemRequest;
 import com.ietscroll.response.LostItemResponse;
 import com.ietscroll.response.Result;
@@ -69,9 +72,21 @@ public class LostItemController {
 			lostItemResponse.setImageURLOfItem(lostItemDTO.getImmageURL());
 			lostItemResponse.setPredictedLocation(lostItemDTO.getPredictedLocation());
 			lostItemResponse.setPrize(lostItemDTO.getPrize());
-
+			
 			lostItemResponses.add(lostItemResponse);
 		}
 		return lostItemResponses;
+	}
+	
+	@PatchMapping("/close")
+	public Result closeLostItemRequest(Authentication authentication,@RequestParam String lostItemId) {
+		return lostItemService.closeLostItem(authentication.getName(), lostItemId);
+	}
+	
+	@GetMapping
+	public ResponseEntity<PagedResponseDTO<LostItemResponse>> getAllLostItems(
+	        @RequestParam(defaultValue = "0") int page,
+	        @RequestParam(defaultValue = "10") int size) {
+		return ResponseEntity.ok(lostItemService.getAllLostItems(page, size));
 	}
 }

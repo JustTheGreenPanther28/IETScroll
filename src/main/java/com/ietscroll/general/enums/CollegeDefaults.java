@@ -1,4 +1,4 @@
-package com.ietscroll.service.impl;
+package com.ietscroll.general.enums;
 
 public enum CollegeDefaults {
 	
