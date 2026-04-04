@@ -17,9 +17,9 @@ import com.ietscroll.service.OTPService;
 @Service
 public class OTPServiceImpl implements OTPService {
 
-	private UserRepository userRepo;
-	private OTPRepository otpRepo;
-	private EmailService emailService;
+	private final  UserRepository userRepo;
+	private final OTPRepository otpRepo;
+	private final EmailService emailService;
 
 	public OTPServiceImpl(EmailService emailService, UserRepository userRepo, OTPRepository otpRepo) {
 		this.otpRepo = otpRepo;

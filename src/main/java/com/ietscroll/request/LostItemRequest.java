@@ -6,11 +6,9 @@ import com.ietscroll.general.enums.LostItemStatus;
 
 public class LostItemRequest {
 	private String lostItemname;
-	private MultipartFile imageURLOfItem;
 	private String predictedLocation;
 	private String description;
-	private LostItemStatus status;
-	private int prize = 0;
+	private int prize;
 
 	public String getLostItemname() {
 		return lostItemname;
@@ -18,14 +16,6 @@ public class LostItemRequest {
 
 	public void setLostItemname(String lostItemname) {
 		this.lostItemname = lostItemname;
-	}
-
-	public MultipartFile getImageURLOfItem() {
-		return imageURLOfItem;
-	}
-
-	public void setImageURLOfItem(MultipartFile imageURLOfItem) {
-		this.imageURLOfItem = imageURLOfItem;
 	}
 
 	public String getPredictedLocation() {
@@ -42,14 +32,6 @@ public class LostItemRequest {
 
 	public void setDescription(String description) {
 		this.description = description;
-	}
-
-	public LostItemStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(LostItemStatus status) {
-		this.status = status;
 	}
 
 	public int getPrize() {

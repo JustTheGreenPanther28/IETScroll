@@ -25,10 +25,10 @@ import jakarta.validation.constraints.NotNull;
 @Service
 public class UserServiceImpl implements UserService {
 
-	private UserRepository userRepo;
-	private OTPService otpService;
-	private ModelMapper modelMapper;
-	private BCryptPasswordEncoder encoder;
+	private final UserRepository userRepo;
+	private final OTPService otpService;
+	private final ModelMapper modelMapper;
+	private final BCryptPasswordEncoder encoder;
 
 	public UserServiceImpl(UserRepository userRepo, ModelMapper modelMapper, OTPService otpService,
 			BCryptPasswordEncoder encoder) {

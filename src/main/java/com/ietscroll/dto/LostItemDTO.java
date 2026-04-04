@@ -2,6 +2,8 @@ package com.ietscroll.dto;
 
 import java.util.UUID;
 
+import org.springframework.web.multipart.MultipartFile;
+
 import com.ietscroll.general.enums.LostItemStatus;
 
 public class LostItemDTO {
@@ -9,6 +11,7 @@ public class LostItemDTO {
 	private int id;
 	private UUID publicIdOfLostRequest;
 	private String lostItemname;
+	private MultipartFile image;
 	private String imageURLOfItem;
 	private String predictedLocation;
 	private String description;
@@ -86,6 +89,14 @@ public class LostItemDTO {
 
 	public void setLostItemname(String lostItemname) {
 		this.lostItemname = lostItemname;
+	}
+
+	public MultipartFile getImage() {
+		return image;
+	}
+
+	public void setImage(MultipartFile image) {
+		this.image = image;
 	}
 
 }

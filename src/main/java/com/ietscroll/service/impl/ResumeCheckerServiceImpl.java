@@ -8,6 +8,7 @@ import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
 import org.springframework.core.io.InputStreamResource;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -17,13 +18,14 @@ import com.ietscroll.service.ResumeCheckerService;
 @Service
 public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 
-	private ChatClient chatClient;
+	private final ChatClient chatClient;
 
 	public ResumeCheckerServiceImpl(ChatClient chatClient) {
 		this.chatClient=chatClient;
 	}
 
 	@Override
+	@Async
 	public QualityOfResume getQuality(MultipartFile file, String role, int experience) {
 		System.out.println(extractTextFromFile(file));
 
@@ -55,6 +57,7 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 					content.append(doc.getText()).append("\n");
 				}
 			}
+			
 			return content.toString().trim();
 
 		} catch (IOException e) {

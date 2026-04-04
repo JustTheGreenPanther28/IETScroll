@@ -36,10 +36,9 @@ public class LostItemEntity {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private LostItemStatus status;
+	private LostItemStatus status=LostItemStatus.OPEN;
 
-	@Column(nullable = true)
-	private int prize;
+	private int prize=0;
 
 	@Column(nullable = false)
 	private String ownerEmail;
