@@ -19,22 +19,24 @@ import com.ietscroll.service.ResumeCheckerService;
 public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 
 	private final ChatClient chatClient;
+	private static final List<String> DOCUMENT_TYPES = List.of("application/pdf", "application/msword",
+			"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
 	public ResumeCheckerServiceImpl(ChatClient chatClient) {
-		this.chatClient=chatClient;
+		this.chatClient = chatClient;
 	}
 
 	@Override
 	@Async
 	public QualityOfResume getQuality(MultipartFile file, String role, int experience) {
-		System.out.println(extractTextFromFile(file));
 
-		return chatClient.prompt()
-		.user(extractTextFromFile(file))
-		.system(sys->sys.params(Map.of("role",role,"experience",experience)))
-		.call()
-		.responseEntity(QualityOfResume.class)
-		.entity();
+		if (!DOCUMENT_TYPES.contains(file.getContentType())) {
+			throw new RuntimeException("Kindly upload your resume in form of PDF/DOCS ");
+		}
+
+		return chatClient.prompt().user(extractTextFromFile(file))
+				.system(sys -> sys.params(Map.of("role", role, "experience", experience))).call()
+				.responseEntity(QualityOfResume.class).entity();
 	}
 
 	private static String extractTextFromFile(MultipartFile file) {
@@ -57,7 +59,7 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 					content.append(doc.getText()).append("\n");
 				}
 			}
-			
+
 			return content.toString().trim();
 
 		} catch (IOException e) {

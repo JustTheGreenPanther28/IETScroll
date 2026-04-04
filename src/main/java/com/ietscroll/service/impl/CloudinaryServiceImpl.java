@@ -3,11 +3,13 @@ package com.ietscroll.service.impl;
 import java.io.IOException;
 import java.util.Map;
 
+import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.cloudinary.Cloudinary;
 import com.ietscroll.service.CloudinaryService;
 
+@Service
 public class CloudinaryServiceImpl implements CloudinaryService {
 
 	private final Cloudinary cloudinary;

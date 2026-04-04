@@ -25,8 +25,8 @@ public class LostItemEntity {
 	@Column(nullable = false, length = 25)
 	private String lostItemname;
 
-	@Column(columnDefinition = "TEXT",nullable = false, unique = true)
-	private String imageURLOfItem;
+	@Column(columnDefinition = "TEXT", nullable = false, unique = true)
+	private String imageURL;
 
 	@Column(nullable = true, length = 50)
 	private String predictedLocation;
@@ -36,9 +36,9 @@ public class LostItemEntity {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private LostItemStatus status=LostItemStatus.OPEN;
+	private LostItemStatus status = LostItemStatus.OPEN;
 
-	private int prize=0;
+	private int prize = 0;
 
 	@Column(nullable = false)
 	private String ownerEmail;
@@ -48,20 +48,20 @@ public class LostItemEntity {
 		this.publicIdOfLostRequest = UUID.randomUUID();
 	}
 
-	public int getId() {
-		return id;
+	public String getLostItemname() {
+		return lostItemname;
 	}
 
-	public void setId(int id) {
-		this.id = id;
+	public void setLostItemname(String lostItemname) {
+		this.lostItemname = lostItemname;
 	}
 
-	public String getImageURLOfItem() {
-		return imageURLOfItem;
+	public String getImageURL() {
+		return imageURL;
 	}
 
-	public void setImageURLOfItem(String imageURLOfItem) {
-		this.imageURLOfItem = imageURLOfItem;
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
 	}
 
 	public String getPredictedLocation() {
@@ -102,6 +102,10 @@ public class LostItemEntity {
 
 	public void setOwnerEmail(String ownerEmail) {
 		this.ownerEmail = ownerEmail;
+	}
+
+	public int getId() {
+		return id;
 	}
 
 	public UUID getPublicIdOfLostRequest() {
