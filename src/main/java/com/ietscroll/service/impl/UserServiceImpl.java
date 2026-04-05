@@ -1,8 +1,10 @@
 package com.ietscroll.service.impl;
 
-import java.util.ArrayList;
+import java.util.List;
 
 import org.modelmapper.ModelMapper;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -29,6 +31,8 @@ public class UserServiceImpl implements UserService {
 	private final OTPService otpService;
 	private final ModelMapper modelMapper;
 	private final BCryptPasswordEncoder encoder;
+	@Value("${server.admin.email}") 
+	private String adminEmail;
 
 	public UserServiceImpl(UserRepository userRepo, ModelMapper modelMapper, OTPService otpService,
 			BCryptPasswordEncoder encoder) {
@@ -68,16 +72,20 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
+		
+	    if (username == null || (!(username.endsWith("@ietdavv.edu.in") && !username.equals(adminEmail)))) {
+	        throw new UsernameNotFoundException("Incorrect email");
+	    }
+	    UserEntity user = userRepo.findByEmail(username);
+	    if (user == null || !user.isVerified()) {
+	        throw new UsernameNotFoundException("Incorrect email");
+	    }
 
-		if (username == null || !username.endsWith("@ietdavv.edu.in")) {
-			throw new UsernameNotFoundException("Incorrect email");
-		}
-		UserEntity user = userRepo.findByEmail(username);
-		if (user == null || !user.isVerified()) {
-			throw new UsernameNotFoundException("Inccorect email");
-		}
-
-		return new User(user.getEmail(), user.getEncryptedPassword(), new ArrayList<>());
+	    return new User(
+	        user.getEmail(),
+	        user.getEncryptedPassword(),
+	        List.of(new SimpleGrantedAuthority("ROLE_" + user.getRole().name()))
+	    );
 	}
 
 	@Override
