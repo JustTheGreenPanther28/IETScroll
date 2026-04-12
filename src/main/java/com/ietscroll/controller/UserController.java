@@ -1,6 +1,5 @@
 package com.ietscroll.controller;
 
-import org.modelmapper.ModelMapper;
 import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PatchMapping;
@@ -16,20 +15,20 @@ import com.ietscroll.response.Result;
 import com.ietscroll.response.UserResponse;
 import com.ietscroll.service.UserService;
 
+import jakarta.validation.Valid;
+
 @RestController
 @RequestMapping("/api/v1/user")
 public class UserController {
 
 	private UserService userService;
-	private ModelMapper modelMapper;
 
-	public UserController(UserService userService, ModelMapper modelMapper) {
+	public UserController(UserService userService) {
 		this.userService = userService;
-		this.modelMapper = modelMapper;
 	}
 
 	@PostMapping("/register")
-	public UserResponse register(@RequestBody UserRegisterRequest userDetail) {
+	public UserResponse register(@Valid @RequestBody UserRegisterRequest userDetail) {
 
 		UserDTO userDetailDTO = new UserDTO();
 		userDetailDTO.setBranch(userDetail.branch());
@@ -52,12 +51,12 @@ public class UserController {
 	}
 	
 	@PatchMapping("/username/{newUsername}")
-	public Result updateUsername(Authentication authentication, @PathVariable String newUsername) {
+	public Result updateUsername(Authentication authentication, @Valid @PathVariable String newUsername) {
 		return userService.updateUsername(authentication.getName(), newUsername);
 	}
 	
 	@PatchMapping("/fullname/{fullname}")
-	public Result updateFullname(Authentication authentication, @PathVariable String fullname) {
+	public Result updateFullname(Authentication authentication, @Valid @PathVariable String fullname) {
 		return userService.updateFullName(authentication.getName(), fullname);
 	}
 
