@@ -1,40 +1,22 @@
-package com.ietscroll.dto;
+package com.ietscroll.response;
 
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import org.springframework.web.multipart.MultipartFile;
-
-import com.ietscroll.general.enums.LostItemStatus;
-
-public class FoundItemDTO {
-	private int id;
-
+public class FoundItemResponse {
 	private UUID publicIdOfFoundItem;
 
 	private String foundItemName;
 
 	private String imageURL;
-	
-	private MultipartFile image;
 
 	private String predictedLocation;
 
 	private String description;
 
-	private LostItemStatus status = LostItemStatus.OPEN;
-
 	private String contactTo;
 
 	private LocalDateTime createdAt;
-
-	public int getId() {
-		return id;
-	}
-
-	public void setId(int id) {
-		this.id = id;
-	}
 
 	public UUID getPublicIdOfFoundItem() {
 		return publicIdOfFoundItem;
@@ -76,14 +58,6 @@ public class FoundItemDTO {
 		this.description = description;
 	}
 
-	public LostItemStatus getStatus() {
-		return status;
-	}
-
-	public void setStatus(LostItemStatus status) {
-		this.status = status;
-	}
-
 	public String getContactTo() {
 		return contactTo;
 	}
@@ -98,14 +72,6 @@ public class FoundItemDTO {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
-	}
-
-	public MultipartFile getImage() {
-		return image;
-	}
-
-	public void setImage(MultipartFile image) {
-		this.image = image;
 	}
 
 }
