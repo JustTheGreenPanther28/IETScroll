@@ -1,19 +1,27 @@
 package com.ietscroll.service.impl;
 
 import java.io.IOException;
+import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.dto.FoundItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.entity.FoundItemEntity;
+import com.ietscroll.general.enums.FoundItemStatus;
+import com.ietscroll.general.enums.LostItemStatus;
 import com.ietscroll.repository.FoundItemRepository;
-import com.ietscroll.response.LostItemResponse;
+import com.ietscroll.response.FoundItemResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.CloudinaryService;
 import com.ietscroll.service.FoundItemService;
@@ -22,10 +30,17 @@ import com.ietscroll.service.SightEngineService;
 @Service
 public class FoundItemServiceImpl implements FoundItemService {
 
-	private FoundItemRepository foundItemRepo;
-	private CloudinaryService cloudinaryService;
-	private SightEngineService sightEngineService;
+	private final FoundItemRepository foundItemRepo;
+	private final CloudinaryService cloudinaryService;
+	private final SightEngineService sightEngineService;
 	private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
+
+	public FoundItemServiceImpl(FoundItemRepository foundItemRepo, CloudinaryService cloudinaryService,
+			SightEngineService sightEngineService) {
+		this.foundItemRepo = foundItemRepo;
+		this.cloudinaryService = cloudinaryService;
+		this.sightEngineService = sightEngineService;
+	}
 
 	@Override
 	public List<FoundItemDTO> getMyFoundItems(String email) {
@@ -87,15 +102,42 @@ public class FoundItemServiceImpl implements FoundItemService {
 	}
 
 	@Override
-	public PagedResponseDTO<LostItemResponse> getAllFoundItems(int page, int size) {
-		// TODO Auto-generated method stub
-		return null;
+	public PagedResponseDTO<FoundItemResponse> getAllFoundItems(int page, int size) {
+
+		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+		Page<FoundItemResponse> mapped = foundItemRepo.findByStatus(FoundItemStatus.PENDING, pageable)
+				.map(foundItem -> {
+					FoundItemResponse response = new FoundItemResponse();
+					response.setDescription(foundItem.getDescription());
+					response.setImageURL(foundItem.getImageURL());
+					response.setPredictedLocation(foundItem.getPredictedLocation());
+					response.setFoundItemName(foundItem.getFoundItemName());
+					response.setPublicIdOfFoundItem(foundItem.getPublicIdOfFoundItem());
+					response.setCreatedAt(foundItem.getCreatedAt());
+					response.setContactTo(foundItem.getContactTo());
+					return response;
+				});
+		return PagedResponseDTO.from(mapped);
 	}
 
 	@Override
 	public Result closeFoundItemRequest(String email, String publicId) {
-		// TODO Auto-generated method stub
-		return null;
+		if (email == null || publicId == null) {
+			throw new RuntimeException("Invalid credentials");
+		}
+
+		// Converting String -> UUID -> Byte Array (Because MYSQL store UUID in form of
+		UUID publicUUId = UUID.fromString(publicId);
+
+		ByteBuffer bb = ByteBuffer.allocate(16);
+		bb.putLong(publicUUId.getMostSignificantBits());
+		bb.putLong(publicUUId.getLeastSignificantBits());
+
+		int rowsChanged = foundItemRepo.closeRequest(email, bb.array());
+		if (rowsChanged == 0) {
+			return Result.FAILED;
+		}
+		return Result.SUCCUESS;
 	}
 
 }

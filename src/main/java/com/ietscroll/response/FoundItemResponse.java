@@ -3,6 +3,8 @@ package com.ietscroll.response;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
+import jakarta.validation.constraints.Email;
+
 public class FoundItemResponse {
 	private UUID publicIdOfFoundItem;
 
@@ -14,6 +16,7 @@ public class FoundItemResponse {
 
 	private String description;
 
+	@Email
 	private String contactTo;
 
 	private LocalDateTime createdAt;

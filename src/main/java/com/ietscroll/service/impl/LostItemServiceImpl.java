@@ -33,14 +33,12 @@ public class LostItemServiceImpl implements LostItemService {
 	private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
 
 	private final LostItemRepository lostItemRepo;
-	private final UserRepository userRepo;
 	private final SightEngineService sightEngineService;
 	private final CloudinaryService cloudinaryService;
 
-	public LostItemServiceImpl(LostItemRepository lostItemRepo, UserRepository userRepo,
+	public LostItemServiceImpl(LostItemRepository lostItemRepo,
 			SightEngineService sightEngineService, CloudinaryService cloudinaryService) {
 		this.lostItemRepo = lostItemRepo;
-		this.userRepo = userRepo;
 		this.sightEngineService = sightEngineService;
 		this.cloudinaryService = cloudinaryService;
 	}

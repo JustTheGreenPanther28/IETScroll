@@ -3,7 +3,7 @@ package com.ietscroll.entity;
 import java.time.LocalDateTime;
 import java.util.UUID;
 
-import com.ietscroll.general.enums.LostItemStatus;
+import com.ietscroll.general.enums.FoundItemStatus;
 
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
@@ -37,7 +37,7 @@ public class FoundItemEntity {
 
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
-	private LostItemStatus status = LostItemStatus.OPEN;
+	private FoundItemStatus status = FoundItemStatus.PENDING;
 
 	@Column(nullable = false)
 	private String contactTo;
@@ -97,11 +97,11 @@ public class FoundItemEntity {
 		this.description = description;
 	}
 
-	public LostItemStatus getStatus() {
+	public FoundItemStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(LostItemStatus status) {
+	public void setStatus(FoundItemStatus status) {
 		this.status = status;
 	}
 

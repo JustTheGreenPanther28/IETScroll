@@ -5,6 +5,7 @@ import java.util.UUID;
 
 import org.springframework.web.multipart.MultipartFile;
 
+import com.ietscroll.general.enums.FoundItemStatus;
 import com.ietscroll.general.enums.LostItemStatus;
 
 public class FoundItemDTO {
@@ -22,7 +23,7 @@ public class FoundItemDTO {
 
 	private String description;
 
-	private LostItemStatus status = LostItemStatus.OPEN;
+	private FoundItemStatus status = FoundItemStatus.PENDING;
 
 	private String contactTo;
 
@@ -76,11 +77,11 @@ public class FoundItemDTO {
 		this.description = description;
 	}
 
-	public LostItemStatus getStatus() {
+	public FoundItemStatus getStatus() {
 		return status;
 	}
 
-	public void setStatus(LostItemStatus status) {
+	public void setStatus(FoundItemStatus status) {
 		this.status = status;
 	}
 

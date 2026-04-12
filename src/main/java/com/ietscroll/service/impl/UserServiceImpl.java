@@ -73,7 +73,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
 		
-	    if (username == null || (!(username.endsWith("@ietdavv.edu.in") && !username.equals(adminEmail)))) {
+	    if (username == null || (!(username.endsWith("@ietdavv.edu.in") || !(username.equals(adminEmail))))) {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    UserEntity user = userRepo.findByEmail(username);
