@@ -1,0 +1,75 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+	<meta charset="UTF-8">
+	<title>IET SCROLL - Register</title>
+	<link rel="stylesheet" href="style.css">
+</head>
+
+<script src="register.js" defer></script>
+
+<body>
+	<div class="container">
+		<form class="card" method="POST" action="/api/v1/user/register">
+
+			<h1 class="logo">IET <span>SCROLL</span></h1>
+			<p class="subtitle">Create your account</p>
+
+			<input id="username" type="text" name="username" placeholder="Username" required>
+
+			<input id="name" type="text" name="fullName" placeholder="Full Name">
+
+			<input id="email" type="email" name="email" placeholder="College Email" required>
+
+			<input id="yearOfPassout" type="number" name="yearOfPassout" placeholder="Year of Passout" required>
+
+			<select name="course" required>
+				<option value="">Course</option>
+				<option value="BTech">B.TECH.</option>
+				<option value="MTech">M.TECH.</option>
+				<option value="MSc">M.SC.</option>
+				<option value="PHD">PHD</option>
+				<option value="OTHER">OTHER</option>
+
+			</select>
+
+			<select name="branch" required>
+				<option value="">Select Branch</option>
+				<option value="COMPUTER_SCIENCE_AND_BUISNESS_SYSTEM">
+					Computer Science & Business System
+				</option>
+				<option value="COMPUTER_SCIENCE">
+					Computer Science
+				</option>
+				<option value="INFORMATION_TECHNOLOGY">
+					Information Technology
+				</option>
+				<option value="ELECTRONICS_AND_TELECOMMUNICATION_ENGINEERING">
+					Electronics & Telecommunication Engineering
+				</option>
+				<option value="ELECTRONICS_AND_INSTRUMENTATION_ENGINEERING">
+					Electronics & Instrumentation Engineering
+				</option>
+				<option value="MECHANICAL_ENGINEERING">
+					Mechanical Engineering
+				</option>
+				<option value="CIVIL_ENGINEERING">
+					Civil Engineering
+				</option>
+				<option value="OTHER">
+					Other
+				</option>
+			</select>
+
+			<input type="password" name="password" placeholder="Password" required>
+
+			<button type="submit">Register</button>
+			<p class="switch">
+				Already have an account? <a href="login.html">Login</a>
+			</p>
+		</form>
+	</div>
+</body>
+
+</html>

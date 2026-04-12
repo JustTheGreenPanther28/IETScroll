@@ -2,7 +2,7 @@ package com.ietscroll.general.enums;
 
 public enum Course {
 	BTech,
-	Mtech,
+	MTech,
 	MSc,
 	PHD,
 	OTHER
