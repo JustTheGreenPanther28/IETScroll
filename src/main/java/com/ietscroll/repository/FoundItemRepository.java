@@ -26,7 +26,7 @@ public interface FoundItemRepository extends JpaRepository<FoundItemEntity, Inte
 
 	@Modifying
 	@Transactional
-	@Query(value = "UPDATE found_item set status='CLOSE' where email=? AND public_id_of_found_item=?", nativeQuery = true)
+	@Query(value = "UPDATE found_item set status='CLOSE' where status='PENDING' email=? AND public_id_of_found_item=?", nativeQuery = true)
 	int closeRequest(String email, byte[] array);
 
 }

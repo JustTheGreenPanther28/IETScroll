@@ -1,6 +1,7 @@
 package com.ietscroll.entity;
 
 import java.time.Year;
+import java.util.List;
 import java.util.UUID;
 
 import com.ietscroll.general.enums.Branch;
@@ -14,6 +15,7 @@ import jakarta.persistence.Enumerated;
 import jakarta.persistence.GeneratedValue;
 import jakarta.persistence.GenerationType;
 import jakarta.persistence.Id;
+import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.Email;
 
@@ -56,6 +58,12 @@ public class UserEntity {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Role role = Role.STUDENT;
+	
+	@OneToMany(mappedBy="applicant")
+	private List<TeamJoinRequest> joinRequest;
+	
+	@OneToMany(mappedBy="currentMembers")
+	private List<Team> teamMembers;
 
 	@PrePersist
 	protected void onCreate() {
@@ -144,5 +152,13 @@ public class UserEntity {
 
 	public void setRole(Role role) {
 		this.role = role;
+	}
+
+	public List<TeamJoinRequest> getJoinRequest() {
+		return joinRequest;
+	}
+
+	public void setJoinRequest(List<TeamJoinRequest> joinRequest) {
+		this.joinRequest = joinRequest;
 	}
 }
