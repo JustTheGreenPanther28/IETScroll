@@ -24,8 +24,8 @@ public class AIConfiguration {
 
 	@Bean
 	@Primary
-	ChatClient chatClient(@Qualifier("openAiChatModel") ChatModel chatModel, ChatMemory chatMemory,
-			@Value("classpath:/prompts/DefaultSystemPrompt.st") Resource systemPromptResource) {
+	ChatClient mistralChatClient(@Qualifier("openAiChatModel") ChatModel chatModel, ChatMemory chatMemory,
+			@Value("classpath:/prompts/ContentDefaultSystemPrompt.st") Resource systemPromptResource) {
 
 		return ChatClient.builder(chatModel)
 				.defaultAdvisors(new SafeGuardAdvisor(badWords))
@@ -33,30 +33,34 @@ public class AIConfiguration {
 	}
 	
 	@Bean
-	ChatClient gemmaChatClient(
-	        @Qualifier("gemmaChatModel") ChatModel chatModel,
-	        ChatMemory chatMemory) {
+	ChatModel llamaNemotronChatModel(
+	        @Value("${spring.ai.openai.api-llama-key}") String apiKey) {
+
+	    OpenAiApi llamaApi = OpenAiApi
+	            .builder()
+	            .apiKey(apiKey)
+	            .baseUrl("https://integrate.api.nvidia.com")
+	            .build();
+
+	    return OpenAiChatModel.builder()
+	            .openAiApi(llamaApi)
+	            .defaultOptions(OpenAiChatOptions.builder()
+	                    .model("meta/llama-3.3-70b-instruct")
+	                    .build())
+	            .build();
+	}
+	
+	@Bean
+	ChatClient llamaChatClient(
+	        @Qualifier("llamaNemotronChatModel") ChatModel chatModel,
+	        ChatMemory chatMemory,
+	        @Value("classpath:/prompts/ResumeDefaultSystemPrompt.st") Resource resumeRatingPrompt) {
 
 	    return ChatClient.builder(chatModel)
 	            .defaultAdvisors(new SafeGuardAdvisor(badWords))
+	            .defaultSystem(resumeRatingPrompt)  
 	            .build();
 	}
-
-	@Bean
-	ChatModel gemmaChatModel(@Value("${spring.ai.openai.api-key}") String apiKey) {
-		OpenAiApi gemmaApi = OpenAiApi
-				.builder()
-				.baseUrl("https://integrate.api.nvidia.com/v1")
-				.apiKey(apiKey)
-				.build();
-		
-		return OpenAiChatModel.builder()
-				.openAiApi(gemmaApi)
-				.defaultOptions(OpenAiChatOptions.builder().model("google/gemma-4-31b-it").build())
-				.build();
-	}
-	
-	
 
 	@Bean
 	ChatMemory chatMemory() {

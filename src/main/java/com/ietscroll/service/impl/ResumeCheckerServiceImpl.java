@@ -3,13 +3,12 @@ package com.ietscroll.service.impl;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
-import java.util.concurrent.CompletableFuture;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
 import org.springframework.ai.reader.tika.TikaDocumentReader;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.core.io.InputStreamResource;
-import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -23,7 +22,7 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 	private static final List<String> DOCUMENT_TYPES = List.of("application/pdf", "application/msword",
 			"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
-	public ResumeCheckerServiceImpl(ChatClient chatClient) {
+	public ResumeCheckerServiceImpl(@Qualifier("llamaChatClient") ChatClient chatClient) {
 		this.resumeChatClient = chatClient;
 	}
 

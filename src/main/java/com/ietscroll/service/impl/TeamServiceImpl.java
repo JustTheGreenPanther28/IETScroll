@@ -32,17 +32,14 @@ public class TeamServiceImpl implements TeamService {
 	private TeamRepository teamRepo;
 	private UserRepository userRepo;
 	private SkillRepository skillRepository;
-	private ChatClient gemmaChatModel;
-	private Resource systemPrompt;
+	private ChatClient mistralChatClient;
 
 	public TeamServiceImpl(TeamRepository teamRepo, UserRepository userRepo, SkillRepository skillRepository,
-			@Qualifier("gemmaChatClient") ChatClient gemmaChatModel,
-			@Value("classpath:/prompts/GemmaDefaultSystemPrompt.st") Resource systemPrompt) {
+			@Qualifier("mistralChatClient") ChatClient mistralChatClient) {
 		this.teamRepo = teamRepo;
 		this.userRepo = userRepo;
 		this.skillRepository = skillRepository;
-		this.gemmaChatModel = gemmaChatModel;
-		this.systemPrompt = systemPrompt;
+		this.mistralChatClient = mistralChatClient;
 	}
 
 	@Override
@@ -57,10 +54,9 @@ public class TeamServiceImpl implements TeamService {
 			throw new RuntimeException("You can't create more than one team");
 		}
 
-		String isSafe = gemmaChatModel
+		String isSafe = mistralChatClient
 				.prompt()
 				.user(team.getPurpose())
-				.system(systemPrompt)
 				.call()
 				.content();
 
