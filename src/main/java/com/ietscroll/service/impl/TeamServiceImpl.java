@@ -2,26 +2,25 @@ package com.ietscroll.service.impl;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.UUID;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ietscroll.dto.TeamDTO;
-import com.ietscroll.dto.TeamJoinRequestDTO;
 import com.ietscroll.entity.Skills;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamFinderSkill;
 import com.ietscroll.entity.UserEntity;
-import com.ietscroll.exception.InappropriateImageException;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.SkillRepository;
 import com.ietscroll.repository.TeamRepository;
 import com.ietscroll.repository.UserRepository;
 import com.ietscroll.response.Result;
-import com.ietscroll.response.TeamJoinResponse;
 import com.ietscroll.response.TeamResponse;
 import com.ietscroll.service.TeamService;
 
@@ -60,11 +59,12 @@ public class TeamServiceImpl implements TeamService {
 				.content();
 
 		if (!Boolean.parseBoolean(isSafe)) {
-			throw new InappropriateImageException("Kindly maintain decorum!");
+			throw new RuntimeException("Kindly maintain decorum!");
 		}
 
 		UserEntity user = userRepo.findByEmail(ownerEmail);
-		if(user==null) {
+
+		if (user == null) {
 			throw new UsernameNotFoundException("Email doesn't exist");
 		}
 
@@ -93,7 +93,7 @@ public class TeamServiceImpl implements TeamService {
 		teamEntity = teamRepo.save(teamEntity);
 
 		TeamResponse teamResponse = new TeamResponse();
-		
+
 		teamResponse.setCreatedAt(teamEntity.getCreatedAt());
 		teamResponse.setCreatedBy(teamEntity.getCreatedBy().getEmail());
 		teamResponse.setMaxMember(teamEntity.getMaxMember());
@@ -102,67 +102,46 @@ public class TeamServiceImpl implements TeamService {
 		teamResponse.setStatus(teamEntity.getStatus());
 		return teamResponse;
 	}
-	
+
 	@Override
-	public TeamResponse closeTeam(String ownerEmail) {
-		
-		
-		return null;
+	public Result closeTeam(String ownerEmail) {
+
+		int count = teamRepo.closeTeam(ownerEmail);
+
+		return count == 1 ? Result.SUCCUESS : Result.FAILED;
 	}
 
 	@Override
-	public List<TeamResponse> getActiveTeams() {
-		// TODO Auto-generated method stub
-		return null;
+	public Result changeTeamSize(String ownerEmail, int teamSize) {
+
+		if (teamSize <= 0 || teamSize > 20) {
+			throw new RuntimeException("Team size should not less than zero and higher than twenty");
+		}
+		int count = teamRepo.updateTeamSize(ownerEmail, teamSize);
+
+		return count == 1 ? Result.SUCCUESS : Result.FAILED;
 	}
 
 	@Override
-	public List<TeamResponse> getMyApplications(String joinerEmail) {
-		// TODO Auto-generated method stub
+	public Page<TeamResponse> getActiveTeams(int page, int size) {
+		Pageable pageable = PageRequest.of(page, size);
+
+		teamRepo.findByStatus(TeamStatus.OPEN, pageable)
+		.map(team -> {
+			TeamResponse teamResponse = new TeamResponse();
+			teamResponse.setCreatedAt(team.getCreatedAt());
+			teamResponse.setCreatedBy(team.getCreatedBy().getEmail());
+			teamResponse.setMaxMember(team.getMaxMember());
+			teamResponse.setPublicId(team.getPublicId());
+			teamResponse.setPurpose(team.getPurpose());
+			teamResponse.setStatus(team.getStatus());
+			return teamResponse;
+		});
 		return null;
 	}
-
-	@Override
-	public TeamResponse changeTeamSize(String ownerEmail, int teamSize) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 
 	@Override
 	public List<TeamResponse> getMyTeamPosts(String ownerEmail) {
-		// TODO Auto-generated method stub
 		return null;
 	}
-
-	@Override
-	public TeamJoinResponse requestToJoinTeam(String joinerEmail, UUID teamId, TeamJoinRequestDTO dto) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public List<TeamJoinResponse> getTeamRequests(String ownerEmail) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Result acceptMember(String ownerEmail, String joinerEmail) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Result rejectMember(String ownerEmail, String joinerEmail) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
-	@Override
-	public Result kickMember(String ownerEmail, String memberEmail) {
-		// TODO Auto-generated method stub
-		return null;
-	}
-
 }
