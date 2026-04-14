@@ -27,6 +27,8 @@ public class TeamDTO {
 	private List<TeamFinderSkill> neededSkills;
 
 	private List<TeamJoinRequest> applicants;
+	
+	private List<Integer> skillIds;
 
 	public long getId() {
 		return id;
@@ -98,6 +100,14 @@ public class TeamDTO {
 
 	public void setApplicants(List<TeamJoinRequest> applicants) {
 		this.applicants = applicants;
+	}
+
+	public List<Integer> getSkillIds() {
+		return skillIds;
+	}
+
+	public void setSkillIds(List<Integer> skillIds) {
+		this.skillIds = skillIds;
 	}
 
 }

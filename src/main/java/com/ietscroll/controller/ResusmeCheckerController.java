@@ -1,10 +1,11 @@
 package com.ietscroll.controller;
 
 
-import org.springframework.http.MediaType;
+import java.util.concurrent.CompletableFuture;
+
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RequestPart;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.multipart.MultipartFile;
@@ -22,8 +23,8 @@ public class ResusmeCheckerController {
 		this.resumeCheckerService=resumeCheckerService;
 	}
 	
-	@PostMapping(path="/quality" , consumes= {MediaType.MULTIPART_FORM_DATA_VALUE})
-	public QualityOfResume getQuality(@RequestPart("file") MultipartFile file, @RequestParam int exp,@RequestParam String role) {
-		return resumeCheckerService.getQuality(file,role,exp);
+	@PostMapping(path="/quality")
+	public QualityOfResume getQuality(@RequestPart("file") MultipartFile file, @RequestPart String exp,@RequestPart String role) {
+		return resumeCheckerService.getQuality(file,role,Integer.parseInt(exp));
 	}
 }

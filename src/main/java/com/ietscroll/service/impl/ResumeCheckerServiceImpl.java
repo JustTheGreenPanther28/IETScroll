@@ -3,6 +3,7 @@ package com.ietscroll.service.impl;
 import java.io.IOException;
 import java.util.List;
 import java.util.Map;
+import java.util.concurrent.CompletableFuture;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.ai.document.Document;
@@ -18,25 +19,25 @@ import com.ietscroll.service.ResumeCheckerService;
 @Service
 public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 
-	private final ChatClient chatClient;
+	private final ChatClient resumeChatClient;
 	private static final List<String> DOCUMENT_TYPES = List.of("application/pdf", "application/msword",
 			"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
 	public ResumeCheckerServiceImpl(ChatClient chatClient) {
-		this.chatClient = chatClient;
+		this.resumeChatClient = chatClient;
 	}
 
 	@Override
-	@Async
 	public QualityOfResume getQuality(MultipartFile file, String role, int experience) {
-
 		if (!DOCUMENT_TYPES.contains(file.getContentType())) {
 			throw new RuntimeException("Kindly upload your resume in form of PDF/DOCS ");
 		}
-
-		return chatClient.prompt().user(extractTextFromFile(file))
+		return resumeChatClient
+				.prompt()
+				.user(extractTextFromFile(file))
 				.system(sys -> sys.params(Map.of("role", role, "experience", experience))).call()
-				.responseEntity(QualityOfResume.class).entity();
+				.responseEntity(QualityOfResume.class)
+				.entity();
 	}
 
 	private static String extractTextFromFile(MultipartFile file) {
@@ -47,11 +48,9 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 		try {
 			TikaDocumentReader reader = new TikaDocumentReader(new InputStreamResource(file.getInputStream()));
 			List<Document> documents = reader.get();
-
 			if (documents == null || documents.isEmpty()) {
 				return "";
 			}
-
 			StringBuilder content = new StringBuilder();
 
 			for (Document doc : documents) {
@@ -59,7 +58,6 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 					content.append(doc.getText()).append("\n");
 				}
 			}
-
 			return content.toString().trim();
 
 		} catch (IOException e) {

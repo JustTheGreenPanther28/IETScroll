@@ -71,13 +71,13 @@ public class WebSecurity {
 //	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 	    http.authorizeHttpRequests(auth -> auth
-	            .requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString())
 	            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 	            .requestMatchers("/", "/index.html", "/style.css","login.html","register.html").permitAll()
 	            .requestMatchers(HttpMethod.POST,SecurityConstaints.LOGIN).permitAll()
 	            .requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
 	            .requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
 	            .requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
+	            .requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString())
 	            .anyRequest().authenticated());
 
 	    http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)

@@ -24,6 +24,8 @@ public class TeamJoinResponse {
 	
 	private String createdBy;
 	
+	private TeamRequestStatus status;
+	
 	public String getTeamId() {
 		return teamId;
 	}
@@ -47,8 +49,6 @@ public class TeamJoinResponse {
 	public void setStatus(TeamRequestStatus status) {
 		this.status = status;
 	}
-
-	private TeamRequestStatus status;
 	
 	
 	public String getApplicantEmail() {
@@ -98,7 +98,4 @@ public class TeamJoinResponse {
 	public void setYearOfPassout(Year yearOfPassout) {
 		this.yearOfPassout = yearOfPassout;
 	}
-	
-	
-
 }

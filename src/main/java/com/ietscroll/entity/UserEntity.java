@@ -61,9 +61,6 @@ public class UserEntity {
 	
 	@OneToMany(mappedBy="applicant")
 	private List<TeamJoinRequest> joinRequest;
-	
-	@OneToMany(mappedBy="currentMembers")
-	private List<Team> teamMembers;
 
 	@PrePersist
 	protected void onCreate() {

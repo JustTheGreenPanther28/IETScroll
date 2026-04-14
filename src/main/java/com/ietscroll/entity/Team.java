@@ -51,7 +51,7 @@ public class Team {
 
     private LocalDateTime createdAt;
 
-    @OneToMany(mappedBy = "teamFinder", cascade = CascadeType.ALL, orphanRemoval = true)
+    @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamFinderSkill> neededSkills;
 
     @OneToMany(mappedBy = "requestedTeam", cascade = CascadeType.ALL, orphanRemoval = true)
