@@ -6,8 +6,6 @@ import java.util.UUID;
 
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
-import org.springframework.beans.factory.annotation.Value;
-import org.springframework.core.io.Resource;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
@@ -17,6 +15,7 @@ import com.ietscroll.entity.Skills;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamFinderSkill;
 import com.ietscroll.entity.UserEntity;
+import com.ietscroll.exception.InappropriateImageException;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.SkillRepository;
 import com.ietscroll.repository.TeamRepository;
@@ -61,7 +60,7 @@ public class TeamServiceImpl implements TeamService {
 				.content();
 
 		if (!Boolean.parseBoolean(isSafe)) {
-			throw new RuntimeException("Please be respectful");
+			throw new InappropriateImageException("Kindly maintain decorum!");
 		}
 
 		UserEntity user = userRepo.findByEmail(ownerEmail);
@@ -94,6 +93,7 @@ public class TeamServiceImpl implements TeamService {
 		teamEntity = teamRepo.save(teamEntity);
 
 		TeamResponse teamResponse = new TeamResponse();
+		
 		teamResponse.setCreatedAt(teamEntity.getCreatedAt());
 		teamResponse.setCreatedBy(teamEntity.getCreatedBy().getEmail());
 		teamResponse.setMaxMember(teamEntity.getMaxMember());
@@ -101,6 +101,13 @@ public class TeamServiceImpl implements TeamService {
 		teamResponse.setPurpose(teamEntity.getPurpose());
 		teamResponse.setStatus(teamEntity.getStatus());
 		return teamResponse;
+	}
+	
+	@Override
+	public TeamResponse closeTeam(String ownerEmail) {
+		
+		
+		return null;
 	}
 
 	@Override
@@ -121,11 +128,6 @@ public class TeamServiceImpl implements TeamService {
 		return null;
 	}
 
-	@Override
-	public TeamResponse closeTeam(String ownerEmail) {
-		// TODO Auto-generated method stub
-		return null;
-	}
 
 	@Override
 	public List<TeamResponse> getMyTeamPosts(String ownerEmail) {
