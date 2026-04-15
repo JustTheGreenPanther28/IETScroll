@@ -3,6 +3,7 @@ package com.ietscroll.service.impl;
 import java.util.ArrayList;
 import java.util.List;
 
+import org.modelmapper.ModelMapper;
 import org.springframework.ai.chat.client.ChatClient;
 import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
@@ -16,6 +17,7 @@ import com.ietscroll.entity.Skills;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamFinderSkill;
 import com.ietscroll.entity.UserEntity;
+import com.ietscroll.general.enums.Privacy;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.SkillRepository;
 import com.ietscroll.repository.TeamRepository;
@@ -52,11 +54,7 @@ public class TeamServiceImpl implements TeamService {
 			throw new RuntimeException("You can't create more than one team");
 		}
 
-		String isSafe = mistralChatClient
-				.prompt()
-				.user(team.getPurpose())
-				.call()
-				.content();
+		String isSafe = mistralChatClient.prompt().user(team.getPurpose()).call().content();
 
 		if (!Boolean.parseBoolean(isSafe)) {
 			throw new RuntimeException("Kindly maintain decorum!");
@@ -72,6 +70,7 @@ public class TeamServiceImpl implements TeamService {
 		teamEntity.setCreatedBy(user);
 		teamEntity.setMaxMember(team.getMaxMember());
 		teamEntity.setPurpose(team.getPurpose());
+		teamEntity.setPrivacy(team.getPrivacy());
 
 		List<Skills> skills = skillRepository.findAllById(team.getSkillIds());
 
@@ -89,6 +88,7 @@ public class TeamServiceImpl implements TeamService {
 		}
 
 		teamEntity.setNeededSkills(neededSkills);
+		
 
 		teamEntity = teamRepo.save(teamEntity);
 
@@ -113,7 +113,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public Result changeTeamSize(String ownerEmail, int teamSize) {
-
+		
 		if (teamSize <= 0 || teamSize > 20) {
 			throw new RuntimeException("Team size should not less than zero and higher than twenty");
 		}
@@ -126,8 +126,7 @@ public class TeamServiceImpl implements TeamService {
 	public Page<TeamResponse> getActiveTeams(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		teamRepo.findByStatus(TeamStatus.OPEN, pageable)
-		.map(team -> {
+		return teamRepo.findByStatusAndPrivacy(TeamStatus.OPEN,Privacy.PUBLIC, pageable).map(team -> {
 			TeamResponse teamResponse = new TeamResponse();
 			teamResponse.setCreatedAt(team.getCreatedAt());
 			teamResponse.setCreatedBy(team.getCreatedBy().getEmail());
@@ -135,13 +134,25 @@ public class TeamServiceImpl implements TeamService {
 			teamResponse.setPublicId(team.getPublicId());
 			teamResponse.setPurpose(team.getPurpose());
 			teamResponse.setStatus(team.getStatus());
+			teamResponse.setPrivacy(team.getPrivacy());
 			return teamResponse;
 		});
-		return null;
+	}
+	
+	@Override
+	public TeamResponse getMyTeamDetails(String onwerEmail) {
+		
+		Team team = teamRepo.findByStatusAndCreatedBy_Email(TeamStatus.OPEN, onwerEmail);
+		ModelMapper modelMapper = new ModelMapper();
+		TeamResponse teamResponse = modelMapper.map(team, TeamResponse.class);
+		teamResponse.setCreatedBy(onwerEmail);
+		return teamResponse;
+		
 	}
 
 	@Override
 	public List<TeamResponse> getMyTeamPosts(String ownerEmail) {
 		return null;
 	}
+
 }

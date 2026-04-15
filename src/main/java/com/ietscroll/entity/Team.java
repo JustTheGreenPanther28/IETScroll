@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.UUID;
 
+import com.ietscroll.general.enums.Privacy;
 import com.ietscroll.general.enums.TeamStatus;
 
 import jakarta.persistence.CascadeType;
@@ -43,13 +44,18 @@ public class Team {
     @Enumerated(EnumType.STRING)
     @Column(nullable = false)
     private TeamStatus status = TeamStatus.OPEN;
+    
+    @Enumerated(EnumType.STRING)
+    @Column(nullable = false)
+    private Privacy privacy=Privacy.PUBLIC;
 
     @Min(1)
-    @Max(10)
+    @Max(20)
     @Column(nullable = false)
     private int maxMember;
 
     private LocalDateTime createdAt;
+    
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TeamFinderSkill> neededSkills;
@@ -122,6 +128,14 @@ public class Team {
     public void setApplicants(List<TeamJoinRequest> applicants) {
         this.applicants = applicants;
     }
+
+	public Privacy getPrivacy() {
+		return privacy;
+	}
+
+	public void setPrivacy(Privacy privacy) {
+		this.privacy = privacy;
+	}
 }
 
 

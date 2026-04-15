@@ -15,6 +15,8 @@ public interface TeamRequestService {
 	List<TeamResponse> getMyApplications(String joinerEmail);
 
 	List<TeamJoinResponse> getTeamRequests(String ownerEmail);
+	
+	List<TeamJoinResponse> getTeamMMember(String ownerEmail);
 
 	Result acceptMember(String ownerEmail, String joinerEmail);
 

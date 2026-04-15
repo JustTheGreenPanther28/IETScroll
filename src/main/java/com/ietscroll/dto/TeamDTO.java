@@ -7,6 +7,7 @@ import java.util.UUID;
 import com.ietscroll.entity.TeamFinderSkill;
 import com.ietscroll.entity.TeamJoinRequest;
 import com.ietscroll.entity.UserEntity;
+import com.ietscroll.general.enums.Privacy;
 import com.ietscroll.general.enums.TeamStatus;
 
 public class TeamDTO {
@@ -23,6 +24,8 @@ public class TeamDTO {
 	private int maxMember;
 
 	private LocalDateTime createdAt;
+	
+    private Privacy privacy;
 
 	private List<TeamFinderSkill> neededSkills;
 
@@ -108,6 +111,14 @@ public class TeamDTO {
 
 	public void setSkillIds(List<Integer> skillIds) {
 		this.skillIds = skillIds;
+	}
+
+	public Privacy getPrivacy() {
+		return privacy;
+	}
+
+	public void setPrivacy(Privacy privacy) {
+		this.privacy = privacy;
 	}
 
 }

@@ -10,7 +10,9 @@ import com.ietscroll.response.TeamResponse;
 
 public interface TeamService {
 	TeamResponse createTeam(String ownerEmail, TeamDTO team);
-
+	
+	
+	TeamResponse getMyTeamDetails(String onwerEmail);
 	Page<TeamResponse> getActiveTeams(int page,int size);
 
 	Result changeTeamSize(String ownerEmail, int teamSize);

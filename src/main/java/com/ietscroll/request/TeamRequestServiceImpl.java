@@ -45,4 +45,10 @@ public class TeamRequestServiceImpl implements TeamRequestService{
 		// TODO Auto-generated method stub
 		return null;
 	}
+
+	@Override
+	public List<TeamJoinResponse> getTeamMMember(String ownerEmail) {
+		// TODO Auto-generated method stub
+		return null;
+	}
 }
