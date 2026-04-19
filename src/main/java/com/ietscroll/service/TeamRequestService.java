@@ -10,14 +10,12 @@ import com.ietscroll.response.TeamResponse;
 
 public interface TeamRequestService {
 	
-	TeamJoinResponse requestToJoinTeam(String joinerEmail, UUID teamId, TeamJoinRequestDTO dto);
+	Result requestToJoinTeam(String joinerEmail, UUID teamId, TeamJoinRequestDTO dto);
 
 	List<TeamResponse> getMyApplications(String joinerEmail);
-
 	List<TeamJoinResponse> getTeamRequests(String ownerEmail);
-	
 	List<TeamJoinResponse> getTeamMMember(String ownerEmail);
-
+	
 	Result acceptMember(String ownerEmail, String joinerEmail);
 
 	Result rejectMember(String ownerEmail, String joinerEmail);

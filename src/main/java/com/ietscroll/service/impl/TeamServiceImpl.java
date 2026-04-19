@@ -1,7 +1,9 @@
 package com.ietscroll.service.impl;
 
+import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.ai.chat.client.ChatClient;
@@ -88,7 +90,6 @@ public class TeamServiceImpl implements TeamService {
 		}
 
 		teamEntity.setNeededSkills(neededSkills);
-		
 
 		teamEntity = teamRepo.save(teamEntity);
 
@@ -113,7 +114,7 @@ public class TeamServiceImpl implements TeamService {
 
 	@Override
 	public Result changeTeamSize(String ownerEmail, int teamSize) {
-		
+
 		if (teamSize <= 0 || teamSize > 20) {
 			throw new RuntimeException("Team size should not less than zero and higher than twenty");
 		}
@@ -123,10 +124,37 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
+	public TeamResponse getTeamById(UUID publicId) {
+		if(publicId==null || publicId.toString().isBlank()) {
+			throw new RuntimeException("Invalid Id");
+		}
+		
+		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+		bb.putLong(publicId.getMostSignificantBits());
+		bb.putLong(publicId.getLeastSignificantBits());
+
+		Team team=teamRepo.findByStatusAndPublicId(TeamStatus.OPEN, bb.array());
+
+		if(team==null) {
+			throw new RuntimeException("No valid team found with given team Id");
+		}
+		
+		TeamResponse response = new TeamResponse();
+		
+		response.setCreatedAt(team.getCreatedAt());
+		response.setCreatedBy(team.getCreatedBy().getEmail());
+		response.setMaxMember(team.getMaxMember());
+		response.setPurpose(team.getPurpose());
+		response.setPrivacy(team.getPrivacy());
+		
+		return response;
+	}
+
+	@Override
 	public Page<TeamResponse> getActiveTeams(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		return teamRepo.findByStatusAndPrivacy(TeamStatus.OPEN,Privacy.PUBLIC, pageable).map(team -> {
+		return teamRepo.findByStatusAndPrivacy(TeamStatus.OPEN, Privacy.PUBLIC, pageable).map(team -> {
 			TeamResponse teamResponse = new TeamResponse();
 			teamResponse.setCreatedAt(team.getCreatedAt());
 			teamResponse.setCreatedBy(team.getCreatedBy().getEmail());
@@ -138,21 +166,34 @@ public class TeamServiceImpl implements TeamService {
 			return teamResponse;
 		});
 	}
-	
+
 	@Override
 	public TeamResponse getMyTeamDetails(String onwerEmail) {
-		
+
 		Team team = teamRepo.findByStatusAndCreatedBy_Email(TeamStatus.OPEN, onwerEmail);
 		ModelMapper modelMapper = new ModelMapper();
 		TeamResponse teamResponse = modelMapper.map(team, TeamResponse.class);
 		teamResponse.setCreatedBy(onwerEmail);
 		return teamResponse;
-		
+
 	}
 
 	@Override
 	public List<TeamResponse> getMyTeamPosts(String ownerEmail) {
 		return null;
+	}
+
+	@Override
+	public boolean isTeamExist(UUID publicId) {
+		if(publicId==null || publicId.toString().isBlank()) {
+			throw new RuntimeException("Invalid Id");
+		}
+		
+		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
+		bb.putLong(publicId.getMostSignificantBits());
+		bb.putLong(publicId.getLeastSignificantBits());
+		
+		return teamRepo.findByStatusAndPublicId(TeamStatus.OPEN,bb.array())==null ? false : true;
 	}
 
 }

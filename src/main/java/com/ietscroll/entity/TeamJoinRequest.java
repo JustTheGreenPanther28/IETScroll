@@ -2,6 +2,8 @@ package com.ietscroll.entity;
 
 import java.time.LocalDateTime;
 
+import org.hibernate.annotations.CascadeType;
+
 import com.ietscroll.general.enums.TeamRequestStatus;
 
 import jakarta.persistence.Column;

@@ -8,4 +8,7 @@ import com.ietscroll.entity.TeamJoinRequest;
 @Repository
 public interface TeamJoinRequestRepository extends JpaRepository<TeamJoinRequest,Integer>{
 
+	TeamJoinRequest findByApplicantEmailAndTeamId(String email,byte[]publicId);
+	
+	boolean existsByApplicantEmailAndTeamId(String email, byte[] teamId);
 }

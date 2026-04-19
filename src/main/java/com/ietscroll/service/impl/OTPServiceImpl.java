@@ -45,10 +45,14 @@ public class OTPServiceImpl implements OTPService {
 
 	@Override
 	public Result verifyOTP(int otpGivenByUser, String email) {
-
 		otpRepo.deleteOldOTPs();
 		List<OTPEntity> otps = otpRepo.findByEmail(email);
+		UserEntity exist = userRepo.findByEmail(email);
 
+		if(exist==null) {
+			throw new RuntimeException("User doesn't exist");
+		}
+		
 		if (otps == null) {
 			throw new RuntimeException("Incorrect email or OTP expired!");
 		}

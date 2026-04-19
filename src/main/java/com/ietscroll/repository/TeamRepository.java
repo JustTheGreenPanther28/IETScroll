@@ -26,8 +26,11 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
 	@Transactional
 	@Query(value = "Update team_finder set max_member = ?2 where status='OPEN' AND created_by=?1", nativeQuery = true)
 	int updateTeamSize(String email, int teamSize);
-	
-	Team findByStatusAndCreatedBy_Email(TeamStatus teamStatus,String email);
+
+	Team findByStatusAndCreatedBy_Email(TeamStatus teamStatus, String email);
+
+	@Query(value="Select * from team_finder where status =?1 AND public_id=?2",nativeQuery=true)
+	Team findByStatusAndPublicId(TeamStatus teamStatus, byte[] publicId);
 
 	Page<Team> findByStatusAndPrivacy(TeamStatus status, Privacy privacy, Pageable pageable);
 
