@@ -16,7 +16,6 @@ public interface TeamService {
 	TeamResponse getTeamById(UUID publicId);
 	Page<TeamResponse> getActiveTeams(int page,int size);
 
-	boolean isTeamExist(UUID publicId);
 	Result changeTeamSize(String ownerEmail, int teamSize);
 	Result closeTeam(String ownerEmail);
 

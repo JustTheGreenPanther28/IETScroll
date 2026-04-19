@@ -29,8 +29,8 @@ public interface TeamRepository extends JpaRepository<Team, Integer> {
 
 	Team findByStatusAndCreatedBy_Email(TeamStatus teamStatus, String email);
 
-	@Query(value="Select * from team_finder where status =?1 AND public_id=?2",nativeQuery=true)
-	Team findByStatusAndPublicId(TeamStatus teamStatus, byte[] publicId);
+	@Query(value="Select * from team_finder where status ='OPEN' AND public_id=:publicId",nativeQuery=true)
+	Team findByPublicId(byte[] publicId);
 
 	Page<Team> findByStatusAndPrivacy(TeamStatus status, Privacy privacy, Pageable pageable);
 

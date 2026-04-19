@@ -1,4 +1,4 @@
-package com.ietscroll.request;
+package com.ietscroll.service.impl;
 
 import java.nio.ByteBuffer;
 import java.util.List;
@@ -6,10 +6,10 @@ import java.util.UUID;
 
 import org.springframework.stereotype.Service;
 
-import com.ietscroll.dto.TeamJoinRequestDTO;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamJoinRequest;
 import com.ietscroll.entity.UserEntity;
+import com.ietscroll.general.enums.TeamRequestStatus;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.TeamJoinRequestRepository;
 import com.ietscroll.repository.TeamRepository;
@@ -18,7 +18,6 @@ import com.ietscroll.response.Result;
 import com.ietscroll.response.TeamJoinResponse;
 import com.ietscroll.response.TeamResponse;
 import com.ietscroll.service.TeamRequestService;
-import com.ietscroll.service.TeamService;
 
 @Service
 public class TeamJoinRequestServiceImpl implements TeamRequestService {
@@ -26,42 +25,35 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	private TeamJoinRequestRepository teamJoinRequestRepo;
 	private TeamRepository teamRepo;
 	private UserRepository userRepo;
-	private TeamService teamService;
 
-	public TeamJoinRequestServiceImpl(TeamJoinRequestRepository teamRequestRepo, TeamRepository teamRepo,
-			UserRepository userRepo, TeamService teamService) {
+	public TeamJoinRequestServiceImpl(TeamJoinRequestRepository teamRequestRepo, TeamRepository teamRepo,UserRepository userRepo) {
 		this.teamJoinRequestRepo = teamRequestRepo;
 		this.teamRepo = teamRepo;
-		this.userRepo = userRepo;
-		this.teamService = teamService;
+		this.userRepo=userRepo;
 	}
 
 	@Override
-	public Result requestToJoinTeam(String joinerEmail, UUID teamId, TeamJoinRequestDTO teamRequestDTO) {
+	public Result requestToJoinTeam(String joinerEmail, UUID teamId, String message) {
 		if (teamId == null || teamId.toString().isBlank()) {
 			throw new RuntimeException("Team id is wrong");
 		}
 		byte[] teamIdArray = uuidToByteArray(teamId);
-		
-		if (teamJoinRequestRepo.existsByApplicantEmailAndTeamId(joinerEmail, teamIdArray)) {
+
+		if (teamJoinRequestRepo.existsByEmailAndTeamPublicId(joinerEmail, teamIdArray)>0) {
 			throw new RuntimeException("You already applied here");
 		}
 
-		Team appliedTo = teamRepo.findByStatusAndPublicId(TeamStatus.OPEN, teamIdArray);
+		Team appliedTo = teamRepo.findByPublicId(teamIdArray);
 		if (appliedTo == null) {
 			throw new RuntimeException("Incorrect Team ID!");
 		}
 
-		UserEntity applicant = userRepo.findByEmail(joinerEmail);
-
 		TeamJoinRequest teamJoinRequest = new TeamJoinRequest();
 
-		UserEntity user = new UserEntity();
-		user.setEmail(joinerEmail);
+		UserEntity user = userRepo.findByEmail(joinerEmail);
+		
 		teamJoinRequest.setApplicant(user);
-
-		teamJoinRequest.setMessage(teamRequestDTO.getMessage());
-
+		teamJoinRequest.setMessage(message);
 		teamJoinRequest.setRequestedTeam(appliedTo);
 
 		TeamJoinRequest requested = teamJoinRequestRepo.save(teamJoinRequest);
@@ -71,7 +63,16 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 
 	@Override
 	public List<TeamJoinResponse> getTeamRequests(String ownerEmail) {
-		// TODO Auto-generated method stub
+		if(ownerEmail==null || ownerEmail.isEmpty()) {
+			throw new RuntimeException("Invalid");
+		}
+		Team ownerTeam = teamRepo.findByStatusAndCreatedBy_Email(TeamStatus.OPEN, ownerEmail);
+		
+		byte[] publicId = uuidToByteArray(ownerTeam.getPublicId());
+		
+		
+		
+		
 		return null;
 	}
 

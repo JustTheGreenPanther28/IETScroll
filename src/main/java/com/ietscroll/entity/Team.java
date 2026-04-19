@@ -136,6 +136,13 @@ public class Team {
 	public void setPrivacy(Privacy privacy) {
 		this.privacy = privacy;
 	}
+
+	@Override
+	public String toString() {
+		return "Team [id=" + id + ", publicId=" + publicId + ", createdBy=" + createdBy + ", purpose=" + purpose
+				+ ", status=" + status + ", privacy=" + privacy + ", maxMember=" + maxMember + ", createdAt="
+				+ createdAt + ", neededSkills=" + neededSkills + ", applicants=" + applicants + "]";
+	}
 }
 
 

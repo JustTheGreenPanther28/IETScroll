@@ -32,16 +32,16 @@ import com.ietscroll.service.TeamService;
 public class TeamServiceImpl implements TeamService {
 
 	private TeamRepository teamRepo;
-	private UserRepository userRepo;
 	private SkillRepository skillRepository;
 	private ChatClient mistralChatClient;
+	private UserRepository userRepo;
 
-	public TeamServiceImpl(TeamRepository teamRepo, UserRepository userRepo, SkillRepository skillRepository,
-			@Qualifier("mistralChatClient") ChatClient mistralChatClient) {
+	public TeamServiceImpl(TeamRepository teamRepo, SkillRepository skillRepository,
+			@Qualifier("mistralChatClient") ChatClient mistralChatClient,UserRepository userRepo) {
 		this.teamRepo = teamRepo;
-		this.userRepo = userRepo;
 		this.skillRepository = skillRepository;
 		this.mistralChatClient = mistralChatClient;
+		this.userRepo=userRepo;
 	}
 
 	@Override
@@ -63,10 +63,6 @@ public class TeamServiceImpl implements TeamService {
 		}
 
 		UserEntity user = userRepo.findByEmail(ownerEmail);
-
-		if (user == null) {
-			throw new UsernameNotFoundException("Email doesn't exist");
-		}
 
 		Team teamEntity = new Team();
 		teamEntity.setCreatedBy(user);
@@ -101,6 +97,7 @@ public class TeamServiceImpl implements TeamService {
 		teamResponse.setPublicId(teamEntity.getPublicId());
 		teamResponse.setPurpose(teamEntity.getPurpose());
 		teamResponse.setStatus(teamEntity.getStatus());
+		teamResponse.setPrivacy(teamEntity.getPrivacy());
 		return teamResponse;
 	}
 
@@ -133,7 +130,7 @@ public class TeamServiceImpl implements TeamService {
 		bb.putLong(publicId.getMostSignificantBits());
 		bb.putLong(publicId.getLeastSignificantBits());
 
-		Team team=teamRepo.findByStatusAndPublicId(TeamStatus.OPEN, bb.array());
+		Team team=teamRepo.findByPublicId(bb.array());
 
 		if(team==null) {
 			throw new RuntimeException("No valid team found with given team Id");
@@ -145,6 +142,8 @@ public class TeamServiceImpl implements TeamService {
 		response.setCreatedBy(team.getCreatedBy().getEmail());
 		response.setMaxMember(team.getMaxMember());
 		response.setPurpose(team.getPurpose());
+		System.out.println(team.getPrivacy());
+
 		response.setPrivacy(team.getPrivacy());
 		
 		return response;
@@ -181,19 +180,6 @@ public class TeamServiceImpl implements TeamService {
 	@Override
 	public List<TeamResponse> getMyTeamPosts(String ownerEmail) {
 		return null;
-	}
-
-	@Override
-	public boolean isTeamExist(UUID publicId) {
-		if(publicId==null || publicId.toString().isBlank()) {
-			throw new RuntimeException("Invalid Id");
-		}
-		
-		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-		bb.putLong(publicId.getMostSignificantBits());
-		bb.putLong(publicId.getLeastSignificantBits());
-		
-		return teamRepo.findByStatusAndPublicId(TeamStatus.OPEN,bb.array())==null ? false : true;
 	}
 
 }

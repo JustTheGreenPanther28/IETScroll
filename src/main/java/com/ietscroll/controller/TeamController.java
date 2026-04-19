@@ -39,6 +39,7 @@ public class TeamController {
 	
 	@PostMapping
 	public TeamResponse createTeam(Authentication authentication, @RequestBody TeamCreationRequest teamCreationRequest ) {
+		System.out.println(teamCreationRequest);
 		TeamDTO teamDTO = new TeamDTO();
 		teamDTO.setPurpose(teamCreationRequest.purpose());
 		teamDTO.setMaxMember(teamCreationRequest.teamSize());
