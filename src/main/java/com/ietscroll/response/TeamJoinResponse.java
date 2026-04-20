@@ -1,5 +1,6 @@
 package com.ietscroll.response;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 
 import com.ietscroll.general.enums.Branch;
@@ -21,25 +22,27 @@ public class TeamJoinResponse {
 	private Year yearOfPassout;
 	
 	private String teamId;
-	
-	private String createdBy;
-	
+		
 	private TeamRequestStatus status;
 	
+	private String message;
+	
+    private LocalDateTime requestedAt;
+	
+	public LocalDateTime getRequestedAt() {
+		return requestedAt;
+	}
+
+	public void setRequestedAt(LocalDateTime requestedAt) {
+		this.requestedAt = requestedAt;
+	}
+
 	public String getTeamId() {
 		return teamId;
 	}
 
 	public void setTeamId(String teamId) {
 		this.teamId = teamId;
-	}
-
-	public String getCreatedBy() {
-		return createdBy;
-	}
-
-	public void setCreatedBy(String createdBy) {
-		this.createdBy = createdBy;
 	}
 
 	public TeamRequestStatus getStatus() {
@@ -97,5 +100,13 @@ public class TeamJoinResponse {
 
 	public void setYearOfPassout(Year yearOfPassout) {
 		this.yearOfPassout = yearOfPassout;
+	}
+
+	public String getMessage() {
+		return message;
+	}
+
+	public void setMessage(String message) {
+		this.message = message;
 	}
 }

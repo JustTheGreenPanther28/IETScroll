@@ -16,6 +16,8 @@ import com.ietscroll.response.Result;
 import com.ietscroll.response.TeamResponse;
 import com.ietscroll.service.TeamService;
 
+import jakarta.validation.constraints.Min;
+
 @RestController
 @RequestMapping("/api/v1/team")
 public class TeamController {
@@ -55,7 +57,7 @@ public class TeamController {
 	}
 	
 	@PatchMapping("/team-size")
-	public Result changeTeamSize(Authentication authentication,@RequestParam int teamSize) {
+	public Result changeTeamSize(Authentication authentication,@RequestParam @Min(3) int teamSize) {
 		return teamService.changeTeamSize(authentication.getName(), teamSize);
 	}
 	

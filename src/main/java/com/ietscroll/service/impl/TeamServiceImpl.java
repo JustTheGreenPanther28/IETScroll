@@ -11,17 +11,19 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
-import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import com.ietscroll.dto.TeamDTO;
 import com.ietscroll.entity.Skills;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamFinderSkill;
+import com.ietscroll.entity.TeamJoinRequest;
 import com.ietscroll.entity.UserEntity;
 import com.ietscroll.general.enums.Privacy;
+import com.ietscroll.general.enums.TeamRequestStatus;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.SkillRepository;
+import com.ietscroll.repository.TeamJoinRequestRepository;
 import com.ietscroll.repository.TeamRepository;
 import com.ietscroll.repository.UserRepository;
 import com.ietscroll.response.Result;
@@ -32,16 +34,19 @@ import com.ietscroll.service.TeamService;
 public class TeamServiceImpl implements TeamService {
 
 	private TeamRepository teamRepo;
+	private TeamJoinRequestRepository teamJoinRequestRepo;
 	private SkillRepository skillRepository;
 	private ChatClient mistralChatClient;
 	private UserRepository userRepo;
 
 	public TeamServiceImpl(TeamRepository teamRepo, SkillRepository skillRepository,
-			@Qualifier("mistralChatClient") ChatClient mistralChatClient,UserRepository userRepo) {
+			@Qualifier("mistralChatClient") ChatClient mistralChatClient, UserRepository userRepo,
+			TeamJoinRequestRepository teamJoinRequestRepo) {
 		this.teamRepo = teamRepo;
 		this.skillRepository = skillRepository;
 		this.mistralChatClient = mistralChatClient;
-		this.userRepo=userRepo;
+		this.userRepo = userRepo;
+		this.teamJoinRequestRepo=teamJoinRequestRepo;
 	}
 
 	@Override
@@ -88,6 +93,14 @@ public class TeamServiceImpl implements TeamService {
 		teamEntity.setNeededSkills(neededSkills);
 
 		teamEntity = teamRepo.save(teamEntity);
+		
+		TeamJoinRequest teamJoinRequest = new TeamJoinRequest();
+		teamJoinRequest.setApplicant(user);
+		teamJoinRequest.setMessage("OWNER");
+		teamJoinRequest.setRequestedTeam(teamEntity);
+		teamJoinRequest.setStatus(TeamRequestStatus.ACCEPTED);
+		
+		teamJoinRequestRepo.save(teamJoinRequest);
 
 		TeamResponse teamResponse = new TeamResponse();
 
@@ -116,36 +129,36 @@ public class TeamServiceImpl implements TeamService {
 			throw new RuntimeException("Team size should not less than zero and higher than twenty");
 		}
 		int count = teamRepo.updateTeamSize(ownerEmail, teamSize);
-
+		
 		return count == 1 ? Result.SUCCUESS : Result.FAILED;
 	}
 
 	@Override
 	public TeamResponse getTeamById(UUID publicId) {
-		if(publicId==null || publicId.toString().isBlank()) {
+		if (publicId == null || publicId.toString().isBlank()) {
 			throw new RuntimeException("Invalid Id");
 		}
-		
+
 		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
 		bb.putLong(publicId.getMostSignificantBits());
 		bb.putLong(publicId.getLeastSignificantBits());
 
-		Team team=teamRepo.findByPublicId(bb.array());
+		Team team = teamRepo.findByPublicId(bb.array());
 
-		if(team==null) {
+		if (team == null) {
 			throw new RuntimeException("No valid team found with given team Id");
 		}
-		
+
 		TeamResponse response = new TeamResponse();
-		
+
 		response.setCreatedAt(team.getCreatedAt());
 		response.setCreatedBy(team.getCreatedBy().getEmail());
 		response.setMaxMember(team.getMaxMember());
 		response.setPurpose(team.getPurpose());
-		System.out.println(team.getPrivacy());
+		response.setCurrentMember(team.getCurrentMember());
 
 		response.setPrivacy(team.getPrivacy());
-		
+
 		return response;
 	}
 
@@ -153,11 +166,18 @@ public class TeamServiceImpl implements TeamService {
 	public Page<TeamResponse> getActiveTeams(int page, int size) {
 		Pageable pageable = PageRequest.of(page, size);
 
-		return teamRepo.findByStatusAndPrivacy(TeamStatus.OPEN, Privacy.PUBLIC, pageable).map(team -> {
+		Page<Team >teams = teamRepo.findByStatusAndPrivacy(TeamStatus.OPEN, Privacy.PUBLIC, pageable);
+		
+		if(teams==null) {
+			throw new RuntimeException("No active teams rightnow");
+		}
+		return teams.map(
+				team -> {
 			TeamResponse teamResponse = new TeamResponse();
-			teamResponse.setCreatedAt(team.getCreatedAt());
 			teamResponse.setCreatedBy(team.getCreatedBy().getEmail());
+			teamResponse.setCreatedAt(team.getCreatedAt());
 			teamResponse.setMaxMember(team.getMaxMember());
+			teamResponse.setCurrentMember(team.getCurrentMember());
 			teamResponse.setPublicId(team.getPublicId());
 			teamResponse.setPurpose(team.getPurpose());
 			teamResponse.setStatus(team.getStatus());
@@ -170,6 +190,9 @@ public class TeamServiceImpl implements TeamService {
 	public TeamResponse getMyTeamDetails(String onwerEmail) {
 
 		Team team = teamRepo.findByStatusAndCreatedBy_Email(TeamStatus.OPEN, onwerEmail);
+		if(team==null) {
+			throw new RuntimeException("Team doesn't exist");
+		}
 		ModelMapper modelMapper = new ModelMapper();
 		TeamResponse teamResponse = modelMapper.map(team, TeamResponse.class);
 		teamResponse.setCreatedBy(onwerEmail);

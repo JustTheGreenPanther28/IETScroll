@@ -49,12 +49,15 @@ public class Team {
     @Column(nullable = false)
     private Privacy privacy=Privacy.PUBLIC;
 
-    @Min(1)
     @Max(20)
     @Column(nullable = false)
-    private int maxMember;
+    private int maxMember=5;
+    
+    @Max(20)
+    @Column(nullable = false)
+    private int currentMember=1;
 
-    private LocalDateTime createdAt;
+	private LocalDateTime createdAt;
     
 
     @OneToMany(mappedBy = "team", cascade = CascadeType.ALL, orphanRemoval = true)
@@ -76,6 +79,14 @@ public class Team {
     public UUID getPublicId() {
         return publicId;
     }
+    
+    public int getCurrentMember() {
+  		return currentMember;
+  	}
+
+  	public void setCurrentMember(int currentMember) {
+  		this.currentMember = currentMember;
+  	}
 
     public UserEntity getCreatedBy() {
         return createdBy;

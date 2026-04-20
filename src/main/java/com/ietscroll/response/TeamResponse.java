@@ -16,11 +16,14 @@ public class TeamResponse {
 
 	private int maxMember;
 
+	private int currentMember;
+
 	private LocalDateTime createdAt;
 
 	private TeamStatus status;
 
 	private Privacy privacy;
+	
 
 	public UUID getPublicId() {
 		return publicId;
@@ -76,6 +79,14 @@ public class TeamResponse {
 
 	public void setPrivacy(Privacy privacy) {
 		this.privacy = privacy;
+	}
+
+	public int getCurrentMember() {
+		return currentMember;
+	}
+
+	public void setCurrentMember(int currentMember) {
+		this.currentMember = currentMember;
 	}
 
 }
