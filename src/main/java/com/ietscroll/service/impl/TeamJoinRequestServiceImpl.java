@@ -98,10 +98,12 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	public Result acceptMember(String ownerEmail, String joinerEmail) {
 
 		if (ownerEmail == null || joinerEmail == null || ownerEmail.isBlank() || joinerEmail.isBlank()) {
+			System.out.println("hereeeeeeeeeee");
 			throw new RuntimeException("Invalid request!");
 		}
 
 		if (ownerEmail.equals(joinerEmail)) {
+			System.out.println("hereeeeeeeeeeeeeeeeeeeee");
 			throw new RuntimeException("Invalid request!");
 		}
 

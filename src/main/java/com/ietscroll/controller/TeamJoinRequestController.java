@@ -48,19 +48,19 @@ public class TeamJoinRequestController {
 		return teamRequestService.getTeamRequests(authentication.getName(), TeamRequestStatus.ACCEPTED);
 	}
 
-	@PatchMapping("/accept/{email}")
+	@PatchMapping("/accept/{applicantEmail}")
 	public Result acceptRequest(Authentication authentication, @PathVariable String applicantEmail) {
-		return teamRequestService.acceptMember(applicantEmail, applicantEmail);
+		return teamRequestService.acceptMember(authentication.getName(), applicantEmail);
 	}
 
-	@PatchMapping("/reject/{email}")
+	@PatchMapping("/reject/{applicantEmail}")
 	public Result rejectRequest(Authentication authentication, @PathVariable String applicantEmail) {
-		return teamRequestService.rejectMember(applicantEmail, applicantEmail);
+		return teamRequestService.rejectMember(authentication.getName(), applicantEmail);
 	}
 
-	@PatchMapping("/remove/{email}")
+	@PatchMapping("/remove/{applicantEmail}")
 	public Result removeMember(Authentication authentication, @PathVariable String applicantEmail) {
-		return teamRequestService.kickMember(applicantEmail, applicantEmail);
+		return teamRequestService.kickMember(authentication.getName(), applicantEmail);
 	}
 
 	@GetMapping("/my-application")
