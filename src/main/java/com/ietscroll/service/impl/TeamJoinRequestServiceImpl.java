@@ -103,7 +103,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		}
 
 		if (ownerEmail.equals(joinerEmail)) {
-			System.out.println("hereeeeeeeeeeeeeeeeeeeee");
+			System.out.println("");
 			throw new RuntimeException("Invalid request!");
 		}
 
