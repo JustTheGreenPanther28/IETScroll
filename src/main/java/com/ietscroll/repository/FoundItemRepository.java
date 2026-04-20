@@ -1,6 +1,6 @@
 package com.ietscroll.repository;
-
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -16,17 +16,16 @@ import com.ietscroll.general.enums.FoundItemStatus;
 @Repository
 public interface FoundItemRepository extends JpaRepository<FoundItemEntity, Integer> {
 
-	@Query(value = "Select Count(*) from found_item where contact_to= ? AND status= 'PENDING'", nativeQuery = true)
-	int countByUser(String email);
+    @Query(value = "SELECT COUNT(*) FROM found_item WHERE contact_to = ?1 AND status = 'PENDING'", nativeQuery = true)
+    int countByUser(String email);
 
-	@Query(value = "Select * from found_item where contact_to = ? AND status = 'PENDING'", nativeQuery = true)
-	List<FoundItemEntity> findActiveRequestByEmail(String email);
+    @Query(value = "SELECT * FROM found_item WHERE contact_to = ?1 AND status = 'PENDING'", nativeQuery = true)
+    List<FoundItemEntity> findActiveRequestByEmail(String email);
 
-	Page<FoundItemEntity> findByStatus(FoundItemStatus lostItemStatus, Pageable pageable);
+    Page<FoundItemEntity> findByStatus(FoundItemStatus status, Pageable pageable);
 
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE found_item set status='CLOSE' where status='PENDING' email=? AND public_id_of_found_item=?", nativeQuery = true)
-	int closeRequest(String email, byte[] array);
-
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE found_item SET status='CLOSE' WHERE status='PENDING' AND contact_to=?1 AND public_id_of_found_item=?2", nativeQuery = true)
+    int closeRequest(String email, UUID publicId);
 }

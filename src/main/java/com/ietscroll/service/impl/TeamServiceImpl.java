@@ -139,11 +139,7 @@ public class TeamServiceImpl implements TeamService {
 			throw new RuntimeException("Invalid Id");
 		}
 
-		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-		bb.putLong(publicId.getMostSignificantBits());
-		bb.putLong(publicId.getLeastSignificantBits());
-
-		Team team = teamRepo.findByPublicId(bb.array());
+		Team team = teamRepo.findByPublicId(publicId);
 
 		if (team == null) {
 			throw new RuntimeException("No valid team found with given team Id");

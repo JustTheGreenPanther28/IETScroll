@@ -1,6 +1,7 @@
 package com.ietscroll.repository;
 
 import java.util.List;
+import java.util.UUID;
 
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -17,18 +18,16 @@ import com.ietscroll.general.enums.LostItemStatus;
 @Repository
 public interface LostItemRepository extends JpaRepository<LostItemEntity, Integer> {
 
-	@Query(value = "SELECT * FROM lost_item WHERE owner_email = :email AND status='OPEN' ", nativeQuery = true)
-	List<LostItemEntity> findActiveRequestByEmail(@Param("email") String email);
+    @Query(value = "SELECT * FROM lost_item WHERE owner_email = :email AND status='OPEN'", nativeQuery = true)
+    List<LostItemEntity> findActiveRequestByEmail(@Param("email") String email);
 
-	@Modifying
-	@Transactional
-	@Query(value = "UPDATE lost_item SET status='CLOSED' where status='OPEN' AND owner_email = ? AND public_id_of_lost_request = ?", nativeQuery = true)
-	int closeRequest(String email, byte[]idOfRequest);
+    @Modifying
+    @Transactional
+    @Query(value = "UPDATE lost_item SET status='CLOSED' WHERE status='OPEN' AND owner_email = ?1 AND public_id_of_lost_request = ?2", nativeQuery = true)
+    int closeRequest(String email, UUID idOfRequest);
 
-	@Query(value = "Select COUNT(*) from lost_item where owner_email = :email AND status = 'OPEN'", nativeQuery = true)
-	int countRequestByUser(@Param("email") String email);
-	
-	
-	Page<LostItemEntity> findByStatus(LostItemStatus lostItemStatus,Pageable pageable);
+    @Query(value = "SELECT COUNT(*) FROM lost_item WHERE owner_email = :email AND status = 'OPEN'", nativeQuery = true)
+    int countRequestByUser(@Param("email") String email);
 
+    Page<LostItemEntity> findByStatus(LostItemStatus status, Pageable pageable);
 }

@@ -19,7 +19,7 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.validation.constraints.Email;
 
-@Entity(name = "user")
+@Entity(name = "users")
 public class UserEntity {
 
 	@Id

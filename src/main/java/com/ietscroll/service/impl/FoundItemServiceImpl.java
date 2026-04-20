@@ -127,13 +127,9 @@ public class FoundItemServiceImpl implements FoundItemService {
 		}
 
 		// Converting String -> UUID -> Byte Array (Because MYSQL store UUID in form of
-		UUID publicUUId = UUID.fromString(publicId);
+		UUID publicUUID = UUID.fromString(publicId);
 
-		ByteBuffer bb = ByteBuffer.allocate(16);
-		bb.putLong(publicUUId.getMostSignificantBits());
-		bb.putLong(publicUUId.getLeastSignificantBits());
-
-		int rowsChanged = foundItemRepo.closeRequest(email, bb.array());
+		int rowsChanged = foundItemRepo.closeRequest(email, publicUUID);
 		if (rowsChanged == 0) {
 			return Result.FAILED;
 		}

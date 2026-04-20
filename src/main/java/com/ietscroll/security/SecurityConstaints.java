@@ -7,8 +7,8 @@ public class SecurityConstaints {
 	public static final String TOKEN_PREFIX = "Bearer ";
 	public static final String HEADER_STRING = "Authorization";
 	public static final String SIGN_UP_URL = "/api/v1/user/register";
-	public static final String EMAIL_VERIFICATION = "/api/v1/otp";
+	public static final String EMAIL_VERIFICATION = "/api/v1/otp/verify";
 	public static final String LOGIN = "/login";
-	public static final String RESEND_OTP = "/api/v1/users/otp/resend";
+	public static final String RESEND_OTP = "/api/v1/otp/resend";
 	public static final String ADMIN_APIs = "/api/v1/admin/**";
 }

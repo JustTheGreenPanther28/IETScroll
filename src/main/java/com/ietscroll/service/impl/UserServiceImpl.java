@@ -45,9 +45,9 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO register(UserDTO userDTO) {
 
-		if (!userDTO.getEmail().endsWith("@ietdavv.edu.in")) {
-			throw new RuntimeException("Kindly enter college email");
-		}
+		if (userDTO.getEmail() ==null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
+	        throw new UsernameNotFoundException("Incorrect email");
+	    }
 		UserEntity found = userRepo.findByEmail(userDTO.getEmail());
 		UserEntity found1 = userRepo.findByUsername(userDTO.getUsername());
 

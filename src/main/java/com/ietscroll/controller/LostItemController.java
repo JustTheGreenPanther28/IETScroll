@@ -31,11 +31,9 @@ import com.ietscroll.service.LostItemService;
 public class LostItemController {
 
 	private LostItemService lostItemService;
-	private ModelMapper modelMapper;
 
-	public LostItemController(LostItemService lostItemService, ModelMapper modelMapper) {
+	public LostItemController(LostItemService lostItemService) {
 		this.lostItemService = lostItemService;
-		this.modelMapper = modelMapper;
 	}
 
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })

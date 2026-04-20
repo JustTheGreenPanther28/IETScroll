@@ -39,13 +39,11 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		if (teamId == null || teamId.toString().isBlank()) {
 			throw new RuntimeException("Team id is wrong");
 		}
-		byte[] teamIdArray = uuidToByteArray(teamId);
-
-		if (teamJoinRequestRepo.existsByEmailAndTeamPublicId(joinerEmail, teamIdArray) > 0) {
+		if (teamJoinRequestRepo.existsByEmailAndTeamPublicId(joinerEmail, teamId) > 0) {
 			throw new RuntimeException("You already applied here");
 		}
 
-		Team appliedTo = teamRepo.findByPublicId(teamIdArray);
+		Team appliedTo = teamRepo.findByPublicId(teamId);
 		if (appliedTo == null || appliedTo.getStatus() == TeamStatus.CLOSED) {
 			throw new RuntimeException("Incorrect Team ID!");
 		}
@@ -118,10 +116,8 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 					"Maximum team size is " + ownerTeam.getMaxMember() + ". You can't add more members!");
 		}
 
-		byte[] teamId = uuidToByteArray(ownerTeam.getPublicId());
-
 		int rowsChanged = teamJoinRequestRepo.changeStatusOfApplicant(TeamRequestStatus.ACCEPTED.toString(),
-				joinerEmail, teamId);
+				joinerEmail, ownerTeam.getPublicId());
 
 		if (rowsChanged == 1) {
 			ownerTeam.setCurrentMember(ownerTeam.getCurrentMember() + 1);
@@ -149,10 +145,8 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 			throw new RuntimeException("Team doesn't exist or closed");
 		}
 
-		byte[] teamId = uuidToByteArray(ownerTeam.getPublicId());
-
 		int rowsChanged = teamJoinRequestRepo.changeStatusOfApplicant(TeamRequestStatus.REJECTED.toString(),
-				joinerEmail, teamId);
+				joinerEmail, ownerTeam.getPublicId());
 
 		if (rowsChanged == 1) {
 			return Result.SUCCUESS;
@@ -178,9 +172,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 			throw new RuntimeException("Team doesn't exist or closed");
 		}
 
-		byte[] teamId = uuidToByteArray(ownerTeam.getPublicId());
-
-		int rowsChanged = teamJoinRequestRepo.kickApplicant(memberEmail, teamId);
+		int rowsChanged = teamJoinRequestRepo.kickApplicant(memberEmail, ownerTeam.getPublicId());
 
 		if (rowsChanged == 1) {
 			ownerTeam.setCurrentMember(ownerTeam.getCurrentMember() - 1);
@@ -213,12 +205,5 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		}
 
 		return applications;
-	}
-
-	public byte[] uuidToByteArray(UUID id) {
-		ByteBuffer bb = ByteBuffer.wrap(new byte[16]);
-		bb.putLong(id.getMostSignificantBits());
-		bb.putLong(id.getLeastSignificantBits());
-		return bb.array();
 	}
 }
