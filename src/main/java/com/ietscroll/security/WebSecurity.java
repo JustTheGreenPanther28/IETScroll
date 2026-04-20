@@ -73,6 +73,7 @@ public class WebSecurity {
 	    http.authorizeHttpRequests(auth -> auth
 	            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 	            .requestMatchers("/", "/index.html", "/style.css","login.html","register.html","styleForSafety.css","safety.html").permitAll()
+	            .requestMatchers("/actuator/health").permitAll()
 	            .requestMatchers(HttpMethod.POST,SecurityConstaints.LOGIN).permitAll()
 	            .requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
 	            .requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
