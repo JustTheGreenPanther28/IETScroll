@@ -26,17 +26,22 @@ import com.ietscroll.response.FoundItemResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.FoundItemService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/found-item")
+@Tag(name = "Found Item Management", description = "APIs for reporting, managing, and browsing found items. Includes image moderation and upload handling.")
 public class FoundItemController {
 
-	private FoundItemService foundItemService;
+	private final FoundItemService foundItemService;
 
 	public FoundItemController(FoundItemService foundItemService, ModelMapper modelMapper) {
 		this.foundItemService = foundItemService;
 	}
 
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
+	@Operation(summary = "Create a found item", description = "Uploads a found item with image. The image is validated using moderation APIs and stored in Cloudinary. Maximum 3 active requests per user.")
 	public ResponseEntity<Result> createLostItemPost(Authentication authentication,
 			@RequestPart("data") String foundItemJSON, @RequestPart("image") MultipartFile image) throws IOException {
 
@@ -57,6 +62,7 @@ public class FoundItemController {
 	}
 
 	@GetMapping("/me")
+	@Operation(summary = "Get current user's found items", description = "Fetch all active found item posts created by the authenticated user.")
 	public List<FoundItemResponse> getUserLostItem(Authentication authentication) {
 		List<FoundItemDTO> foundItemDTOs = foundItemService.getMyFoundItems(authentication.getName());
 
@@ -75,11 +81,13 @@ public class FoundItemController {
 	}
 
 	@PatchMapping("/close")
+	@Operation(summary = "Close a found item request", description = "Marks a found item request as closed using its public ID.")
 	public Result closeLostItemRequest(Authentication authentication, @RequestParam String foundItemId) {
 		return foundItemService.closeFoundItemRequest(authentication.getName(), foundItemId);
 	}
 
 	@GetMapping
+	@Operation(summary = "Get all found items (paginated)", description = "Fetch all pending found items with pagination sorted by latest first.")
 	public ResponseEntity<PagedResponseDTO<FoundItemResponse>> getAllLostItems(
 			@RequestParam(defaultValue = "0") int page, @RequestParam(defaultValue = "10") int size) {
 		return ResponseEntity.ok(foundItemService.getAllFoundItems(page, size));

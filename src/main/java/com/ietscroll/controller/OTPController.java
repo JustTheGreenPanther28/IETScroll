@@ -9,21 +9,24 @@ import com.ietscroll.request.AccountVerificationRequest;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.OTPService;
 
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.tags.Tag;
+
 @RestController
 @RequestMapping("/api/v1/otp")
+@Tag(name = "OTP & Verification", description = "Handles email-based OTP verification for user authentication.")
 public class OTPController {
-	
+
 	private OTPService otpService;
-	
+
 	public OTPController(OTPService otpService) {
-		this.otpService=otpService;
+		this.otpService = otpService;
 	}
-	
+
 	@PostMapping("/verify")
+	@Operation(summary = "Verify OTP", description = "Validates the OTP provided by the user and activates the account if successful.")
 	public Result verifyAccount(@RequestBody AccountVerificationRequest otpAndEmail) {
 		return otpService.verifyOTP(otpAndEmail.otp(), otpAndEmail.email());
 	}
-	
-	
 
 }
