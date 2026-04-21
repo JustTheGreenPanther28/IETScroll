@@ -16,17 +16,10 @@ import io.swagger.v3.oas.models.servers.Server;
 
 @Configuration
 public class SwaggerConfiguration {
-
-    private final Cloudinary cloudinary;
-
-    SwaggerConfiguration(Cloudinary cloudinary) {
-        this.cloudinary = cloudinary;
-    }
-
+	
 	@Bean
 	public OpenAPI myConfiguration() {
 
-		// Contact
 		Contact contact = new Contact();
 		contact.setName("IET Scroll Developer Team");
 		contact.setEmail("iet.scroll.in@gmail.com");
@@ -35,18 +28,17 @@ public class SwaggerConfiguration {
 		license.setName("Student Project - Not Officially Affiliated");
 		license.setUrl("https://github.com/JustTheGreenPanther28");
 
-		// Info
 		Info info = new Info();
 		info.setTitle("IET Scroll API (Student Project)");
 		info.setDescription(
-				"This is a student-built backend application for managing unoffical problem in college like : lost & found items, team searching and formation for project, hackathon, and resume analysis. This project is NOT officially affiliated with IET DAVV.");
+				"This is a student-built backend application for managing unoffical problem in college like : lost & found items,resume analysis, team searching and formation for project and hackathon. \nThis project is NOT officially affiliated with IET DAVV.");
 		info.setVersion("v1.0.0");
 		info.setContact(contact);
 		info.setLicense(license);
 
 		ExternalDocumentation externalDocs = new ExternalDocumentation();
 		externalDocs.setDescription("Project Repository");
-		externalDocs.setUrl("https://github.com/JustTheGreenPanther28?tab=repositories");
+		externalDocs.setUrl("https://github.com/JustTheGreenPanther28/IETScroll");
 
 		OpenAPI openAPI = new OpenAPI();
 		openAPI.setInfo(info);
