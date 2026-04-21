@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Verify — IET Scroll</title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet" />
+  <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,700;0,900;1,400&family=DM+Sans:wght@300;400;500&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+  <link rel="stylesheet" href="auth.css" />
+</head>
+<body class="auth-body">
+
+  <div class="auth-split">
+
+    <div class="auth-left d-none d-lg-flex">
+      <div class="auth-left-inner">
+        <a href="index.html" class="auth-brand">IET <span>Scroll</span> <small>BETA</small></a>
+        <h2 class="auth-left-title">One last<br/><em>step.</em></h2>
+        <p class="auth-left-sub">We sent a verification code to your college email. Enter it to activate your account.</p>
+        <div class="auth-left-tags">
+          <span>Verified students only</span>
+          <span>@ietdavv.edu.in</span>
+        </div>
+      </div>
+    </div>
+
+    <div class="auth-right">
+      <div class="auth-box">
+
+        <a href="index.html" class="auth-brand-mobile d-flex d-lg-none">IET <span>Scroll</span></a>
+
+        <div class="auth-header">
+          <div class="auth-step-label">Step 2 of 2</div>
+          <h1 class="auth-title">Verify your<br/><em>email</em></h1>
+          <p class="auth-subtitle" id="emailDisplay">Checking...</p>
+        </div>
+
+        <div id="errorMsg" class="auth-error d-none"></div>
+        <div id="successMsg" class="auth-success d-none"></div>
+
+        <div class="auth-form">
+
+          <div class="auth-field">
+            <label>OTP Code <span class="req">*</span></label>
+            <input type="number" id="otp" placeholder="Enter 6-digit OTP" maxlength="6" />
+          </div>
+
+          <button class="auth-submit" id="verifyBtn" onclick="verify()">
+            <span id="verifyText">Verify Account</span>
+            <span id="verifySpinner" class="d-none">...</span>
+          </button>
+
+          <p class="auth-switch">Wrong email? <a href="register.html">Go back</a></p>
+
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <script>
+    const BASE = 'https://iet-scroll.onrender.com';
+    const email = localStorage.getItem('pendingEmail') || '';
+
+    document.getElementById('emailDisplay').textContent = email ? `Code sent to ${email}` : 'No email found — go back and register.';
+
+    async function verify() {
+      const otp = parseInt(document.getElementById('otp').value);
+      clearMessages();
+
+      if (!otp || isNaN(otp)) {
+        showError('Please enter the OTP.');
+        return;
+      }
+
+      if (!email) {
+        showError('No email found. Please register again.');
+        return;
+      }
+
+      setLoading(true);
+
+      try {
+        const res = await fetch(`${BASE}/api/v1/otp/verify`, {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ otp, email })
+        });
+
+        if (res.ok) {
+          localStorage.removeItem('pendingEmail');
+          showSuccess('Account verified! Redirecting to login...');
+          setTimeout(() => window.location.href = 'login.html', 1500);
+        } else if (res.status === 400) {
+          showError('Invalid or expired OTP. Please try again.');
+        } else {
+          showError('Verification failed. Try again.');
+        }
+      } catch (e) {
+        showError('Cannot connect to server. Try again later.');
+      }
+
+      setLoading(false);
+    }
+
+    function showError(msg) {
+      const el = document.getElementById('errorMsg');
+      el.textContent = msg;
+      el.classList.remove('d-none');
+    }
+
+    function showSuccess(msg) {
+      const el = document.getElementById('successMsg');
+      el.textContent = msg;
+      el.classList.remove('d-none');
+    }
+
+    function clearMessages() {
+      document.getElementById('errorMsg').classList.add('d-none');
+      document.getElementById('successMsg').classList.add('d-none');
+    }
+
+    function setLoading(val) {
+      document.getElementById('verifyText').classList.toggle('d-none', val);
+      document.getElementById('verifySpinner').classList.toggle('d-none', !val);
+      document.getElementById('verifyBtn').disabled = val;
+    }
+  </script>
+
+  <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html>
