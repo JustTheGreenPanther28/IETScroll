@@ -468,7 +468,7 @@
 			setError('email', '');
 			setError('password', '');
 
-			if (!email || !email.endsWith('@ietdavv.edu.in')) {
+			if (!email) {
 				setError('email', 'Must be a valid @ietdavv.edu.in email');
 				ok = false;
 			}
