@@ -494,7 +494,7 @@
 			};
 
 			try {
-				const res = await fetch(`${BASE}/api/v1/user/login`, {
+				const res = await fetch(`${BASE}/login`, {
 					method: 'POST',
 					headers: {'Content-Type': 'application/json'},
 					body: JSON.stringify(payload),
@@ -514,7 +514,7 @@
 
 					if (token) localStorage.setItem('iet_token', token.trim());
 
-					showAlert('success', '✓ Login successful! Redirecting…');
+					showAlert('success', 'Login successful! Redirecting…');
 					setTimeout(() => {window.location.href = 'dashboard.html';}, 1400);
 				} else {
 					const contentType = res.headers.get('content-type') || '';
