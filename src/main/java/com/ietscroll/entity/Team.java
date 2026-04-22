@@ -21,7 +21,6 @@ import jakarta.persistence.OneToMany;
 import jakarta.persistence.PrePersist;
 import jakarta.persistence.Table;
 import jakarta.validation.constraints.Max;
-import jakarta.validation.constraints.Min;
 
 @Entity
 @Table(name = "team_finder")

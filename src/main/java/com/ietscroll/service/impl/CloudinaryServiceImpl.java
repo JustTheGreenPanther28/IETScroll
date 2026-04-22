@@ -25,7 +25,7 @@ public class CloudinaryServiceImpl implements CloudinaryService {
 	//Map.of("public_id", "item_123", "overwrite", true) <- replace existing image
 	//Map.of("resource_type", "image") <- the MULTIPARTFILE can be image,video or raw etc
 	@Override
-	public Map upload(MultipartFile image) throws IOException {
+	public Map<?, ?> upload(MultipartFile image) throws IOException {
 		return cloudinary.uploader().upload(image.getBytes(), 
 				Map.of(
 						"folder","IETSCROLL_Lost_Items"

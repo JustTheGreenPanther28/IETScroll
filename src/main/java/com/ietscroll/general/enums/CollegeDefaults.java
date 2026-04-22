@@ -7,7 +7,15 @@ public enum CollegeDefaults {
 	private String value;
 	
 	CollegeDefaults(String value){
-		this.value=value;
+		this.setValue(value);
+	}
+
+	public String getValue() {
+		return value;
+	}
+
+	public void setValue(String value) {
+		this.value = value;
 	}
 	
 }

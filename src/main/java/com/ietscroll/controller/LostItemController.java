@@ -72,7 +72,7 @@ public class LostItemController {
 			lostItemResponse.setPublicIdOfLostRequest(lostItemDTO.getPublicIdOfLostRequest());
 			lostItemResponse.setLostItemname(lostItemDTO.getLostItemname());
 			lostItemResponse.setDescription(lostItemDTO.getDescription());
-			lostItemResponse.setImageURLOfItem(lostItemDTO.getImmageURL());
+			lostItemResponse.setImageURLOfItem(lostItemDTO.getImageURL());
 			lostItemResponse.setPredictedLocation(lostItemDTO.getPredictedLocation());
 			lostItemResponse.setPrize(lostItemDTO.getPrize());
 

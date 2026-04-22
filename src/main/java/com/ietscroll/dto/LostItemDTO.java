@@ -13,7 +13,7 @@ public class LostItemDTO {
 	private UUID publicIdOfLostRequest;
 	private String lostItemname;
 	private MultipartFile image;
-	private String immageURL;
+	private String imageURL;
 	private String predictedLocation;
 	private String description;
 	private LostItemStatus status;
@@ -35,14 +35,6 @@ public class LostItemDTO {
 
 	public void setPublicIdOfLostRequest(UUID publicIdOfLostRequest) {
 		this.publicIdOfLostRequest = publicIdOfLostRequest;
-	}
-
-	public String getImmageURL() {
-		return immageURL;
-	}
-
-	public void setImmageURL(String immageURL) {
-		this.immageURL = immageURL;
 	}
 
 	public String getPredictedLocation() {
@@ -104,7 +96,7 @@ public class LostItemDTO {
 	@Override
 	public String toString() {
 		return "LostItemDTO [id=" + id + ", publicIdOfLostRequest=" + publicIdOfLostRequest + ", lostItemname="
-				+ lostItemname + ", image=" + image + ", immageURL=" + immageURL + ", predictedLocation="
+				+ lostItemname + ", image=" + image + ", immageURL=" + imageURL + ", predictedLocation="
 				+ predictedLocation + ", description=" + description + ", status=" + status + ", prize=" + prize
 				+ ", ownerEmail=" + ownerEmail + "]";
 	}
@@ -115,6 +107,14 @@ public class LostItemDTO {
 
 	public void setCreatedAt(LocalDateTime createdAt) {
 		this.createdAt = createdAt;
+	}
+
+	public String getImageURL() {
+		return imageURL;
+	}
+
+	public void setImageURL(String imageURL) {
+		this.imageURL = imageURL;
 	}
 
 }

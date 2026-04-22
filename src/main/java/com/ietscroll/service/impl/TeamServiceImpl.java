@@ -1,6 +1,5 @@
 package com.ietscroll.service.impl;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -38,15 +37,17 @@ public class TeamServiceImpl implements TeamService {
 	private SkillRepository skillRepository;
 	private ChatClient mistralChatClient;
 	private UserRepository userRepo;
+	private ModelMapper modelMapper;
 
 	public TeamServiceImpl(TeamRepository teamRepo, SkillRepository skillRepository,
 			@Qualifier("mistralChatClient") ChatClient mistralChatClient, UserRepository userRepo,
-			TeamJoinRequestRepository teamJoinRequestRepo) {
+			TeamJoinRequestRepository teamJoinRequestRepo,ModelMapper modelMapper) {
 		this.teamRepo = teamRepo;
 		this.skillRepository = skillRepository;
 		this.mistralChatClient = mistralChatClient;
 		this.userRepo = userRepo;
 		this.teamJoinRequestRepo=teamJoinRequestRepo;
+		this.modelMapper=modelMapper;
 	}
 
 	@Override
@@ -119,7 +120,7 @@ public class TeamServiceImpl implements TeamService {
 
 		int count = teamRepo.closeTeam(ownerEmail);
 
-		return count == 1 ? Result.SUCCUESS : Result.FAILED;
+		return count == 1 ? Result.SUCCESS : Result.FAILED;
 	}
 
 	@Override
@@ -130,7 +131,7 @@ public class TeamServiceImpl implements TeamService {
 		}
 		int count = teamRepo.updateTeamSize(ownerEmail, teamSize);
 		
-		return count == 1 ? Result.SUCCUESS : Result.FAILED;
+		return count == 1 ? Result.SUCCESS : Result.FAILED;
 	}
 
 	@Override
@@ -189,7 +190,6 @@ public class TeamServiceImpl implements TeamService {
 		if(team==null) {
 			throw new RuntimeException("Team doesn't exist");
 		}
-		ModelMapper modelMapper = new ModelMapper();
 		TeamResponse teamResponse = modelMapper.map(team, TeamResponse.class);
 		teamResponse.setCreatedBy(onwerEmail);
 		return teamResponse;

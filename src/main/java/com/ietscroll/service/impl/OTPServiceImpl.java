@@ -53,7 +53,7 @@ public class OTPServiceImpl implements OTPService {
 			throw new RuntimeException("User doesn't exist");
 		}
 		
-		if (otps == null) {
+		if (otps==null || otps.isEmpty()) {
 			throw new RuntimeException("Incorrect email or OTP expired!");
 		}
 
@@ -63,7 +63,7 @@ public class OTPServiceImpl implements OTPService {
 			UserEntity user = userRepo.findByEmail(email);
 			user.setVerified(true);
 			userRepo.save(user);
-			return Result.SUCCUESS;
+			return Result.SUCCESS;
 		}
 
 		return Result.FAILED;

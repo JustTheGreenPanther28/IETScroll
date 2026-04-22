@@ -1,7 +1,6 @@
 package com.ietscroll.service.impl;
 
 import java.io.IOException;
-import java.nio.ByteBuffer;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -19,7 +18,6 @@ import com.ietscroll.dto.FoundItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.entity.FoundItemEntity;
 import com.ietscroll.general.enums.FoundItemStatus;
-import com.ietscroll.general.enums.LostItemStatus;
 import com.ietscroll.repository.FoundItemRepository;
 import com.ietscroll.response.FoundItemResponse;
 import com.ietscroll.response.Result;
@@ -84,7 +82,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 		sightEngineService.checkImage(image);
 
 		// Map has details about uploaded image
-		Map uploadedDetail = cloudinaryService.upload(image);
+		Map<?,?> uploadedDetail = cloudinaryService.upload(image);
 		// Getting url from it
 		String url = (String) uploadedDetail.get("secure_url");
 
@@ -98,7 +96,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 
 		foundItemRepo.save(foundItem);
 
-		return Result.SUCCUESS;
+		return Result.SUCCESS;
 	}
 
 	@Override
@@ -133,7 +131,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 		if (rowsChanged == 0) {
 			return Result.FAILED;
 		}
-		return Result.SUCCUESS;
+		return Result.SUCCESS;
 	}
 
 }

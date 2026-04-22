@@ -5,8 +5,6 @@ import java.util.List;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
-import com.cloudinary.Cloudinary;
-
 import io.swagger.v3.oas.models.ExternalDocumentation;
 import io.swagger.v3.oas.models.OpenAPI;
 import io.swagger.v3.oas.models.info.Contact;
@@ -18,8 +16,9 @@ import io.swagger.v3.oas.models.servers.Server;
 public class SwaggerConfiguration {
 	
 	@Bean
-	public OpenAPI myConfiguration() {
+	OpenAPI myConfiguration() {
 
+		
 		Contact contact = new Contact();
 		contact.setName("IET Scroll Developer Team");
 		contact.setEmail("iet.scroll.in@gmail.com");
@@ -31,7 +30,7 @@ public class SwaggerConfiguration {
 		Info info = new Info();
 		info.setTitle("IET Scroll API (Student Project)");
 		info.setDescription(
-				"This is a student-built backend application for managing unoffical problem in college like : lost & found items,resume analysis, team searching and formation for project and hackathon. \nThis project is NOT officially affiliated with IET DAVV.");
+				"This is a student-built backend application for managing unoffical problem in college like : lost & found items, resume analysis, team searching and formation for project and hackathon. \nThis project is NOT officially affiliated with IET DAVV.");
 		info.setVersion("v1.0.0");
 		info.setContact(contact);
 		info.setLicense(license);

@@ -116,7 +116,7 @@ public class UserServiceImpl implements UserService {
 		user.setUsername(newUsername);
 		userRepo.save(user);
 
-		return Result.SUCCUESS;
+		return Result.SUCCESS;
 	}
 
 	@Override
@@ -130,7 +130,7 @@ public class UserServiceImpl implements UserService {
 		user.setFullName(newFullName);
 		userRepo.save(user);
 
-		return Result.SUCCUESS;
+		return Result.SUCCESS;
 	}
 
 }

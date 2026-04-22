@@ -1,6 +1,5 @@
 package com.ietscroll.service.impl;
 
-import java.nio.ByteBuffer;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
@@ -58,7 +57,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 
 		TeamJoinRequest requested = teamJoinRequestRepo.save(teamJoinRequest);
 
-		return requested == null ? Result.FAILED : Result.SUCCUESS;
+		return requested == null ? Result.FAILED : Result.SUCCESS;
 	}
 
 	@Override
@@ -124,7 +123,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		if (rowsChanged == 1) {
 			ownerTeam.setCurrentMember(ownerTeam.getCurrentMember() + 1);
 			teamRepo.save(ownerTeam);
-			return Result.SUCCUESS;
+			return Result.SUCCESS;
 		}
 
 		return Result.FAILED;
@@ -151,7 +150,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 				joinerEmail, ownerTeam.getPublicId());
 
 		if (rowsChanged == 1) {
-			return Result.SUCCUESS;
+			return Result.SUCCESS;
 		}
 		return Result.FAILED;
 
@@ -179,7 +178,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		if (rowsChanged == 1) {
 			ownerTeam.setCurrentMember(ownerTeam.getCurrentMember() - 1);
 			teamRepo.save(ownerTeam);
-			return Result.SUCCUESS;
+			return Result.SUCCESS;
 		}
 
 		return Result.FAILED;

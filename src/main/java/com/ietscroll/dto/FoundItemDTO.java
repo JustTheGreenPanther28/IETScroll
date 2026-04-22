@@ -6,7 +6,6 @@ import java.util.UUID;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.general.enums.FoundItemStatus;
-import com.ietscroll.general.enums.LostItemStatus;
 
 public class FoundItemDTO {
 	private int id;
