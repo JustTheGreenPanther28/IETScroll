@@ -5,6 +5,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ietscroll.entity.OTPEntity;
 import com.ietscroll.entity.UserEntity;
@@ -28,6 +29,7 @@ public class OTPServiceImpl implements OTPService {
 	}
 
 	@Override
+	@Transactional
 	public void GenerateOTP(String email) {
 		SecureRandom secureRandom = new SecureRandom();
 		int otp = secureRandom.nextInt(100000, 999999);

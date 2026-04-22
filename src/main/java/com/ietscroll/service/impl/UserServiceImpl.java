@@ -12,6 +12,7 @@ import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 //import org.springframework.security.core.userdetails.UserDetails;
 //import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ietscroll.dto.UserDTO;
 import com.ietscroll.entity.UserEntity;
@@ -43,6 +44,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public UserDTO register(UserDTO userDTO) {
 
 		if (userDTO.getEmail() ==null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
@@ -102,6 +104,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public Result updateUsername(String email, String newUsername) {
 		UserEntity user = userRepo.findByEmail(email);
 		var userFound = userRepo.findByUsername(newUsername);
@@ -120,6 +123,7 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public Result updateFullName(String email, String newFullName) {
 		UserEntity user = userRepo.findByEmail(email);
 

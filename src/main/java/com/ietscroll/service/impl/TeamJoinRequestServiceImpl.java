@@ -5,6 +5,7 @@ import java.util.List;
 import java.util.UUID;
 
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamJoinRequest;
@@ -34,6 +35,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	}
 
 	@Override
+	@Transactional
 	public Result requestToJoinTeam(String joinerEmail, UUID teamId, String message) {
 		if (teamId == null || teamId.toString().isBlank()) {
 			throw new RuntimeException("Team id is wrong");
@@ -94,6 +96,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	}
 
 	@Override
+	@Transactional
 	public Result acceptMember(String ownerEmail, String joinerEmail) {
 
 		if (ownerEmail == null || joinerEmail == null || ownerEmail.isBlank() || joinerEmail.isBlank()) {
@@ -130,6 +133,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	}
 
 	@Override
+	@Transactional
 	public Result rejectMember(String ownerEmail, String joinerEmail) {
 
 		if (ownerEmail == null || joinerEmail == null || ownerEmail.isBlank() || joinerEmail.isBlank()) {
@@ -157,6 +161,7 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	}
 
 	@Override
+	@Transactional
 	public Result kickMember(String ownerEmail, String memberEmail) {
 
 		if (ownerEmail == null || memberEmail == null || ownerEmail.isBlank() || memberEmail.isBlank()) {

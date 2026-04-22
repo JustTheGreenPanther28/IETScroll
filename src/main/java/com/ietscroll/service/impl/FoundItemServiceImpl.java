@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.dto.FoundItemDTO;
@@ -61,6 +62,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 	}
 
 	@Override
+	@Transactional
 	public Result uploadFoundItem(String email, FoundItemDTO foundItemDTo, MultipartFile image) throws IOException {
 		if (foundItemDTo == null) {
 			throw new RuntimeException("Please give valid input");
@@ -119,6 +121,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 	}
 
 	@Override
+	@Transactional
 	public Result closeFoundItemRequest(String email, String publicId) {
 		if (email == null || publicId == null) {
 			throw new RuntimeException("Invalid credentials");

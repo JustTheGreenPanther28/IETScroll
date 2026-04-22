@@ -12,6 +12,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.domain.Sort;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import com.ietscroll.dto.LostItemDTO;
@@ -42,6 +43,7 @@ public class LostItemServiceImpl implements LostItemService {
 	}
 
 	@Override
+	@Transactional
 	public Result uploadLostItem(String email, LostItemDTO lostItemDTO, MultipartFile image) throws IOException {
 
 		if (lostItemDTO == null) {
@@ -105,6 +107,8 @@ public class LostItemServiceImpl implements LostItemService {
 	}
 
 	@Override
+	@Transactional
+
 	public Result closeLostItem(String email, String publicId) {
 		if (email == null || publicId == null) {
 			throw new RuntimeException("Invalid credentials");

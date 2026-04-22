@@ -11,6 +11,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import com.ietscroll.dto.TeamDTO;
 import com.ietscroll.entity.Skills;
@@ -51,6 +52,7 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
+	@Transactional
 	public TeamResponse createTeam(String ownerEmail, TeamDTO team) {
 
 		if (ownerEmail == null || team == null) {
@@ -116,6 +118,7 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
+	@Transactional
 	public Result closeTeam(String ownerEmail) {
 
 		int count = teamRepo.closeTeam(ownerEmail);
@@ -124,6 +127,7 @@ public class TeamServiceImpl implements TeamService {
 	}
 
 	@Override
+	@Transactional
 	public Result changeTeamSize(String ownerEmail, int teamSize) {
 
 		if (teamSize <= 0 || teamSize > 20) {
