@@ -515,6 +515,7 @@
 					    const cleanToken = token.replace("Bearer ", "").trim();
 					    localStorage.setItem('iet_token', cleanToken);
 					}
+					console.log(token);
 					showAlert('success', 'Login successful! Redirecting…');
 					setTimeout(() => {window.location.href = BASE +'/dashboard.html';}, 1400);
 				} else {

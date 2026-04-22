@@ -261,6 +261,8 @@
 		}
 		
 		const token = localStorage.getItem("iet_token");
+		
+		console.log(token);
 
 		if (!token || isTokenExpired(token)) {
 			localStorage.removeItem("iet_token");
