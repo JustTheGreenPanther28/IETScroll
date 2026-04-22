@@ -9,6 +9,7 @@ import org.springframework.security.config.Customizer;
 import org.springframework.security.config.annotation.authentication.builders.AuthenticationManagerBuilder;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
+import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
@@ -66,8 +67,8 @@ public class WebSecurity {
 		http.csrf(csrf -> csrf.disable());
 		http.cors(Customizer.withDefaults());
 
-//	    http.sessionManagement(session ->
-//	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+	    http.sessionManagement(session ->
+	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
 		http.authorizeHttpRequests(
 				auth -> auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()

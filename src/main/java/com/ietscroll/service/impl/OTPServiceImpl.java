@@ -57,9 +57,12 @@ public class OTPServiceImpl implements OTPService {
 			throw new RuntimeException("Incorrect email or OTP expired!");
 		}
 
-		int originalOTP = otps.get(otps.size() - 1).getOtp();
+		OTPEntity otp = otps.get(otps.size() - 1);
+		if (otp.getExpirationTime().isBefore(LocalDateTime.now())) {
+		    throw new RuntimeException("OTP expired");
+		}
 
-		if (otpGivenByUser == originalOTP) {
+		if (otpGivenByUser == otp.getOtp()) {
 			UserEntity user = userRepo.findByEmail(email);
 			user.setVerified(true);
 			userRepo.save(user);

@@ -11,6 +11,6 @@ import jakarta.validation.constraints.NotNull;
 import jakarta.validation.constraints.Null;
 import jakarta.validation.constraints.Size;
 
-public record TeamCreationRequest(@NotBlank @NotNull @Size(min=10,max=300) String purpose ,@NotNull @NotBlank @Min(3) @Max(20) int teamSize,@Null List<Integer> skillIds,@NotNull Privacy privacy) {
+public record TeamCreationRequest(@NotBlank @NotNull @Size(min=10,max=300) String purpose ,@NotNull @Min(3) @Max(20) int teamSize, @Null List<Integer> skillIds, @NotNull Privacy privacy) {
 
 }

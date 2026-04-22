@@ -1,7 +1,7 @@
 package com.ietscroll.security;
 
 public class SecurityConstaints {
-	public static final long EXPIRATION_TIME = 9123372036854771807L;
+	public static final long EXPIRATION_TIME = 1000 * 60 * 60 * 24;
 	public static final long PASSWORD_EXPIRATION_TIME = 360000;
 	public static final String USER_ID = "USER ID";
 	public static final String TOKEN_PREFIX = "Bearer ";

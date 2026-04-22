@@ -42,16 +42,16 @@ public class AuthorizationFilter extends OncePerRequestFilter {
 				String username = jwtUtil.extractUsername(token);
 				String role = jwtUtil.extractRole(token);
 
-				if (username != null && role != null &&
-						 SecurityContextHolder.getContext().getAuthentication() == null) {
+				if (username != null && role != null
+						&& SecurityContextHolder.getContext().getAuthentication() == null) {
 					SimpleGrantedAuthority authority = new SimpleGrantedAuthority("ROLE_" + role);
-					UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken
-							(username, null,List.of(authority));
+					UsernamePasswordAuthenticationToken auth = new UsernamePasswordAuthenticationToken(username, null,
+							List.of(authority));
 					SecurityContextHolder.getContext().setAuthentication(auth);
 				}
-
 			} catch (Exception e) {
-				throw new RuntimeException(e.getMessage());
+				response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+				return;
 			}
 		}
 
