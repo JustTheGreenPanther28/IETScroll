@@ -431,7 +431,8 @@
 
 	<script>
 		const BASE = 'https://iet-scroll.onrender.com';
-
+		//const BASE = "http://localhost:4040";
+		
 		//PASSWORD => HIDE/SHOW
 		const pwInput = document.getElementById('password');
 		const pwToggle = document.getElementById('pwToggle');
@@ -501,31 +502,22 @@
 				});
 
 				if (res.ok) {
-					const contentType = res.headers.get('content-type') || '';
-					let token = '';
 
-					if (contentType.includes('application/json')) {
-						const data = await res.json();
-						token = data.token || data.jwt || data.accessToken || '';
-					} else {
-						token = await res.text();
-					}
+					let token = res.headers.get("Authorization");
+					console.log("HEADER TOKEN:", token);
 
 					if (token) {
-					    const cleanToken = token.replace("Bearer ", "").trim();
-					    localStorage.setItem('iet_token', cleanToken);
+						token = token.replace("Bearer ", "").trim();
+						localStorage.setItem("iet_token", token);
+					} else {
+						console.error("No token in header!");
 					}
-					console.log(token);
+
 					showAlert('success', 'Login successful! Redirecting…');
-					setTimeout(() => {window.location.href = BASE +'/dashboard.html';}, 1400);
-				} else {
-					const contentType = res.headers.get('content-type') || '';
-					let msg = 'Incorrect email or password.';
-					if (contentType.includes('application/json')) {
-						const data = await res.json();
-						msg = data.message || data.error || msg;
-					}
-					showAlert('fail', msg);
+
+					setTimeout(() => {
+						window.location.href = BASE + '/dashboard.html';
+					}, 1400);
 				}
 			} catch {
 				showAlert('fail', 'Could not reach the server. Please try again.');
