@@ -516,7 +516,7 @@
 					    localStorage.setItem('iet_token', cleanToken);
 					}
 					showAlert('success', 'Login successful! Redirecting…');
-					setTimeout(() => {window.location.href = 'dashboard.html';}, 1400);
+					setTimeout(() => {window.location.href = BASE +'/dashboard.html';}, 1400);
 				} else {
 					const contentType = res.headers.get('content-type') || '';
 					let msg = 'Incorrect email or password.';
