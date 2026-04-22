@@ -58,31 +58,32 @@ public class WebSecurity {
 	 * context.
 	 */
 	@Bean
-	SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authManager, 
-	        JwtUtil jwtUtil, UserService userService) throws Exception {
+	SecurityFilterChain filterChain(HttpSecurity http, AuthenticationManager authManager, JwtUtil jwtUtil,
+			UserService userService) throws Exception {
 
-	    AuthenticationFilter authFilter = new AuthenticationFilter(authManager, jwtUtil, userService);
+		AuthenticationFilter authFilter = new AuthenticationFilter(authManager, jwtUtil, userService);
 
-	    http.csrf(csrf -> csrf.disable());
-	    http.cors(Customizer.withDefaults());
+		http.csrf(csrf -> csrf.disable());
+		http.cors(Customizer.withDefaults());
 
 //	    http.sessionManagement(session ->
 //	        session.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
 
-	    http.authorizeHttpRequests(auth -> auth
-	            .requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
-	            .requestMatchers("/", "/index.html", "/style.css","login.html","register.html","styleForSafety.css").permitAll()
-	            .requestMatchers("/actuator/health").permitAll()
-	            .requestMatchers(HttpMethod.POST,SecurityConstaints.LOGIN).permitAll()
-	            .requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
-	            .requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
-	            .requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
-	            .requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString())
-	            .anyRequest().authenticated());
+		http.authorizeHttpRequests(
+				auth -> auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
+						.requestMatchers("/", "/index.html", "/style.css", "/login.html", "/register.html",
+								"/styleForSafety.css", "/safety.html")
+						.permitAll().requestMatchers("/actuator/health").permitAll()
+						.requestMatchers(HttpMethod.POST, SecurityConstaints.LOGIN).permitAll()
+						.requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
+						.requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
+						.requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
+						.requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString()).anyRequest()
+						.authenticated());
 
-	    http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
-	        .addFilterAfter(new AuthorizationFilter(jwtUtil), AuthenticationFilter.class);
+		http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
+				.addFilterAfter(new AuthorizationFilter(jwtUtil), AuthenticationFilter.class);
 
-	    return http.build();
+		return http.build();
 	}
 }

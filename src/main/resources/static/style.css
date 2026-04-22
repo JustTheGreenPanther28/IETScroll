@@ -1,21 +1,27 @@
+/* =============================================
+   TOKENS
+   ============================================= */
 :root {
-  --cream:       #FAF7F2;
-  --warm-white:  #FFFCF8;
-  --ink:         #1A1410;
-  --ink-soft:    #3D3530;
-  --accent:      #C84B11;
-  --accent-light:#F5E6DF;
-  --accent-gold: #D4A843;
-  --green-dark:  #1C3022;
-  --green-mid:   #2E5438;
-  --muted:       #8A7F78;
-  --border:      #E8E0D5;
+  --cream:        #FAF7F2;
+  --warm-white:   #FFFCF8;
+  --ink:          #1A1410;
+  --ink-soft:     #3D3530;
+  --accent:       #C84B11;
+  --accent-light: #F5E6DF;
+  --accent-gold:  #D4A843;
+  --green-dark:   #1C3022;
+  --green-mid:    #2E5438;
+  --muted:        #8A7F78;
+  --border:       #E8E0D5;
 
   --font-display: 'Playfair Display', Georgia, serif;
   --font-body:    'DM Sans', sans-serif;
   --font-mono:    'Space Mono', monospace;
 }
 
+/* =============================================
+   RESET & BASE
+   ============================================= */
 *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 html { scroll-behavior: smooth; }
 
@@ -26,6 +32,9 @@ body {
   overflow-x: hidden;
 }
 
+/* =============================================
+   NAV
+   ============================================= */
 .main-nav {
   background: rgba(26, 20, 16, 0.92) !important;
   backdrop-filter: blur(14px);
@@ -42,7 +51,6 @@ body {
   letter-spacing: -0.02em;
   white-space: nowrap;
 }
-
 .main-nav-logo span  { color: var(--accent-gold); }
 .main-nav-logo small {
   font-family: var(--font-mono);
@@ -53,7 +61,6 @@ body {
   margin-left: 4px;
 }
 
-/* hamburger custom lines */
 .main-nav-toggler {
   border: 1px solid rgba(255,255,255,0.25);
   padding: 6px 10px;
@@ -82,34 +89,34 @@ body {
 }
 .main-nav-links a:hover { color: var(--cream); }
 
-.main-nav-cta-login {
-  font-family: var(--font-mono);
-  font-size: 0.72rem;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  color:var(--green-dark) ;
-  background: var(--accent-gold);
-  padding: 0.5rem 1.1rem;
-  text-decoration: none;
-  transition: background 0.2s;
-  white-space: nowrap;
-}
 .main-nav-cta-signup {
   font-family: var(--font-mono);
   font-size: 0.72rem;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
-  color: var(--ink) ;
+  color: var(--ink);
   padding: 0.5rem 1.1rem;
   text-decoration: none;
   transition: background 0.2s;
   white-space: nowrap;
 }
-.main-nav-cta:hover { background: #e8ba55; }
 
-/* mobile nav dropdown bg */
+.main-nav-cta-login {
+  font-family: var(--font-mono);
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  color: var(--green-dark);
+  background: var(--accent-gold);
+  padding: 0.5rem 1.1rem;
+  text-decoration: none;
+  transition: background 0.2s;
+  white-space: nowrap;
+}
+.main-nav-cta-login:hover { background: #e8ba55; }
+
 @media (max-width: 991px) {
   .navbar-collapse {
     background: rgba(20, 15, 12, 0.97);
@@ -119,7 +126,9 @@ body {
   }
 }
 
-
+/* =============================================
+   HERO
+   ============================================= */
 .hero-section {
   position: relative;
   min-height: 100vh;
@@ -251,6 +260,9 @@ body {
   animation: pulse 2.2s ease-in-out infinite;
 }
 
+/* =============================================
+   MARQUEE
+   ============================================= */
 .marquee-wrap {
   background: var(--accent);
   padding: 0.8rem 0;
@@ -281,7 +293,6 @@ body {
 /* =============================================
    SECTION COMMONS
    ============================================= */
-
 .section-label {
   font-family: var(--font-mono);
   font-size: 0.68rem;
@@ -306,7 +317,6 @@ body {
 /* =============================================
    FEATURES
    ============================================= */
-
 .features-section {
   padding: 5rem 0;
   background: var(--warm-white);
@@ -335,10 +345,10 @@ body {
   border-color: var(--green-dark);
   color: var(--cream);
 }
-.feat-card.feat-dark p    { color: rgba(250,247,242,0.75); }
+.feat-card.feat-dark p      { color: rgba(250,247,242,0.75); }
 .feat-card.feat-dark strong { color: var(--accent-gold); }
 
-.feat-icon  { font-size: 1.7rem; margin-bottom: 1rem; display: block; }
+.feat-icon { font-size: 1.7rem; margin-bottom: 1rem; display: block; }
 .feat-card h3 {
   font-family: var(--font-display);
   font-size: 1.25rem;
@@ -368,7 +378,6 @@ body {
 /* =============================================
    CAMPUS GALLERY
    ============================================= */
-
 .campus-section {
   padding: 5rem 0;
   background: var(--cream);
@@ -388,12 +397,10 @@ body {
   position: relative;
   z-index: 2;
 }
-
-/* taller slots for the second row */
 .campus-img.campus-tall { height: 260px; }
 
 @media (max-width: 575px) {
-  .campus-img        { height: 160px; }
+  .campus-img             { height: 160px; }
   .campus-img.campus-tall { height: 200px; }
 }
 
@@ -409,7 +416,6 @@ body {
 /* =============================================
    STATS
    ============================================= */
-
 .stats-section {
   background: var(--ink);
   padding: 3.5rem 0;
@@ -420,11 +426,10 @@ body {
   border-right: 1px solid rgba(255,255,255,0.08);
 }
 
-/* remove right border on last of each visual row */
-.col-6:nth-child(2n) .stat-item  { border-right: none; }
+.col-6:nth-child(2n) .stat-item { border-right: none; }
 @media (min-width: 768px) {
-  .col-6:nth-child(2n) .stat-item  { border-right: 1px solid rgba(255,255,255,0.08); }
-  .col-md-3:last-child .stat-item  { border-right: none; }
+  .col-6:nth-child(2n) .stat-item { border-right: 1px solid rgba(255,255,255,0.08); }
+  .col-md-3:last-child .stat-item { border-right: none; }
 }
 
 .stat-num {
@@ -446,7 +451,6 @@ body {
 /* =============================================
    JOIN CTA
    ============================================= */
-
 .join-section {
   position: relative;
   padding: 7rem 0;
@@ -511,7 +515,6 @@ body {
 }
 .join-btn:hover { background: #e8ba55; }
 
-/* stack on mobile */
 @media (max-width: 575px) {
   .join-input { border-bottom: 1px solid var(--border); }
 }
@@ -527,7 +530,6 @@ body {
 /* =============================================
    ABOUT
    ============================================= */
-
 .about-section {
   padding: 5rem 0;
   background: var(--warm-white);
@@ -551,9 +553,7 @@ body {
 }
 .about-credit-text strong { color: var(--accent); }
 
-.about-card-wrap {
-  position: relative;
-}
+.about-card-wrap { position: relative; }
 .about-card-wrap::before {
   content: '';
   position: absolute;
@@ -596,14 +596,16 @@ body {
   padding: 0.3rem 0.7rem;
 }
 
-
+/* =============================================
+   FOOTER
+   ============================================= */
 .site-footer {
   background: var(--ink);
   padding: 2.5rem 0 1.5rem;
 }
 
 .footer-top {
-  border-bottom: 1px solid white;
+  border-bottom: 1px solid rgba(255,255,255,0.12);
 }
 
 .footer-logo-text {
@@ -619,7 +621,7 @@ body {
   font-size: 0.68rem;
   letter-spacing: 0.1em;
   text-transform: uppercase;
-  color: white;
+  color: rgba(250,247,242,0.55);
   text-decoration: none;
   transition: color 0.2s;
 }
@@ -630,13 +632,12 @@ body {
   font-size: 0.62rem;
   letter-spacing: 0.07em;
   text-transform: uppercase;
-  color: navajowhite;
+  color: rgba(250,247,242,0.35);
 }
 
 /* =============================================
    ANIMATIONS
    ============================================= */
-
 @keyframes marquee {
   from { transform: translateX(0); }
   to   { transform: translateX(-50%); }
@@ -645,85 +646,4 @@ body {
 @keyframes pulse {
   0%, 100% { opacity: 0.35; }
   50%       { opacity: 0.85; }
-}
-
-body {
-  margin: 0;
-  font-family: 'Segoe UI', sans-serif;
-  background: linear-gradient(135deg, #1c3022, #2e5438);
-  color: #1a1410;
-}
-
-.container {
-  height: 100vh;
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-
-.card {
-  background: #fff;
-  padding: 35px;
-  width: 320px;
-  border-radius: 12px;
-  box-shadow: 0 15px 40px rgba(0,0,0,0.2);
-  text-align: center;
-}
-
-/* Logo */
-.logo {
-  margin: 0;
-  font-size: 26px;
-  font-weight: bold;
-}
-
-.logo span {
-  color: #C84B11;
-}
-
-/* Subtitle */
-.subtitle {
-  font-size: 14px;
-  color: #666;
-  margin-bottom: 20px;
-}
-
-/* Inputs */
-.card input,
-.card select {
-  width: 100%;
-  padding: 10px;
-  margin: 8px 0;
-  border: 1px solid #ddd;
-  border-radius: 6px;
-  outline: none;
-}
-
-/* Button */
-.card button {
-  width: 100%;
-  padding: 10px;
-  margin-top: 10px;
-  background: #C84B11;
-  color: white;
-  border: none;
-  border-radius: 6px;
-  cursor: pointer;
-  font-weight: bold;
-}
-
-.card button:hover {
-  background: #a63d0d;
-}
-
-/* Switch link */
-.switch {
-  margin-top: 15px;
-  font-size: 13px;
-}
-
-.switch a {
-  color: #C84B11;
-  text-decoration: none;
-  font-weight: bold;
 }
