@@ -432,7 +432,7 @@
 	<script>
 		const BASE = 'https://iet-scroll.onrender.com';
 
-		// password toggle
+		//PASSWORD => HIDE/SHOW
 		const pwInput = document.getElementById('password');
 		const pwToggle = document.getElementById('pwToggle');
 		pwToggle.addEventListener('click', () => {
@@ -501,7 +501,6 @@
 				});
 
 				if (res.ok) {
-					// JWT likely returned as plain text or in a json field
 					const contentType = res.headers.get('content-type') || '';
 					let token = '';
 
@@ -512,8 +511,10 @@
 						token = await res.text();
 					}
 
-					if (token) localStorage.setItem('iet_token', token.trim());
-
+					if (token) {
+					    const cleanToken = token.replace("Bearer ", "").trim();
+					    localStorage.setItem('iet_token', cleanToken);
+					}
 					showAlert('success', 'Login successful! Redirecting…');
 					setTimeout(() => {window.location.href = 'dashboard.html';}, 1400);
 				} else {
