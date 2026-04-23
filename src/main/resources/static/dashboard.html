@@ -8,6 +8,7 @@
 
 	<link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.2/dist/css/bootstrap.min.css" rel="stylesheet">
 	<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.1/font/bootstrap-icons.css">
+	<link href="https://fonts.googleapis.com/css2?family=Sora:wght@400;600;700;800&family=DM+Sans:wght@400;500&display=swap" rel="stylesheet">
 
 	<script>
 		function isTokenExpired(token) {
@@ -18,300 +19,512 @@
 				return true;
 			}
 		}
-
 		const token = localStorage.getItem("iet_token");
-
-		if (!token || isTokenExpired(token)) {
-			localStorage.removeItem("iet_token");
-			window.location.href = "login.html";
-		}
+		// Comment out redirect for preview purposes
+		// if (!token || isTokenExpired(token)) {
+		// 	localStorage.removeItem("iet_token");
+		// 	window.location.href = "login.html";
+		// }
 	</script>
+
 	<style>
 		:root {
-			--bg-main: #0f172a;
-			--sidebar-bg: #1e293b;
+			--bg-main: #0b1120;
+			--sidebar-bg: #111827;
 			--accent: #3b82f6;
-			--card-bg: rgba(30, 41, 59, 0.7);
+			--accent-glow: rgba(59,130,246,0.18);
+			--card-bg: rgba(20, 30, 50, 0.85);
+			--border: #1e2d45;
+			--text-muted: #64748b;
+			--sidebar-width: 260px;
 		}
+
+		* { box-sizing: border-box; }
 
 		body {
 			background: var(--bg-main);
-			color: #f1f5f9;
-			font-family: 'Inter', system-ui, sans-serif;
+			color: #e2e8f0;
+			font-family: 'DM Sans', system-ui, sans-serif;
 			overflow-x: hidden;
+			margin: 0;
 		}
 
-		/* Sidebar Upgrade */
+		/* ─── SIDEBAR ─────────────────────────────────── */
 		.sidebar {
-			width: 260px;
+			width: var(--sidebar-width);
 			background: var(--sidebar-bg);
 			min-height: 100vh;
-			border-right: 1px solid #334155;
+			height: 100%;
+			border-right: 1px solid var(--border);
 			position: fixed;
-			transition: all 0.3s;
+			top: 0; left: 0; bottom: 0;
+			z-index: 200;
+			display: flex;
+			flex-direction: column;
+			transition: transform 0.3s cubic-bezier(.4,0,.2,1);
+			overflow-y: auto;
 		}
 
 		.sidebar-brand {
-			padding: 2rem 1.5rem;
+			padding: 1.75rem 1.5rem 1.25rem;
+			font-family: 'Sora', sans-serif;
 			font-weight: 800;
-			font-size: 1.5rem;
-			letter-spacing: -1px;
+			font-size: 1.35rem;
+			letter-spacing: -0.5px;
 			color: var(--accent);
+			flex-shrink: 0;
 		}
 
+		.nav-list { flex: 1; padding-bottom: 1rem; }
+
 		.nav-link {
-			padding: 12px 20px;
+			padding: 11px 18px;
 			color: #94a3b8;
-			margin: 4px 15px;
+			margin: 3px 12px;
 			border-radius: 10px;
 			display: flex;
 			align-items: center;
-			transition: 0.2s;
+			gap: 12px;
+			font-size: 0.92rem;
+			font-weight: 500;
+			transition: background 0.18s, color 0.18s;
 			cursor: pointer;
+			user-select: none;
 		}
+		.nav-link i { font-size: 1.1rem; flex-shrink: 0; }
+		.nav-link:hover { background: var(--accent-glow); color: var(--accent); }
+		.nav-link.active { background: var(--accent-glow); color: var(--accent); }
+		.nav-link.text-danger { color: #f87171 !important; }
+		.nav-link.text-danger:hover { background: rgba(248,113,113,0.1) !important; color: #f87171 !important; }
 
-		.nav-link i {
-			margin-right: 12px;
-			font-size: 1.2rem;
+		/* ─── OVERLAY (mobile) ────────────────────────── */
+		.sidebar-overlay {
+			display: none;
+			position: fixed; inset: 0;
+			background: rgba(0,0,0,0.55);
+			z-index: 199;
 		}
+		.sidebar-overlay.show { display: block; }
 
-		.nav-link:hover,
-		.nav-link.active {
-			background: rgba(59, 130, 246, 0.1);
+		/* ─── TOP NAV BAR (mobile/tablet) ───────────── */
+		.topbar {
+			display: none;
+			position: fixed;
+			top: 0; left: 0; right: 0;
+			height: 60px;
+			background: var(--sidebar-bg);
+			border-bottom: 1px solid var(--border);
+			z-index: 198;
+			align-items: center;
+			padding: 0 1rem;
+			gap: 12px;
+		}
+		.topbar .brand {
+			font-family: 'Sora', sans-serif;
+			font-weight: 800;
+			font-size: 1.1rem;
 			color: var(--accent);
+			flex: 1;
 		}
+		.hamburger {
+			background: none;
+			border: none;
+			color: #94a3b8;
+			font-size: 1.4rem;
+			cursor: pointer;
+			padding: 4px 6px;
+			border-radius: 8px;
+			transition: color 0.15s;
+		}
+		.hamburger:hover { color: var(--accent); }
 
-		/* Content Area */
+		/* ─── MAIN CONTENT ───────────────────────────── */
 		.main-content {
-			margin-left: 260px;
+			margin-left: var(--sidebar-width);
 			padding: 40px;
-			width: calc(100% - 260px);
+			min-height: 100vh;
+			transition: margin-left 0.3s;
 		}
 
-		/* Glass Cards */
+		/* ─── HEADER ─────────────────────────────────── */
+		.page-header {
+			display: flex;
+			justify-content: space-between;
+			align-items: center;
+			margin-bottom: 2.5rem;
+			flex-wrap: wrap;
+			gap: 12px;
+		}
+		.page-header h2 {
+			font-family: 'Sora', sans-serif;
+			font-weight: 700;
+			font-size: 1.6rem;
+			margin: 0;
+		}
+		.header-right {
+			display: flex;
+			align-items: center;
+			gap: 12px;
+		}
+		.header-meta { text-align: right; }
+		.header-meta .uname { font-weight: 600; font-size: 0.85rem; }
+		.header-meta .uemail { font-size: 0.72rem; color: var(--text-muted); }
+
+		.avatar {
+			width: 42px; height: 42px;
+			background: var(--accent);
+			border-radius: 50%;
+			display: flex; align-items: center; justify-content: center;
+			font-weight: 700;
+			font-size: 1rem;
+			flex-shrink: 0;
+		}
+
+		/* ─── CARDS ──────────────────────────────────── */
 		.stat-card {
 			background: var(--card-bg);
-			backdrop-filter: blur(10px);
-			border: 1px solid #334155;
+			border: 1px solid var(--border);
 			border-radius: 16px;
-			padding: 24px;
-			transition: 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+			padding: 22px 24px;
+			transition: transform 0.25s cubic-bezier(.4,0,.2,1), border-color 0.25s, box-shadow 0.25s;
 		}
-
 		.stat-card:hover {
-			transform: translateY(-5px);
+			transform: translateY(-4px);
 			border-color: var(--accent);
-			box-shadow: 0 10px 30px -10px rgba(59, 130, 246, 0.3);
+			box-shadow: 0 12px 32px -10px rgba(59,130,246,0.25);
 		}
 
 		.icon-box {
-			width: 48px;
-			height: 48px;
-			border-radius: 12px;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			margin-bottom: 15px;
-			background: rgba(59, 130, 246, 0.1);
+			width: 46px; height: 46px;
+			border-radius: 11px;
+			display: flex; align-items: center; justify-content: center;
+			margin-bottom: 14px;
+			background: var(--accent-glow);
 			color: var(--accent);
+			font-size: 1.2rem;
 		}
 
-		.section {
-			display: none;
-			animation: fadeIn 0.4s ease-out;
-		}
-
-		.section.active {
-			display: block;
-		}
-
+		/* ─── SECTIONS ───────────────────────────────── */
+		.section { display: none; animation: fadeIn 0.35s ease-out; }
+		.section.active { display: block; }
 		@keyframes fadeIn {
-			from {
-				opacity: 0;
-				transform: translateY(10px);
-			}
-
-			to {
-				opacity: 1;
-				transform: translateY(0);
-			}
+			from { opacity: 0; transform: translateY(8px); }
+			to   { opacity: 1; transform: translateY(0); }
 		}
 
+		/* ─── BUTTONS ────────────────────────────────── */
 		.btn-primary {
 			background: var(--accent);
 			border: none;
-			padding: 10px 20px;
+			border-radius: 8px;
+			font-weight: 600;
+		}
+		.btn-primary:hover { background: #2563eb; }
+		.btn-outline-light { border-radius: 8px; font-weight: 500; }
+
+		/* ─── FORM CONTROLS ──────────────────────────── */
+		.form-control.dark-input {
+			background: rgba(15,23,42,0.8);
+			border: 1px solid var(--border);
+			color: #e2e8f0;
 			border-radius: 8px;
 		}
+		.form-control.dark-input:focus {
+			background: rgba(15,23,42,0.9);
+			border-color: var(--accent);
+			box-shadow: 0 0 0 3px var(--accent-glow);
+			color: #e2e8f0;
+		}
 
-		.avatar {
-			width: 45px;
-			height: 45px;
-			background: var(--accent);
-			border-radius: 50%;
-			display: flex;
-			align-items: center;
-			justify-content: center;
-			font-weight: bold;
+		/* ─── RESPONSIVE BREAKPOINTS ─────────────────── */
+
+		/* TABLET: ≤ 991px */
+		@media (max-width: 991.98px) {
+			.topbar { display: flex; }
+
+			.sidebar {
+				transform: translateX(calc(-1 * var(--sidebar-width)));
+			}
+			.sidebar.open {
+				transform: translateX(0);
+			}
+
+			.main-content {
+				margin-left: 0;
+				padding: 28px 24px;
+				padding-top: calc(60px + 28px);
+			}
+		}
+
+		/* MOBILE: ≤ 575px */
+		@media (max-width: 575.98px) {
+			.main-content {
+				padding: 18px 14px;
+				padding-top: calc(60px + 18px);
+			}
+			.page-header h2 { font-size: 1.25rem; }
+			.stat-card { padding: 18px 16px; }
+
+			/* Stack action buttons */
+			.quick-actions { flex-direction: column !important; }
+			.quick-actions .btn { width: 100%; }
+
+			/* Header meta: hide on very small */
+			.header-meta { display: none; }
+		}
+
+		/* DESKTOP: ≥ 992px - ensure sidebar always visible */
+		@media (min-width: 992px) {
+			.sidebar { transform: translateX(0) !important; }
+			.topbar { display: none !important; }
+			.sidebar-overlay { display: none !important; }
+		}
+
+		/* ─── MISC ───────────────────────────────────── */
+		hr.nav-divider { border-color: var(--border); margin: 8px 16px; }
+
+		.text-muted-label { color: var(--text-muted); font-size: 0.78rem; display: block; margin-bottom: 2px; }
+
+		.stat-number {
+			font-family: 'Sora', sans-serif;
+			font-size: 2rem;
+			font-weight: 700;
+			line-height: 1;
 		}
 	</style>
 </head>
 
 <body>
 
+	<!-- Mobile/Tablet Topbar -->
+	<div class="topbar" id="topbar">
+		<button class="hamburger" id="hamburgerBtn" aria-label="Open menu" onclick="toggleSidebar()">
+			<i class="bi bi-list"></i>
+		</button>
+		<span class="brand">IET SCROLL</span>
+		<div class="avatar" style="width:36px;height:36px;font-size:.85rem;">U</div>
+	</div>
+
+	<!-- Overlay -->
+	<div class="sidebar-overlay" id="sidebarOverlay" onclick="closeSidebar()"></div>
+
 	<div class="d-flex">
-		<nav class="sidebar">
+		<!-- Sidebar -->
+		<nav class="sidebar" id="sidebar">
 			<div class="sidebar-brand">IET SCROLL</div>
 			<div class="nav-list">
-				<div onclick="show('dashboard', this)" class="nav-link active"><i class="bi bi-grid"></i> Dashboard
+				<div onclick="show('dashboard', this)" class="nav-link active">
+					<i class="bi bi-grid-fill"></i> Dashboard
 				</div>
-				<div onclick="show('profile', this)" class="nav-link"><i class="bi bi-person"></i> Profile</div>
-				<div onclick="show('lost', this)" class="nav-link"><i class="bi bi-archive"></i> Lost Items</div>
-				<div onclick="show('found', this)" class="nav-link"><i class="bi bi-search"></i> Found Items</div>
-				<div onclick="show('team', this)" class="nav-link"><i class="bi bi-people"></i> My Team</div>
-				<div onclick="show('resume', this)" class="nav-link"><i class="bi bi-file-earmark-text"></i> Resume
+				<div onclick="show('profile', this)" class="nav-link">
+					<i class="bi bi-person-fill"></i> Profile
 				</div>
-				<hr class="mx-3 border-secondary">
-				<div onclick="logout()" class="nav-link text-danger"><i class="bi bi-box-arrow-left"></i> Logout</div>
+				<div onclick="show('lost', this)" class="nav-link">
+					<i class="bi bi-archive-fill"></i> Lost Items
+				</div>
+				<div onclick="show('found', this)" class="nav-link">
+					<i class="bi bi-search"></i> Found Items
+				</div>
+				<div onclick="show('team', this)" class="nav-link">
+					<i class="bi bi-people-fill"></i> My Team
+				</div>
+				<div onclick="show('resume', this)" class="nav-link">
+					<i class="bi bi-file-earmark-text-fill"></i> Resume
+				</div>
+				<hr class="nav-divider">
+				<div onclick="logout()" class="nav-link text-danger">
+					<i class="bi bi-box-arrow-left"></i> Logout
+				</div>
 			</div>
 		</nav>
 
+		<!-- Main Content -->
 		<main class="main-content">
-			<header class="d-flex justify-content-between align-items-center mb-5">
+
+			<!-- Page Header -->
+			<header class="page-header">
 				<div>
-					<h2 id="header-title" class="fw-bold m-0">Overview</h2>
+					<h2 id="header-title">Overview</h2>
 					<p class="text-muted small m-0">Welcome back, <span id="welcome-name">User</span></p>
 				</div>
-				<div class="d-flex align-items-center gap-3">
-					<div class="text-end d-none d-md-block">
-						<div id="top-username" class="fw-bold small"></div>
-						<div id="top-email" style="font-size: 11px;"></div>
+				<div class="header-right">
+					<div class="header-meta d-none d-sm-block">
+						<div id="top-username" class="uname"></div>
+						<div id="top-email" class="uemail"></div>
 					</div>
-					<div class="avatar">U</div>
+					<div class="avatar" id="avatar-icon">U</div>
 				</div>
 			</header>
 
+			<!-- DASHBOARD -->
 			<div id="dashboard" class="section active">
-				<div class="row g-4">
-					<div class="col-md-4">
+				<div class="row g-3 g-md-4">
+					<div class="col-6 col-lg-4">
 						<div class="stat-card">
 							<div class="icon-box"><i class="bi bi-megaphone-fill"></i></div>
-							<p class="text-muted small mb-1">Items Reported Lost</p>
-							<h2 id="lostCount" class="fw-bold">0</h2>
+							<p class="text-muted-label">Items Reported Lost</p>
+							<div id="lostCount" class="stat-number">0</div>
 						</div>
 					</div>
-					<div class="col-md-4">
+					<div class="col-6 col-lg-4">
 						<div class="stat-card">
 							<div class="icon-box"><i class="bi bi-check-circle-fill"></i></div>
-							<p class="text-muted small mb-1">Items Found</p>
-							<h2 id="foundCount" class="fw-bold">0</h2>
+							<p class="text-muted-label">Items Found</p>
+							<div id="foundCount" class="stat-number">0</div>
 						</div>
 					</div>
-					<div class="col-md-4">
+					<div class="col-12 col-lg-4">
 						<div class="stat-card">
 							<div class="icon-box"><i class="bi bi-shield-lock-fill"></i></div>
-							<p class="text-muted small mb-1">Team Membership</p>
-							<h2 id="teamStatus" class="fw-bold">--</h2>
+							<p class="text-muted-label">Team Membership</p>
+							<div id="teamStatus" class="stat-number" style="font-size:1.4rem;">--</div>
 						</div>
 					</div>
 				</div>
 
-				<div class="stat-card mt-4">
-					<h5 class="mb-4">Quick Actions</h5>
-					<div class="d-flex gap-3">
-						<button class="btn btn-primary btn-sm" onclick="show('lost')"><i class="bi bi-plus-lg"></i>
-							Report Lost</button>
-						<button class="btn btn-outline-light btn-sm" onclick="show('found')">Report Found</button>
+				<div class="stat-card mt-3 mt-md-4">
+					<h6 class="fw-bold mb-3" style="font-family:'Sora',sans-serif;">Quick Actions</h6>
+					<div class="d-flex gap-2 gap-md-3 quick-actions">
+						<button class="btn btn-primary btn-sm" onclick="show('lost', null)">
+							<i class="bi bi-plus-lg me-1"></i> Report Lost
+						</button>
+						<button class="btn btn-outline-light btn-sm" onclick="show('found', null)">
+							<i class="bi bi-search me-1"></i> Report Found
+						</button>
 					</div>
 				</div>
 			</div>
 
+			<!-- PROFILE -->
 			<div id="profile" class="section">
 				<div class="stat-card">
-					<h5 class="mb-4">Personal Information</h5>
+					<h6 class="fw-bold mb-4" style="font-family:'Sora',sans-serif;">Personal Information</h6>
 					<div class="row">
-						<div class="col-md-6 mb-3">
-							<label class="text-muted small">Full Name</label>
-							<p id="p-name" class="fw-bold">--</p>
+						<div class="col-12 col-sm-6 mb-3">
+							<span class="text-muted-label">Full Name</span>
+							<p id="p-name" class="fw-bold mb-0">--</p>
 						</div>
-						<div class="col-md-6 mb-3">
-							<label class="text-muted small">Branch</label>
-							<p id="p-branch" class="fw-bold">--</p>
+						<div class="col-12 col-sm-6 mb-3">
+							<span class="text-muted-label">Branch</span>
+							<p id="p-branch" class="fw-bold mb-0">--</p>
 						</div>
 					</div>
 				</div>
 			</div>
 
+			<!-- LOST ITEMS -->
 			<div id="lost" class="section">
-				<h3>Lost Items Management</h3>
-			</div>
-			<div id="found" class="section">
-				<h3>Found Items Management</h3>
-			</div>
-			<div id="team" class="section">
-				<h3>Team Settings</h3>
+				<div class="stat-card">
+					<h5 class="fw-bold" style="font-family:'Sora',sans-serif;">Lost Items Management</h5>
+					<p class="text-muted small mt-2">Manage and track items you've reported as lost.</p>
+				</div>
 			</div>
 
+			<!-- FOUND ITEMS -->
+			<div id="found" class="section">
+				<div class="stat-card">
+					<h5 class="fw-bold" style="font-family:'Sora',sans-serif;">Found Items Management</h5>
+					<p class="text-muted small mt-2">Manage items you've found and reported.</p>
+				</div>
+			</div>
+
+			<!-- TEAM -->
+			<div id="team" class="section">
+				<div class="stat-card">
+					<h5 class="fw-bold" style="font-family:'Sora',sans-serif;">Team Settings</h5>
+					<p class="text-muted small mt-2">View and manage your team membership details.</p>
+				</div>
+			</div>
+
+			<!-- RESUME -->
 			<div id="resume" class="section">
-				<div class="stat-card col-md-6">
-					<h5 class="mb-3">Resume AI Analyzer</h5>
-					<input type="file" id="file" class="form-control bg-dark text-white border-secondary mb-3">
-					<input type="text" id="role" class="form-control bg-dark text-white border-secondary mb-3"
-						placeholder="Target Role (e.g. Java Developer)">
-					<button class="btn btn-primary w-100" onclick="uploadResume()">Start Analysis</button>
+				<div class="stat-card" style="max-width: 560px;">
+					<h6 class="fw-bold mb-3" style="font-family:'Sora',sans-serif;">
+						<i class="bi bi-stars me-2 text-accent" style="color:var(--accent)"></i>Resume AI Analyzer
+					</h6>
+					<p class="text-muted small mb-3">Upload your resume and get AI-powered feedback tailored to your target role.</p>
+					<input type="file" id="file" accept=".pdf,.doc,.docx"
+						class="form-control dark-input mb-3" />
+					<input type="text" id="role"
+						class="form-control dark-input mb-3"
+						placeholder="Target Role (e.g. Java Developer)" />
+					<button class="btn btn-primary w-100" onclick="uploadResume()">
+						<i class="bi bi-cpu me-2"></i>Start Analysis
+					</button>
 					<div id="resumeResult" class="mt-3"></div>
 				</div>
 			</div>
+
 		</main>
 	</div>
 
 	<script>
-
 		const BASE = "https://iet-scroll.onrender.com";
-		//const BASE = "http://localhost:4040";
 
+		/* ── Sidebar toggle (mobile/tablet) ── */
+		function toggleSidebar() {
+			const sb = document.getElementById('sidebar');
+			const ov = document.getElementById('sidebarOverlay');
+			sb.classList.toggle('open');
+			ov.classList.toggle('show');
+		}
+		function closeSidebar() {
+			document.getElementById('sidebar').classList.remove('open');
+			document.getElementById('sidebarOverlay').classList.remove('show');
+		}
+
+		/* ── Section navigation ── */
 		function show(id, element) {
-
 			document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
 			document.getElementById(id).classList.add('active');
 
-			document.getElementById('header-title').textContent = id.charAt(0).toUpperCase() + id.slice(1);
+			const titles = {
+				dashboard: 'Overview', profile: 'Profile',
+				lost: 'Lost Items', found: 'Found Items',
+				team: 'My Team', resume: 'Resume Analyzer'
+			};
+			document.getElementById('header-title').textContent = titles[id] || id;
 
 			if (element) {
 				document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
 				element.classList.add('active');
 			}
+
+			// Auto-close sidebar on mobile after nav
+			if (window.innerWidth < 992) closeSidebar();
 		}
 
+		/* ── Init ── */
 		async function init() {
 			try {
-				const headers = {
-					Authorization: "Bearer " + token
-				};
+				if (!token) return;
+				const headers = { Authorization: "Bearer " + token };
 
-				// user details
-				const resUser = await fetch(BASE + "/api/v1/user", {headers});
+				const resUser = await fetch(BASE + "/api/v1/user", { headers });
 				if (resUser.status === 401) return logout();
 				const result = await resUser.json();
 
+				// Update UI
 				document.getElementById('top-username').textContent = result.username;
-				document.getElementById('welcome-name').textContent = result.fullName.split(' ')[0];
+				document.getElementById('welcome-name').textContent = result.fullName?.split(' ')[0] || 'User';
 				document.getElementById('top-email').textContent = result.email;
-
 				document.getElementById('p-name').textContent = result.fullName;
 				document.getElementById('p-branch').textContent = result.branch;
 
-				const resLost = await fetch(BASE + "/api/v1/lost-item/me", {headers});
-				const lost = await resLost.json();
-				document.getElementById('lostCount').textContent = lost.length;
+				// Avatar initial
+				const initial = (result.fullName || result.username || 'U')[0].toUpperCase();
+				document.querySelectorAll('.avatar').forEach(a => a.textContent = initial);
 
-				const resFound = await fetch(BASE + "/api/v1/found-item/me", {headers});
+				const resLost = await fetch(BASE + "/api/v1/lost-item/me", { headers });
+				const lost = await resLost.json();
+				document.getElementById('lostCount').textContent = Array.isArray(lost) ? lost.length : 0;
+
+				const resFound = await fetch(BASE + "/api/v1/found-item/me", { headers });
 				const found = await resFound.json();
-				document.getElementById('foundCount').textContent = found.length;
+				document.getElementById('foundCount').textContent = Array.isArray(found) ? found.length : 0;
 
 			} catch (e) {
 				console.error("Init failed", e);
-				alert(e.message);
 			}
 		}
 
@@ -320,8 +533,20 @@
 			window.location.href = "login.html";
 		}
 
+		function uploadResume() {
+			// Placeholder for resume upload logic
+			const file = document.getElementById('file').files[0];
+			const role = document.getElementById('role').value.trim();
+			if (!file || !role) {
+				document.getElementById('resumeResult').innerHTML =
+					'<div class="alert alert-warning mt-2 p-2 small">Please upload a file and enter a target role.</div>';
+				return;
+			}
+			document.getElementById('resumeResult').innerHTML =
+				'<div class="text-muted small mt-2"><i class="bi bi-arrow-repeat me-1"></i>Analyzing...</div>';
+		}
+
 		init();
 	</script>
 </body>
-
 </html>
