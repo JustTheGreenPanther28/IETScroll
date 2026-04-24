@@ -170,28 +170,6 @@ spring.ai.openai.api-key=YOUR_KEY
 
 ---
 
-## Running Locally
-
-1. Clone the repository:
-
-```bash
-git clone https://github.com/your-org/ietscroll-backend.git
-cd ietscroll-backend
-```
-
-2. Configure `application.properties` (see above).
-
-3. Build and run:
-
-```bash
-./mvnw spring-boot:run
-```
-
-The API will be available at [http://localhost:8080](http://localhost:8080).  
-Swagger UI: [http://localhost:8080/swagger-ui.html](http://localhost:8080/swagger-ui.html)
-
----
-
 ## Key Business Rules
 
 - Only `@ietdavv.edu.in` email addresses can register (plus configurable admin email).
@@ -213,8 +191,7 @@ The frontend will consume this REST API. API docs are available via Swagger UI o
 
 ## License
 
-This project is licensed under the MIT License.  
-[View License](https://github.com/JustTheGreenPanther28)
+OWNER : (https://github.com/JustTheGreenPanther28)
 
 ---
 
