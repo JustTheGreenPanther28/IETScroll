@@ -112,9 +112,6 @@ A Spring Boot REST API powering the **IET Scroll** platform — a vibrant colleg
 
 ---
 
-## Database 
-![Database Schema](src/main/resources/docs/ietscroll_db_schema.html)
-
 ## Key Business Rules
 
 - Only `@ietdavv.edu.in` email addresses can register (plus configurable admin email).
