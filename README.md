@@ -15,7 +15,7 @@ A Spring Boot REST API powering the **IET Scroll** platform — a vibrant colleg
 | Framework              | Spring Boot                          |
 | Security               | Spring Security (JWT / Basic Auth) |
 | ORM                    | Spring Data JPA                      |
-| Database               | MySQL                                |
+| Database               | Postgres                                |
 | Image Storage          | Cloudinary                           |
 | Image Moderation     | SightEngine API                     |
 | AI / LLM              | Spring AI (Llama for resumes, Mistral for moderation) |
