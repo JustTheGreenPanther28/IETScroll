@@ -1,7 +1,3 @@
-Certainly! Here's a more polished and professional version of your README for GitHub, highlighting clarity, structure, and readability:
-
----
-
 # IET Scroll — Backend API
 
 A Spring Boot REST API powering the **IET Scroll** platform — a vibrant college community app for IET DAVV students. This backend supports features such as lost & found item management, team formation, AI-powered resume review, OTP-based authentication, and image moderation.
