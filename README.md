@@ -41,26 +41,7 @@ A Spring Boot REST API powering the **IET Scroll** platform — a vibrant colleg
 
 - **Paginated Feeds**  
   View lost items, found items, and teams with pagination, sorted by latest.
-
----
-
-## Project Structure
-
-```
-src/main/java/com/ietscroll/
-├── controller/          # REST controllers (User, LostItem, FoundItem, Team, OTP, Resume)
-├── service/             # Service interfaces
-│   └── impl/            # Service implementations
-├── entity/              # JPA entities
-├── dto/                 # Data Transfer Objects
-├── request/             # Request body records
-├── response/            # Response body classes
-├── repository/          # Spring Data JPA repositories
-├── general/
-│   └── enums/           # Enums (TeamStatus, LostItemStatus, FoundItemStatus, etc.)
-└── util/                # Utility classes (ModerationEvaluator, CustomByteArrayResource)
-```
-
+  
 ---
 
 ## API Endpoints
