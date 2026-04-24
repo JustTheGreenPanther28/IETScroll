@@ -112,41 +112,6 @@ A Spring Boot REST API powering the **IET Scroll** platform — a vibrant colleg
 
 ---
 
-## Environment Configuration
-
-Add the following settings to your `application.properties` or `application.yml`:
-
-```properties
-# Database
-spring.datasource.url=jdbc:mysql://localhost:3306/ietscroll
-spring.datasource.username=YOUR_DB_USER
-spring.datasource.password=YOUR_DB_PASSWORD
-
-# Gmail SMTP
-spring.mail.host=smtp.gmail.com
-spring.mail.port=587
-spring.mail.username=your-email@gmail.com
-spring.mail.password=YOUR_APP_PASSWORD
-
-# Cloudinary
-cloudinary.cloud-name=YOUR_CLOUD_NAME
-cloudinary.api-key=YOUR_API_KEY
-cloudinary.api-secret=YOUR_API_SECRET
-
-# SightEngine (Image Moderation)
-sightengine.api-user=YOUR_API_USER
-sightengine.api-secret=YOUR_API_SECRET
-sightengine.api-url=https://api.sightengine.com/1.0/check.json
-
-# Admin Email
-server.admin.email=admin@yourdomain.com
-
-# Spring AI (configure per provider)
-spring.ai.openai.api-key=YOUR_KEY
-```
-
----
-
 ## Key Business Rules
 
 - Only `@ietdavv.edu.in` email addresses can register (plus configurable admin email).
