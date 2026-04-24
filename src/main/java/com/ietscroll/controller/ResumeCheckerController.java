@@ -15,11 +15,11 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 @RestController
 @RequestMapping("/api/v1/ietscroll/resume")
 @Tag(name = "Resume Analysis", description = "AI-powered resume evaluation based on role and experience.")
-public class ResusmeCheckerController {
+public class ResumeCheckerController {
 
 	private ResumeCheckerService resumeCheckerService;
 
-	public ResusmeCheckerController(ResumeCheckerService resumeCheckerService) {
+	public ResumeCheckerController(ResumeCheckerService resumeCheckerService) {
 		this.resumeCheckerService = resumeCheckerService;
 	}
 
