@@ -1,7 +1,3 @@
-Certainly! Here's the updated version of your documentation with the "Running Locally" section removed:
-
----
-
 **IET Scroll — Backend API**  
 A Spring Boot REST API powering the IET Scroll platform — a vibrant college community app for IET DAVV students. This backend supports features such as lost & found item management, team formation, AI-powered resume review, OTP-based authentication, and image moderation.
 
