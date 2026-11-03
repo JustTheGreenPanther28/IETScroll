@@ -220,12 +220,16 @@ window.toggleUserBlock = toggleUserBlock;
 window.changeUserPrivilege = changeUserPrivilege;
 window.adminCloseReport = adminCloseReport;
 
-// Initialize on DOM ready
-document.addEventListener('DOMContentLoaded', async () => {
-    await loadProfile();
-    await loadDashboardStats();
-    await loadServerActivities();
-    updateNotifBadges();
-    wireImagePreview('lostItemImage', 'lostItemImagePreview');
-    wireImagePreview('foundItemImage', 'foundItemImagePreview');
-});
+// Initialize — scripts are at end of <body> so DOM is already ready, no need to wait
+(async function initDashboard() {
+    try {
+        await loadProfile();
+        await loadDashboardStats();
+        await loadServerActivities();
+        updateNotifBadges();
+        wireImagePreview('lostItemImage', 'lostItemImagePreview');
+        wireImagePreview('foundItemImage', 'foundItemImagePreview');
+    } catch (e) {
+        console.error('[IETScroll] Initialization error:', e);
+    }
+})();

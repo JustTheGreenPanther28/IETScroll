@@ -46,17 +46,12 @@ function isAdmin() {
     return currentUserRole === 'ADMIN' || currentUserPrivilege === 'ADMIN';
 }
 
-function checkAdminAccess() {
-    if (!isAdmin()) {
-        toast('Access denied: Admin privileges required.', 'error');
-        show('dashboard');
-        return false;
-    }
-    return true;
-}
-
 function logout() {
-    api('/api/v1/user/logout', { method: 'POST' }).catch(() => {});
+    // api() is defined in api.js which loads after auth.js — safe to call here
+    // since logout is only triggered by user action or 401, not at load time
+    if (typeof api === 'function') {
+        api('/api/v1/user/logout', { method: 'POST' }).catch(() => {});
+    }
     localStorage.removeItem('iet_token');
     window.location.replace('login.html');
 }
