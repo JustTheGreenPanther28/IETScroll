@@ -1343,35 +1343,37 @@ async function loadUsersTable() {
 
             tr.innerHTML = `
                 <td>
-                    <div class="fw-bold text-white">${escapeHtml(u.fullName || u.username)}</div>
-                    <div class="text-muted small">${safeEmail}</div>
+                    <div class="user-name-cell">${escapeHtml(u.fullName || u.username)}</div>
+                    <div class="user-email-cell">${safeEmail}</div>
                 </td>
                 <td>
-                    <div class="text-white small">${escapeHtml(u.course || '—')}</div>
-                    <div class="text-muted" style="font-size: 0.75rem;">${escapeHtml(u.branch || '—')}</div>
+                    <div style="color:#e2e8f0;font-size:0.88rem;">${escapeHtml(u.course || '—')}</div>
+                    <div style="color:#64748b;font-size:0.78rem;margin-top:2px;">${escapeHtml(u.branch || '—')}</div>
                 </td>
                 <td>${privBadge}</td>
                 <td>${statusPill}</td>
-                <td style="font-size: 0.78rem;">
-                    <div><span class="text-success">Login:</span> ${loginTime}</div>
-                    <div><span class="text-muted">Logout:</span> ${logoutTime}</div>
+                <td>
+                    <div class="ts-line"><i class="bi bi-box-arrow-in-right"></i> ${loginTime}</div>
+                    <div class="ts-line logout" style="margin-top:4px;"><i class="bi bi-box-arrow-right"></i> ${logoutTime}</div>
                 </td>
-                <td style="font-size: 0.8rem;">
-                    <span class="badge bg-warning bg-opacity-20 text-warning me-1">Lost: ${u.lostItemsCount || 0}</span>
-                    <span class="badge bg-info bg-opacity-20 text-info me-1">Found: ${u.foundItemsCount || 0}</span>
-                    <span class="badge bg-primary bg-opacity-20 text-primary">Teams: ${u.teamsCreatedCount || 0}</span>
+                <td>
+                    <div class="report-count-cell">
+                        <span class="report-mini-badge lost"><i class="bi bi-search-heart"></i> Lost: ${u.lostItemsCount || 0}</span>
+                        <span class="report-mini-badge found"><i class="bi bi-check2-circle"></i> Found: ${u.foundItemsCount || 0}</span>
+                        <span class="report-mini-badge team"><i class="bi bi-people"></i> Teams: ${u.teamsCreatedCount || 0}</span>
+                    </div>
                 </td>
                 <td class="text-end">
-                    <div class="d-inline-flex gap-1 align-items-center">
-                        <select class="form-select form-select-sm bg-dark text-white border-secondary border-opacity-50 py-0" style="font-size: 0.75rem; width: 110px;" onchange="changeUserPrivilege('${safeEmail}', this.value)">
-                            <option value="TRUSTED" ${u.privilegeClass === 'TRUSTED' ? 'selected' : ''}>TRUSTED</option>
-                            <option value="ADMIN" ${u.privilegeClass === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
-                            <option value="MAY_BE_SPAM" ${u.privilegeClass === 'MAY_BE_SPAM' ? 'selected' : ''}>MAY BE SPAM</option>
-                            <option value="NEW" ${u.privilegeClass === 'NEW' ? 'selected' : ''}>NEW</option>
-                            <option value="NORMAL" ${u.privilegeClass === 'NORMAL' ? 'selected' : ''}>NORMAL</option>
+                    <div style="display:inline-flex;gap:6px;align-items:center;flex-wrap:wrap;justify-content:flex-end;">
+                        <select class="privilege-select" onchange="changeUserPrivilege('${safeEmail}', this.value)">
+                            <option value="TRUSTED" ${u.privilegeClass === 'TRUSTED' ? 'selected' : ''}>✦ TRUSTED</option>
+                            <option value="ADMIN" ${u.privilegeClass === 'ADMIN' ? 'selected' : ''}>🛡 ADMIN</option>
+                            <option value="MAY_BE_SPAM" ${u.privilegeClass === 'MAY_BE_SPAM' ? 'selected' : ''}>⚠ SPAM?</option>
+                            <option value="NEW" ${u.privilegeClass === 'NEW' ? 'selected' : ''}>★ NEW</option>
+                            <option value="NORMAL" ${u.privilegeClass === 'NORMAL' ? 'selected' : ''}>● NORMAL</option>
                         </select>
-                        <button class="btn btn-sm ${isBlocked ? 'btn-success-soft' : 'btn-danger-soft'}" style="font-size: 0.75rem;" onclick="toggleUserBlock('${safeEmail}', ${isBlocked})">
-                            ${isBlocked ? '<i class="bi bi-unlock"></i> Unblock' : '<i class="bi bi-lock"></i> Block'}
+                        <button class="tbl-action-btn ${isBlocked ? 'unblock' : 'block'}" onclick="toggleUserBlock('${safeEmail}', ${isBlocked})">
+                            ${isBlocked ? '<i class="bi bi-unlock-fill"></i> Unblock' : '<i class="bi bi-lock-fill"></i> Block'}
                         </button>
                     </div>
                 </td>

@@ -1048,3 +1048,303 @@ label.field-label {
 	color: #ffffff;
 	border-color: #6366f1;
 }
+
+/* ==========================================================================
+   UI/UX OVERHAUL - Scrollbars, Pagination Buttons, Table, General Polish
+   ========================================================================== */
+
+/* ── Custom Scrollbars (everywhere) ── */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #334155 #0f172a;
+}
+*::-webkit-scrollbar {
+	width: 7px;
+	height: 7px;
+}
+*::-webkit-scrollbar-track {
+	background: #0f172a;
+	border-radius: 99px;
+}
+*::-webkit-scrollbar-thumb {
+	background: #334155;
+	border-radius: 99px;
+	border: 1px solid #1e293b;
+}
+*::-webkit-scrollbar-thumb:hover {
+	background: #6366f1;
+}
+
+/* ── Pagination / Navigation Buttons (btn-secondary-dark) ── */
+.btn-secondary-dark {
+	background: #1e293b;
+	border: 1.5px solid #334155;
+	color: #e2e8f0;
+	padding: 9px 20px;
+	border-radius: 10px;
+	font-weight: 700;
+	font-size: 0.88rem;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 7px;
+	white-space: nowrap;
+	line-height: 1;
+}
+.btn-secondary-dark:hover:not(:disabled) {
+	background: #253348;
+	border-color: #6366f1;
+	color: #ffffff;
+	box-shadow: 0 0 0 3px rgba(99,102,241,0.18);
+	transform: translateY(-1px);
+}
+.btn-secondary-dark:active:not(:disabled) {
+	transform: translateY(0);
+}
+.btn-secondary-dark:disabled,
+.btn-secondary-dark[disabled] {
+	opacity: 0.35;
+	cursor: not-allowed;
+	transform: none;
+	border-color: #1e293b;
+	color: #64748b;
+}
+
+/* ── Page number label in pagination ── */
+.page-label {
+	color: #94a3b8;
+	font-size: 0.88rem;
+	font-weight: 600;
+	padding: 0 4px;
+	white-space: nowrap;
+}
+
+/* ── Table scrollable wrapper (fixes white scroll area) ── */
+.table-scroll-wrapper {
+	overflow-x: auto;
+	border-radius: 14px;
+	background: #111827;
+	scrollbar-color: #334155 #111827;
+}
+.table-scroll-wrapper::-webkit-scrollbar-track {
+	background: #111827;
+}
+
+/* ── User Audit Table improvements ── */
+.user-audit-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0 6px;
+	min-width: 820px;
+}
+.user-audit-table thead tr th {
+	background: #0d1525;
+	color: #64748b;
+	font-size: 0.75rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.07em;
+	padding: 10px 14px;
+	white-space: nowrap;
+}
+.user-audit-table thead tr th:first-child { border-radius: 8px 0 0 8px; }
+.user-audit-table thead tr th:last-child  { border-radius: 0 8px 8px 0; }
+
+.user-audit-table td {
+	background: #111827;
+	padding: 13px 14px;
+	vertical-align: middle;
+	font-size: 0.88rem;
+	border-top: 1.5px solid #1e293b;
+	border-bottom: 1.5px solid #1e293b;
+	color: #e2e8f0;
+	transition: background 0.15s;
+}
+.user-audit-table tr td:first-child {
+	border-left: 1.5px solid #1e293b;
+	border-radius: 10px 0 0 10px;
+}
+.user-audit-table tr td:last-child {
+	border-right: 1.5px solid #1e293b;
+	border-radius: 0 10px 10px 0;
+}
+.user-audit-table tr:hover td {
+	background: #16213a;
+	border-color: #334155;
+}
+
+/* Strong name text in table */
+.user-audit-table .user-name-cell {
+	font-weight: 700;
+	color: #f8fafc;
+	font-size: 0.92rem;
+}
+.user-audit-table .user-email-cell {
+	color: #94a3b8;
+	font-size: 0.8rem;
+	margin-top: 2px;
+}
+
+/* ── Timestamp cell ── */
+.ts-line {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.8rem;
+	color: #94a3b8;
+	white-space: nowrap;
+}
+.ts-line i { color: #6366f1; font-size: 0.78rem; }
+.ts-line.logout i { color: #f43f5e; }
+
+/* ── Reports count mini-bars in table ── */
+.report-count-cell {
+	display: flex;
+	align-items: center;
+	gap: 5px;
+	flex-wrap: wrap;
+}
+.report-mini-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	padding: 3px 8px;
+	border-radius: 6px;
+	white-space: nowrap;
+}
+.report-mini-badge.lost {
+	background: rgba(245,158,11,0.18);
+	color: #fbbf24;
+	border: 1px solid rgba(245,158,11,0.4);
+}
+.report-mini-badge.found {
+	background: rgba(16,185,129,0.18);
+	color: #34d399;
+	border: 1px solid rgba(16,185,129,0.4);
+}
+.report-mini-badge.team {
+	background: rgba(99,102,241,0.18);
+	color: #a5b4fc;
+	border: 1px solid rgba(99,102,241,0.4);
+}
+
+/* ── Action buttons inside the table ── */
+.tbl-action-btn {
+	background: transparent;
+	border: 1.5px solid #334155;
+	color: #94a3b8;
+	padding: 5px 11px;
+	border-radius: 8px;
+	font-size: 0.78rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.18s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	white-space: nowrap;
+}
+.tbl-action-btn:hover { color: #ffffff; border-color: #6366f1; background: rgba(99,102,241,0.15); }
+.tbl-action-btn.block  { border-color: rgba(244,63,94,0.4);  color: #fb7185; }
+.tbl-action-btn.block:hover  { background: rgba(244,63,94,0.15); border-color: #f43f5e; color: #fff; }
+.tbl-action-btn.unblock { border-color: rgba(16,185,129,0.4); color: #34d399; }
+.tbl-action-btn.unblock:hover { background: rgba(16,185,129,0.15); border-color: #10b981; color: #fff; }
+
+/* ── Privilege select inside table ── */
+.privilege-select {
+	background: #0f172a;
+	border: 1.5px solid #334155;
+	color: #e2e8f0;
+	border-radius: 8px;
+	padding: 4px 8px;
+	font-size: 0.78rem;
+	font-weight: 600;
+	cursor: pointer;
+	outline: none;
+	transition: border-color 0.2s;
+	max-width: 130px;
+}
+.privilege-select:focus { border-color: #6366f1; }
+.privilege-select option { background: #1e293b; color: #fff; }
+
+/* ── General card containers ── */
+.card-dark {
+	background: var(--card-bg);
+	border: 1.5px solid var(--card-border);
+	border-radius: 18px;
+	padding: 1.75rem;
+	box-shadow: 0 8px 28px rgba(0,0,0,0.4);
+}
+
+/* ── Section headers ── */
+.section-header {
+	display: flex;
+	align-items: flex-start;
+	justify-content: space-between;
+	gap: 1rem;
+	flex-wrap: wrap;
+	margin-bottom: 1.5rem;
+}
+.section-header h5 {
+	font-family: 'Sora', sans-serif;
+	font-size: 1.2rem;
+	font-weight: 800;
+	color: #ffffff;
+	margin: 0;
+}
+.section-header p {
+	color: #64748b;
+	font-size: 0.88rem;
+	margin: 4px 0 0;
+}
+
+/* ── User status pill improvements ── */
+.user-status-pill {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 10px;
+	border-radius: 99px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+.user-status-pill.active {
+	background: rgba(16,185,129,0.18);
+	color: #10b981;
+	border: 1px solid rgba(16,185,129,0.4);
+}
+.user-status-pill.blocked {
+	background: rgba(244,63,94,0.18);
+	color: #f43f5e;
+	border: 1px solid rgba(244,63,94,0.4);
+}
+
+/* ── Smooth focus ring on all interactive elements ── */
+button:focus-visible,
+select:focus-visible,
+input:focus-visible {
+	outline: 2px solid #6366f1;
+	outline-offset: 2px;
+}
+
+/* ── Empty state improvements ── */
+.empty-state {
+	text-align: center;
+	padding: 60px 20px;
+	color: #64748b;
+	background: #0d1525;
+	border: 1.5px dashed #1e293b;
+	border-radius: 16px;
+}
+.empty-state i {
+	font-size: 2.8rem;
+	display: block;
+	margin-bottom: 12px;
+	opacity: 0.6;
+}
+.empty-state p { margin: 0; font-size: 0.95rem; font-weight: 500; }
