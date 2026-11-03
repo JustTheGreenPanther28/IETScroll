@@ -570,10 +570,11 @@ async function submitLostItem() {
         switchLostTab('mine', document.querySelectorAll('#lost .tab-btn')[1]);
     } catch (e) {
         toast(e.message, 'error');
+        const isNet = e.message && e.message.toLowerCase().includes('reach the server');
         addNotification({
             type: 'lost',
             title: name || 'Lost Item Report',
-            status: 'REJECTED',
+            status: isNet ? 'FAILED_TO_SUBMIT' : 'REJECTED_BY_MODERATION',
             message: e.message || 'Report was rejected during safety verification.',
             time: new Date()
         });
@@ -704,10 +705,11 @@ async function submitFoundItem() {
         switchFoundTab('mine', document.querySelectorAll('#found .tab-btn')[1]);
     } catch (e) {
         toast(e.message, 'error');
+        const isNet = e.message && e.message.toLowerCase().includes('reach the server');
         addNotification({
             type: 'found',
             title: name || 'Found Item Report',
-            status: 'REJECTED',
+            status: isNet ? 'FAILED_TO_SUBMIT' : 'REJECTED_BY_MODERATION',
             message: e.message || 'Report was rejected during safety verification.',
             time: new Date()
         });
@@ -905,10 +907,11 @@ async function submitCreateTeam() {
         switchTeamTab('mine', document.querySelectorAll('#team .tab-btn')[1]);
     } catch (e) {
         toast(e.message, 'error');
+        const isNet = e.message && e.message.toLowerCase().includes('reach the server');
         addNotification({
             type: 'team',
             title: purpose || 'Team Creation',
-            status: 'REJECTED',
+            status: isNet ? 'FAILED_TO_SUBMIT' : 'REJECTED_BY_MODERATION',
             message: e.message || 'Team creation rejected by moderation filter.',
             time: new Date()
         });
@@ -1112,12 +1115,39 @@ async function submitResume() {
     }
 }
 
-/* ============ NOTIFICATIONS & ACTIVITY AUDIT ============ */
+/* ============ NOTIFICATIONS & ACTIVITY AUDIT (SERVER-SIDE & CLIENT CACHE) ============ */
+let serverActivities = [];
+
+async function loadServerActivities() {
+    try {
+        const list = await api('/api/v1/user/activities');
+        if (list && Array.isArray(list)) {
+            serverActivities = list;
+            renderNotifications();
+            updateNotifBadges();
+        }
+    } catch (e) {
+        // Fall back to client storage
+        renderNotifications();
+    }
+}
+
 function getNotifKey() {
     return 'iet_notifs_' + (currentUserEmail || 'global');
 }
 
 function getNotifications() {
+    if (serverActivities && serverActivities.length > 0) {
+        return serverActivities.map(a => ({
+            id: 'act_' + a.id,
+            type: (a.activityType || '').toLowerCase(),
+            title: a.title,
+            status: a.status,
+            message: a.message,
+            time: a.timestamp,
+            read: true
+        }));
+    }
     try {
         const raw = localStorage.getItem(getNotifKey());
         return raw ? JSON.parse(raw) : [];
@@ -1139,7 +1169,7 @@ function addNotification({ type, title, status, message, time }) {
         id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 4),
         type,
         title: title || 'Submission',
-        status,
+        status, // 'UPLOADED', 'REJECTED_BY_MODERATION', 'FAILED_TO_SUBMIT'
         message: message || '',
         time: time ? new Date(time).toISOString() : new Date().toISOString(),
         read: false
@@ -1169,7 +1199,7 @@ function renderNotifications() {
             <div class="empty-state">
                 <i class="bi bi-bell-slash"></i>
                 <div class="fw-bold fs-5 text-white mb-1">No Activity Logged Yet</div>
-                <div class="text-muted small">Your report upload history, safety approvals, and rejection notices will appear here with timestamps.</div>
+                <div class="text-muted small">Your report upload history, safety approvals, and rejection notices will appear here with cross-device sync.</div>
             </div>`;
         return;
     }
@@ -1177,6 +1207,7 @@ function renderNotifications() {
     container.innerHTML = '';
     list.forEach(n => {
         const isSuccess = n.status === 'UPLOADED' || n.status === 'SUCCESS';
+        const isNetFail = n.status === 'FAILED_TO_SUBMIT';
         const card = document.createElement('div');
         card.className = 'notif-card ' + (isSuccess ? 'success' : 'rejected');
 
@@ -1184,11 +1215,17 @@ function renderNotifications() {
         if (n.type === 'lost') iconClass = 'bi-search-heart';
         if (n.type === 'found') iconClass = 'bi-box-seam';
         if (n.type === 'team') iconClass = 'bi-people';
+        if (n.type === 'team_join') iconClass = 'bi-person-plus';
         if (n.type === 'resume') iconClass = 'bi-stars';
 
-        const statusBadge = isSuccess
-            ? '<span class="badge-status open"><i class="bi bi-check-circle-fill me-1"></i> UPLOADED</span>'
-            : '<span class="badge-status closed"><i class="bi bi-x-circle-fill me-1"></i> REJECTED</span>';
+        let statusBadge = '<span class="badge-status open"><i class="bi bi-check-circle-fill me-1"></i> UPLOADED</span>';
+        if (isNetFail) {
+            statusBadge = '<span class="badge-status" style="background: rgba(245, 158, 11, 0.2); color: #fbbf24; border: 1px solid rgba(245, 158, 11, 0.5);"><i class="bi bi-wifi-off me-1"></i> NETWORK FAILED</span>';
+        } else if (!isSuccess) {
+            statusBadge = '<span class="badge-status closed"><i class="bi bi-x-circle-fill me-1"></i> REJECTED</span>';
+        }
+
+        const label = isSuccess ? 'Status:' : (isNetFail ? 'Error Details:' : 'Rejection Reason:');
 
         card.innerHTML = `
             <div class="notif-icon-box ${isSuccess ? 'success' : 'rejected'}">
@@ -1203,7 +1240,7 @@ function renderNotifications() {
                     <i class="bi bi-clock"></i> ${formatNotifTime(n.time)}
                 </div>
                 <div class="notif-desc ${isSuccess ? 'success' : 'rejected'}">
-                    <strong>${isSuccess ? 'Status:' : 'Rejection Reason:'}</strong> ${escapeHtml(n.message)}
+                    <strong>${label}</strong> ${escapeHtml(n.message)}
                 </div>
             </div>
         `;
@@ -1230,8 +1267,12 @@ function updateNotifBadges() {
     });
 }
 
-function clearAllNotifications() {
+async function clearAllNotifications() {
     if (!confirm('Clear your entire upload activity history?')) return;
+    try {
+        await api('/api/v1/user/activities', { method: 'DELETE' });
+    } catch {}
+    serverActivities = [];
     saveNotifications([]);
     renderNotifications();
     toast('Activity history cleared', 'info');
@@ -1472,8 +1513,11 @@ function logout() {
 }
 
 // Startup
-loadProfile();
-loadDashboardStats();
-updateNotifBadges();
-wireImagePreview('lostItemImage', 'lostItemImagePreview');
-wireImagePreview('foundItemImage', 'foundItemImagePreview');
+(async function initDashboard() {
+    await loadProfile();
+    await loadDashboardStats();
+    await loadServerActivities();
+    updateNotifBadges();
+    wireImagePreview('lostItemImage', 'lostItemImagePreview');
+    wireImagePreview('foundItemImage', 'foundItemImagePreview');
+})();

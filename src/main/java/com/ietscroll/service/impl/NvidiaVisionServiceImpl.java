@@ -74,7 +74,8 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
     public void checkImage(MultipartFile file) throws IOException {
         String content = callVisionModel(file, SAFETY_PROMPT, 60);
         if (content == null || content.isBlank()) {
-            return;
+            log.warn("NVIDIA Vision safety check returned empty response, failing closed for security.");
+            throw new InappropriateImageException("Image verification could not confirm image safety. Please try a clearer photo of the item.");
         }
 
         log.info("NVIDIA Vision safety evaluation: {}", content);
@@ -110,7 +111,8 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
 
         String content = callVisionModel(file, relevancePrompt, 80);
         if (content == null || content.isBlank()) {
-            return;
+            log.warn("NVIDIA Vision relevance check returned empty response, failing closed for authenticity.");
+            throw new ContentModerationException("Image authenticity verification is currently unable to confirm match with item details. Please provide a clear, direct photo of the item.");
         }
 
         log.info("NVIDIA Vision relevance evaluation: {}", content);
@@ -131,6 +133,9 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
 
         // Optimize and consistently transcode to JPEG for uniform MIME compatibility across providers
         byte[] optimizedBytes = optimizeImageForVision(file);
+        if (optimizedBytes == null || optimizedBytes.length == 0) {
+            return null;
+        }
         String contentType = "image/jpeg";
 
         String base64Image = Base64.getEncoder().encodeToString(optimizedBytes);
@@ -157,7 +162,7 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
         try {
             responseBody = restTemplate.postForObject(apiUrl, entity, String.class);
         } catch (Exception e) {
-            log.warn("NVIDIA Vision API check encountered an error: {}. Proceeding to secondary checks.", e.getMessage());
+            log.warn("NVIDIA Vision API check encountered an error: {}. Failing closed for security.", e.getMessage());
             return null;
         }
 

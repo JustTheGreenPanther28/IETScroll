@@ -36,6 +36,7 @@ import com.ietscroll.service.LostItemService;
 import com.ietscroll.service.NvidiaVisionService;
 import com.ietscroll.service.SightEngineService;
 import com.ietscroll.service.SpamProtectionService;
+import com.ietscroll.service.UserActivityLogService;
 
 @Service
 public class LostItemServiceImpl implements LostItemService {
@@ -48,6 +49,7 @@ public class LostItemServiceImpl implements LostItemService {
 	private final CloudinaryService cloudinaryService;
 	private final SpamProtectionService spamProtectionService;
 	private final NvidiaVisionService nvidiaVisionService;
+	private final UserActivityLogService activityLogService;
 	private final Executor moderationExecutor;
 
 	public LostItemServiceImpl(
@@ -57,6 +59,7 @@ public class LostItemServiceImpl implements LostItemService {
 			CloudinaryService cloudinaryService,
 			SpamProtectionService spamProtectionService,
 			NvidiaVisionService nvidiaVisionService,
+			UserActivityLogService activityLogService,
 			@Qualifier("moderationExecutor") Executor moderationExecutor) {
 		this.lostItemRepo = lostItemRepo;
 		this.userRepo = userRepo;
@@ -64,6 +67,7 @@ public class LostItemServiceImpl implements LostItemService {
 		this.cloudinaryService = cloudinaryService;
 		this.spamProtectionService = spamProtectionService;
 		this.nvidiaVisionService = nvidiaVisionService;
+		this.activityLogService = activityLogService;
 		this.moderationExecutor = moderationExecutor;
 	}
 
@@ -80,13 +84,13 @@ public class LostItemServiceImpl implements LostItemService {
 		String location = lostItemDTO.getPredictedLocation() != null ? lostItemDTO.getPredictedLocation().trim() : "";
 
 		// Campus location policy: reports must be within or near college campus.
-		// If location is missing or blank, mark user as MAY_BE_SPAM or reject
 		if (location.isBlank()) {
 			UserEntity owner = userRepo.findByEmail(email);
 			if (owner != null && owner.getPrivilegeClass() != PrivilegeClass.ADMIN) {
 				owner.setPrivilegeClass(PrivilegeClass.MAY_BE_SPAM);
 				userRepo.save(owner);
 			}
+			activityLogService.logActivity(email, "LOST", itemName, "REJECTED_BY_MODERATION", "Missing campus location (marked as MAY_BE_SPAM)");
 			throw new BadRequestException("Item location must be specified and near the college campus only (e.g. Library, Canteen, Block A, Workshop). Reports without location are treated as SPAM.");
 		}
 
@@ -111,31 +115,38 @@ public class LostItemServiceImpl implements LostItemService {
 					"Maximum lost-item request a user can have is two, kindly close other request to create a new request.");
 		}
 
-		// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
-		CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
-				spamProtectionService.checkItemSubmission(itemName, description, location),
-				moderationExecutor
-		);
-
-		CompletableFuture<Void> visionFuture = CompletableFuture.runAsync(() -> {
-			try {
-				nvidiaVisionService.checkImageRelevance(image, itemName, description);
-			} catch (IOException e) {
-				throw new RuntimeException(e);
-			}
-		}, moderationExecutor);
-
 		try {
+			// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
+			CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
+					spamProtectionService.checkItemSubmission(itemName, description, location),
+					moderationExecutor
+			);
+
+			CompletableFuture<Void> visionFuture = CompletableFuture.runAsync(() -> {
+				try {
+					nvidiaVisionService.checkImageRelevance(image, itemName, description);
+				} catch (IOException e) {
+					throw new RuntimeException(e);
+				}
+			}, moderationExecutor);
+
 			CompletableFuture.allOf(textFuture, visionFuture).join();
 		} catch (CompletionException ce) {
 			Throwable cause = ce.getCause();
+			String errorMsg = cause != null ? cause.getMessage() : "Content moderation check failed";
+			activityLogService.logActivity(email, "LOST", itemName, "REJECTED_BY_MODERATION", errorMsg);
 			if (cause instanceof RuntimeException re) throw re;
 			if (cause instanceof IOException io) throw io;
 			throw new RuntimeException(cause);
 		}
 
 		// ── STEP 3: SightEngine double-verification ────────────
-		sightEngineService.checkImage(image);
+		try {
+			sightEngineService.checkImage(image);
+		} catch (Exception e) {
+			activityLogService.logActivity(email, "LOST", itemName, "REJECTED_BY_MODERATION", e.getMessage());
+			throw e;
+		}
 
 		// Map has details about uploaded image
 		Map<?, ?> uploadedDetail = cloudinaryService.upload(image);
@@ -151,6 +162,8 @@ public class LostItemServiceImpl implements LostItemService {
 		lostItem.setCreatedAt(LocalDateTime.now());
 
 		lostItemRepo.save(lostItem);
+
+		activityLogService.logActivity(email, "LOST", itemName, "UPLOADED", "Item successfully verified and listed publicly. Location: " + location);
 
 		return Result.SUCCESS;
 	}

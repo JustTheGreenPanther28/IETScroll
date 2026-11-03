@@ -29,26 +29,30 @@ import com.ietscroll.response.Result;
 import com.ietscroll.response.TeamResponse;
 import com.ietscroll.service.SpamProtectionService;
 import com.ietscroll.service.TeamService;
+import com.ietscroll.service.UserActivityLogService;
 
 @Service
 public class TeamServiceImpl implements TeamService {
 
-	private TeamRepository teamRepo;
-	private TeamJoinRequestRepository teamJoinRequestRepo;
-	private SkillRepository skillRepository;
-	private SpamProtectionService spamProtectionService;
-	private UserRepository userRepo;
-	private ModelMapper modelMapper;
+	private final TeamRepository teamRepo;
+	private final TeamJoinRequestRepository teamJoinRequestRepo;
+	private final SkillRepository skillRepository;
+	private final SpamProtectionService spamProtectionService;
+	private final UserRepository userRepo;
+	private final ModelMapper modelMapper;
+	private final UserActivityLogService activityLogService;
 
 	public TeamServiceImpl(TeamRepository teamRepo, SkillRepository skillRepository,
 			SpamProtectionService spamProtectionService, UserRepository userRepo,
-			TeamJoinRequestRepository teamJoinRequestRepo, ModelMapper modelMapper) {
+			TeamJoinRequestRepository teamJoinRequestRepo, ModelMapper modelMapper,
+			UserActivityLogService activityLogService) {
 		this.teamRepo = teamRepo;
 		this.skillRepository = skillRepository;
 		this.spamProtectionService = spamProtectionService;
 		this.userRepo = userRepo;
 		this.teamJoinRequestRepo = teamJoinRequestRepo;
 		this.modelMapper = modelMapper;
+		this.activityLogService = activityLogService;
 	}
 
 	@Override
@@ -65,7 +69,12 @@ public class TeamServiceImpl implements TeamService {
 		}
 
 		// ── Strict spam/content-safety check on team purpose ─────────────────
-		spamProtectionService.checkText(team.getPurpose());
+		try {
+			spamProtectionService.checkText(team.getPurpose());
+		} catch (Exception e) {
+			activityLogService.logActivity(ownerEmail, "TEAM", team.getPurpose(), "REJECTED_BY_MODERATION", e.getMessage());
+			throw e;
+		}
 
 		UserEntity user = userRepo.findByEmail(ownerEmail);
 
@@ -95,6 +104,8 @@ public class TeamServiceImpl implements TeamService {
 		teamEntity.setNeededSkills(neededSkills);
 
 		Team createdTeam = teamRepo.save(teamEntity);
+
+		activityLogService.logActivity(ownerEmail, "TEAM", team.getPurpose(), "UPLOADED", "Team created and publicly open for applications.");
 
 		TeamResponse teamResponse = new TeamResponse();
 		teamResponse.setCreatedAt(createdTeam.getCreatedAt());

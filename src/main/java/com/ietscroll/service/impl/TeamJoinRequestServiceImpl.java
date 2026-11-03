@@ -19,19 +19,25 @@ import com.ietscroll.response.ApplicationResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.response.TeamJoinResponse;
 import com.ietscroll.service.TeamRequestService;
+import com.ietscroll.service.UserActivityLogService;
 
 @Service
 public class TeamJoinRequestServiceImpl implements TeamRequestService {
 
-	private TeamJoinRequestRepository teamJoinRequestRepo;
-	private TeamRepository teamRepo;
-	private UserRepository userRepo;
+	private final TeamJoinRequestRepository teamJoinRequestRepo;
+	private final TeamRepository teamRepo;
+	private final UserRepository userRepo;
+	private final UserActivityLogService activityLogService;
 
-	public TeamJoinRequestServiceImpl(TeamJoinRequestRepository teamRequestRepo, TeamRepository teamRepo,
-			UserRepository userRepo) {
+	public TeamJoinRequestServiceImpl(
+			TeamJoinRequestRepository teamRequestRepo,
+			TeamRepository teamRepo,
+			UserRepository userRepo,
+			UserActivityLogService activityLogService) {
 		this.teamJoinRequestRepo = teamRequestRepo;
 		this.teamRepo = teamRepo;
 		this.userRepo = userRepo;
+		this.activityLogService = activityLogService;
 	}
 
 	@Override
@@ -58,6 +64,11 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		teamJoinRequest.setRequestedTeam(appliedTo);
 
 		TeamJoinRequest requested = teamJoinRequestRepo.save(teamJoinRequest);
+
+		if (requested != null) {
+			activityLogService.logActivity(joinerEmail, "TEAM_JOIN", "Join Request (" + appliedTo.getPurpose() + ")", "UPLOADED",
+					"Application submitted with message: \"" + message + "\"");
+		}
 
 		return requested == null ? Result.FAILED : Result.SUCCESS;
 	}
@@ -105,12 +116,10 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 	public Result acceptMember(String ownerEmail, String joinerEmail) {
 
 		if (ownerEmail == null || joinerEmail == null || ownerEmail.isBlank() || joinerEmail.isBlank()) {
-			System.out.println("hereeeeeeeeeee");
 			throw new RuntimeException("Invalid request!");
 		}
 
 		if (ownerEmail.equals(joinerEmail)) {
-			System.out.println("");
 			throw new RuntimeException("Invalid request!");
 		}
 
@@ -131,6 +140,8 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 		if (rowsChanged == 1) {
 			ownerTeam.setCurrentMember(ownerTeam.getCurrentMember() + 1);
 			teamRepo.save(ownerTeam);
+			activityLogService.logActivity(joinerEmail, "TEAM_JOIN", "Team Application Accepted", "UPLOADED",
+					"Your join request to team \"" + ownerTeam.getPurpose() + "\" was accepted.");
 			return Result.SUCCESS;
 		}
 
@@ -159,6 +170,8 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 				joinerEmail, ownerTeam.getPublicId());
 
 		if (rowsChanged == 1) {
+			activityLogService.logActivity(joinerEmail, "TEAM_JOIN", "Team Application Rejected", "REJECTED_BY_MODERATION",
+					"Your join request to team \"" + ownerTeam.getPurpose() + "\" was declined.");
 			return Result.SUCCESS;
 		}
 		return Result.FAILED;

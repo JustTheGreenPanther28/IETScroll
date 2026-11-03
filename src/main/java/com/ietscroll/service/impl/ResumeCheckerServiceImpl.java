@@ -23,15 +23,15 @@ import com.ietscroll.exception.LimitExceededException;
 import com.ietscroll.repository.ResumeUsageAuditRepository;
 import com.ietscroll.response.QualityOfResume;
 import com.ietscroll.service.ResumeCheckerService;
+import com.ietscroll.service.UserActivityLogService;
 
 @Service
 public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 
 	private final ChatClient resumeChatClient;
 	private final ResumeUsageAuditRepository resumeUsageAuditRepository;
+	private final UserActivityLogService activityLogService;
 
-	// Real, sniffed MIME types we accept (checked against file bytes, not the
-	// client-supplied Content-Type header, which is trivially spoofable).
 	private static final List<String> DOCUMENT_TYPES = List.of("application/pdf", "application/msword",
 			"application/vnd.openxmlformats-officedocument.wordprocessingml.document");
 
@@ -41,9 +41,11 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 
 	public ResumeCheckerServiceImpl(
 			@Qualifier("llamaChatClient") ChatClient chatClient,
-			ResumeUsageAuditRepository resumeUsageAuditRepository) {
+			ResumeUsageAuditRepository resumeUsageAuditRepository,
+			UserActivityLogService activityLogService) {
 		this.resumeChatClient = chatClient;
 		this.resumeUsageAuditRepository = resumeUsageAuditRepository;
+		this.activityLogService = activityLogService;
 	}
 
 	@Override
@@ -58,6 +60,7 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 			String currentYearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 			long countThisMonth = resumeUsageAuditRepository.countByUserEmailAndYearMonth(userEmail, currentYearMonth);
 			if (countThisMonth >= 3) {
+				activityLogService.logActivity(userEmail, "RESUME", "Resume Review (" + role + ")", "REJECTED_BY_MODERATION", "Monthly rate limit reached (max 3 per month)");
 				throw new LimitExceededException(
 						"Monthly limit reached! You can analyze your resume a maximum of 3 times per month. Please try again next month.");
 			}
@@ -88,6 +91,8 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 		if (userEmail != null && !userEmail.isBlank()) {
 			String currentYearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 			resumeUsageAuditRepository.save(new ResumeUsageAudit(userEmail, currentYearMonth));
+			activityLogService.logActivity(userEmail, "RESUME", "Resume Review (" + role + ")", "UPLOADED",
+					"Resume evaluated. Score: " + (quality != null ? quality.getScore() : 0) + "/100");
 		}
 
 		return quality;
