@@ -16,8 +16,10 @@ import org.springframework.transaction.TransactionException;
 import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
+import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.context.request.WebRequest;
 import org.springframework.web.multipart.support.MissingServletRequestPartException;
+import org.springframework.web.servlet.resource.NoResourceFoundException;
 
 import jakarta.validation.ConstraintViolationException;
 
@@ -75,6 +77,13 @@ public class GlobalExceptionHandler {
 		ErrorMessage errorMessage = new ErrorMessage(new Date(),
 				"A temporary database issue occurred. Please try again in a few moments.");
 		return new ResponseEntity<>(errorMessage, new HttpHeaders(), HttpStatus.INTERNAL_SERVER_ERROR);
+	}
+
+	// ── Suppress favicon.ico and other missing static resource 404s (not real errors) ──
+	@ExceptionHandler(NoResourceFoundException.class)
+	@ResponseStatus(HttpStatus.NOT_FOUND)
+	public void handleNoResourceFound() {
+		// Silently return 404 — no logging, no response body
 	}
 
 	@ExceptionHandler(Exception.class)
