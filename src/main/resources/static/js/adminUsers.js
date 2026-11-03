@@ -59,6 +59,7 @@ async function loadUsersTable() {
             const tr = document.createElement('tr');
             const safeEmail = escapeHtml(u.email);
             const isBlocked = u.blocked;
+            const roleBadge = renderRoleBadge(u.role);
             const privBadge = renderPrivilegeBadge(u.privilegeClass);
             const statusPill = isBlocked
                 ? '<span class="user-status-pill blocked"><i class="bi bi-slash-circle me-1"></i>BLOCKED</span>'
@@ -76,7 +77,12 @@ async function loadUsersTable() {
                     <div style="color:#e2e8f0;font-size:0.88rem;">${escapeHtml(u.course || '—')}</div>
                     <div style="color:#64748b;font-size:0.78rem;margin-top:2px;">${escapeHtml(u.branch || '—')}</div>
                 </td>
-                <td>${privBadge}</td>
+                <td>
+                    <div style="display:flex;flex-direction:column;gap:4px;align-items:flex-start;">
+                        ${roleBadge ? `<div>${roleBadge}</div>` : ''}
+                        <div>${privBadge}</div>
+                    </div>
+                </td>
                 <td>${statusPill}</td>
                 <td>
                     <div class="ts-line"><i class="bi bi-box-arrow-in-right"></i> ${loginTime}</div>
@@ -91,13 +97,18 @@ async function loadUsersTable() {
                 </td>
                 <td class="text-end">
                     <div style="display:inline-flex;gap:8px;align-items:center;flex-wrap:nowrap;justify-content:flex-end;">
-                        <select class="privilege-select" onchange="changeUserPrivilege('${safeEmail}', this.value)" ${(!isSeniorAdmin() && (u.privilegeClass === 'ADMIN' || u.privilegeClass === 'SENIOR_ADMIN')) ? 'disabled' : ''}>
-                            ${isSeniorAdmin() ? `<option value="SENIOR_ADMIN" ${u.privilegeClass === 'SENIOR_ADMIN' ? 'selected' : ''}>👑 SENIOR ADMIN</option>` : ''}
-                            ${(isSeniorAdmin() || u.privilegeClass === 'ADMIN') ? `<option value="ADMIN" ${u.privilegeClass === 'ADMIN' ? 'selected' : ''}>🛡 ADMIN</option>` : ''}
+                        ${isSeniorAdmin() ? `
+                        <select class="privilege-select" onchange="changeUserRole('${safeEmail}', this.value)" title="Assign Role (Senior Admin only)">
+                            <option value="STUDENT" ${u.role === 'STUDENT' ? 'selected' : ''}>STUDENT</option>
+                            <option value="ADMIN" ${u.role === 'ADMIN' ? 'selected' : ''}>ADMIN</option>
+                            <option value="SENIOR_ADMIN" ${u.role === 'SENIOR_ADMIN' ? 'selected' : ''}>SENIOR ADMIN</option>
+                        </select>
+                        ` : ''}
+                        <select class="privilege-select" onchange="changeUserPrivilege('${safeEmail}', this.value)" title="Profile Showcase Privilege">
                             <option value="TRUSTED" ${u.privilegeClass === 'TRUSTED' ? 'selected' : ''}>✦ TRUSTED</option>
-                            <option value="MAY_BE_SPAM" ${u.privilegeClass === 'MAY_BE_SPAM' ? 'selected' : ''}>⚠ SPAM?</option>
-                            <option value="NEW" ${u.privilegeClass === 'NEW' ? 'selected' : ''}>★ NEW</option>
                             <option value="NORMAL" ${u.privilegeClass === 'NORMAL' ? 'selected' : ''}>● NORMAL</option>
+                            <option value="NEW" ${u.privilegeClass === 'NEW' ? 'selected' : ''}>★ NEW</option>
+                            <option value="MAY_BE_SPAM" ${u.privilegeClass === 'MAY_BE_SPAM' ? 'selected' : ''}>⚠ SPAM?</option>
                         </select>
                         <button class="tbl-action-btn ${isBlocked ? 'unblock' : 'block'}" onclick="toggleUserBlock('${safeEmail}', ${isBlocked})">
                             ${isBlocked ? '<i class="bi bi-unlock-fill"></i> Unblock' : '<i class="bi bi-lock-fill"></i> Block'}
@@ -109,6 +120,20 @@ async function loadUsersTable() {
         });
     } catch (e) {
         tbody.innerHTML = `<tr><td colspan="7" class="text-center py-4 text-danger">${escapeHtml(e.message)}</td></tr>`;
+    }
+}
+
+async function changeUserRole(email, newRole) {
+    if (!isSeniorAdmin()) {
+        toast('Only Senior Admin can assign roles.', 'error');
+        return;
+    }
+    try {
+        await api(`/api/v1/admin/users/${encodeURIComponent(email)}/role?role=${newRole}`, { method: 'PATCH' });
+        toast(`Role for ${email} updated to ${newRole}`);
+        loadUsersTable();
+    } catch (e) {
+        toast('Failed to change role: ' + e.message, 'error');
     }
 }
 

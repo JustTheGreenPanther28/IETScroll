@@ -58,8 +58,9 @@ const BASE = (window.location.protocol === 'file:' || window.location.origin ===
 			if (!fullName) {setError('fullName', 'Full name is required'); ok = false;}
 			if (!username) {setError('username', 'Username is required'); ok = false;}
 
-			if (!email || !email.endsWith('@ietdavv.edu.in')) {
-				setError('email', 'Must be a valid @ietdavv.edu.in email'); ok = false;
+			const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
+			if (!email || !emailRegex.test(email)) {
+				setError('email', 'Enter a valid email address'); ok = false;
 			}
 
 			if (!password || password.length < 8) {

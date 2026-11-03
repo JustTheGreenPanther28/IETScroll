@@ -32,10 +32,12 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 		try {
 
 			UserLoginRequest creds = new ObjectMapper().readValue(request.getInputStream(), UserLoginRequest.class);
+			String email = creds.email() != null ? creds.email().trim().toLowerCase() : "";
+			String password = creds.password() != null ? creds.password() : "";
 
 			// principle => email , Credentials => password
 			return getAuthenticationManager()
-					.authenticate(new UsernamePasswordAuthenticationToken(creds.email(), creds.password()));
+					.authenticate(new UsernamePasswordAuthenticationToken(email, password));
 
 		} catch (IOException e) {
 			throw new RuntimeException("Failed to parse login request", e);

@@ -58,11 +58,17 @@ public class AdminController {
         return adminService.unblockUser(email);
     }
 
-    @PatchMapping("/users/{email}/privilege")
-    @Operation(summary = "Update user privilege tier", description = "Assigns privilege class (TRUSTED, ADMIN, SENIOR_ADMIN, MAY_BE_SPAM, NEW, NORMAL). Only SENIOR_ADMIN can assign ADMIN or SENIOR_ADMIN roles.")
-    public Result updatePrivilege(@PathVariable String email, @RequestParam PrivilegeClass privilege, org.springframework.security.core.Authentication authentication) {
+    @PatchMapping("/users/{email}/role")
+    @Operation(summary = "Assign or revoke user role", description = "Assigns role (STUDENT, ADMIN, SENIOR_ADMIN). Only SENIOR_ADMIN can assign or revoke ADMIN and SENIOR_ADMIN roles.")
+    public Result updateRole(@PathVariable String email, @RequestParam com.ietscroll.security.Role role, org.springframework.security.core.Authentication authentication) {
         String callerEmail = authentication != null ? authentication.getName() : null;
-        return adminService.updateUserPrivilege(email, privilege, callerEmail);
+        return adminService.updateUserRole(email, role, callerEmail);
+    }
+
+    @PatchMapping("/users/{email}/privilege")
+    @Operation(summary = "Update user privilege tier", description = "Assigns privilege class (TRUSTED, MAY_BE_SPAM, NEW, NORMAL).")
+    public Result updatePrivilege(@PathVariable String email, @RequestParam PrivilegeClass privilege) {
+        return adminService.updateUserPrivilege(email, privilege);
     }
 
     @PatchMapping("/lost-item/{publicId}/close")

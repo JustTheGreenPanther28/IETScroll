@@ -106,7 +106,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 		// Campus location policy: reports must be within or near college campus.
 		if (location.isBlank()) {
 			UserEntity reporter = userRepo.findByEmail(email);
-			if (reporter != null && reporter.getPrivilegeClass() != PrivilegeClass.ADMIN) {
+			if (reporter != null && reporter.getRole() == com.ietscroll.security.Role.STUDENT) {
 				reporter.setPrivilegeClass(PrivilegeClass.MAY_BE_SPAM);
 				userRepo.save(reporter);
 			}

@@ -121,13 +121,22 @@ function formatNotifTime(isoString) {
     }
 }
 
-// ── Privilege badge renderer ──────────────────────────────────────────────────
+// ── Privilege & Role badge renderer ──────────────────────────────────────────
+function renderRoleBadge(role) {
+    const r = (role || 'STUDENT').toUpperCase();
+    if (r === 'SENIOR_ADMIN') {
+        return `<span class="privilege-badge badge-senior-admin"><i class="bi bi-star-fill"></i> SENIOR ADMIN</span>`;
+    }
+    if (r === 'ADMIN') {
+        return `<span class="privilege-badge badge-admin"><i class="bi bi-shield-fill-check"></i> ADMIN</span>`;
+    }
+    return '';
+}
+
 function renderPrivilegeBadge(privilege) {
     const p = (privilege || 'NORMAL').toUpperCase();
     const map = {
-        SENIOR_ADMIN: { cls: 'badge-senior-admin', icon: 'bi-star-fill' },
         TRUSTED:      { cls: 'badge-trusted', icon: 'bi-patch-check-fill' },
-        ADMIN:        { cls: 'badge-admin',   icon: 'bi-shield-fill-check' },
         MAY_BE_SPAM:  { cls: 'badge-spam',    icon: 'bi-exclamation-triangle-fill' },
         NEW:          { cls: 'badge-new',     icon: 'bi-sparkles' },
     };

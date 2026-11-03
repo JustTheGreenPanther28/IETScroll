@@ -87,19 +87,23 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-	    if (username == null || !(username.endsWith("@ietdavv.edu.in") || username.equalsIgnoreCase(adminEmail))) {
+	    if (username == null) {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
-	    UserEntity user = userRepo.findByEmail(username);
+	    String cleanUsername = username.trim().toLowerCase();
+	    String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
+	    if (!(cleanUsername.endsWith("@ietdavv.edu.in") || cleanUsername.equalsIgnoreCase(cleanAdminEmail))) {
+	        throw new UsernameNotFoundException("Incorrect email");
+	    }
+	    UserEntity user = userRepo.findByEmailIgnoreCase(cleanUsername);
 	    if (user == null || !user.isVerified()) {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    if (user.isBlocked()) {
 	        throw new LockedException("Account has been suspended by administrator.");
 	    }
-	    if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
+	    if (user.getEmail().equalsIgnoreCase(cleanAdminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
 	        user.setRole(Role.SENIOR_ADMIN);
-	        user.setPrivilegeClass(PrivilegeClass.SENIOR_ADMIN);
 	        userRepo.save(user);
 	    }
 
@@ -112,10 +116,15 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO getUserByEmail(@NotNull @Email @NotBlank String email) {
-		if (email == null || !(email.endsWith("@ietdavv.edu.in") || email.equalsIgnoreCase(adminEmail))) {
+		if (email == null) {
+			throw new BadRequestException("Email is required");
+		}
+		String cleanEmail = email.trim().toLowerCase();
+		String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
+		if (!(cleanEmail.endsWith("@ietdavv.edu.in") || cleanEmail.equalsIgnoreCase(cleanAdminEmail))) {
 			throw new BadRequestException("Only @ietdavv.edu.in email addresses or admin email are accepted");
 		}
-		UserEntity user = userRepo.findByEmail(email);
+		UserEntity user = userRepo.findByEmailIgnoreCase(cleanEmail);
 		if (user == null) {
 			throw new ResourceNotFoundException("User doesn't exist");
 		}
@@ -125,7 +134,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public Result updateUsername(String email, String newUsername) {
-		UserEntity user = userRepo.findByEmail(email);
+		String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+		UserEntity user = userRepo.findByEmailIgnoreCase(cleanEmail);
 		var userFound = userRepo.findByUsername(newUsername);
 
 		if (userFound != null) {
@@ -144,7 +154,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public Result updateFullName(String email, String newFullName) {
-		UserEntity user = userRepo.findByEmail(email);
+		String cleanEmail = email != null ? email.trim().toLowerCase() : "";
+		UserEntity user = userRepo.findByEmailIgnoreCase(cleanEmail);
 
 		if (user == null) {
 			throw new ResourceNotFoundException("User doesn't exist");
@@ -160,12 +171,13 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void recordLogin(String email) {
 		if (email == null) return;
-		UserEntity user = userRepo.findByEmail(email);
+		String cleanEmail = email.trim().toLowerCase();
+		String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
+		UserEntity user = userRepo.findByEmailIgnoreCase(cleanEmail);
 		if (user != null) {
 			user.setLastLoginAt(LocalDateTime.now());
-			if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
+			if (user.getEmail().equalsIgnoreCase(cleanAdminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
 				user.setRole(Role.SENIOR_ADMIN);
-				user.setPrivilegeClass(PrivilegeClass.SENIOR_ADMIN);
 			}
 			userRepo.save(user);
 		}
@@ -175,7 +187,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public void recordLogout(String email) {
 		if (email == null) return;
-		UserEntity user = userRepo.findByEmail(email);
+		UserEntity user = userRepo.findByEmailIgnoreCase(email.trim().toLowerCase());
 		if (user != null) {
 			user.setLastLogoutAt(LocalDateTime.now());
 			userRepo.save(user);

@@ -14,7 +14,8 @@ public interface AdminService {
     Page<UserAuditDTO> searchUsers(String query, PrivilegeClass privilege, Boolean isBlocked, Pageable pageable);
     Result blockUser(String email);
     Result unblockUser(String email);
-    Result updateUserPrivilege(String email, PrivilegeClass privilege, String callerEmail);
+    Result updateUserPrivilege(String email, PrivilegeClass privilege);
+    Result updateUserRole(String email, com.ietscroll.security.Role role, String callerEmail);
     Result closeLostItem(UUID publicId);
     Result closeFoundItem(UUID publicId);
     Result closeTeam(UUID publicId);

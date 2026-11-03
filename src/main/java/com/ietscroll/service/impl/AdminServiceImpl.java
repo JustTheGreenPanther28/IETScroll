@@ -109,30 +109,31 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public Result updateUserPrivilege(String email, PrivilegeClass privilege, String callerEmail) {
-        UserEntity user = userRepository.findByEmail(email);
+    public Result updateUserPrivilege(String email, PrivilegeClass privilege) {
+        UserEntity user = email != null ? userRepository.findByEmailIgnoreCase(email.trim()) : null;
+        if (user == null) {
+            throw new ResourceNotFoundException("User not found with email: " + email);
+        }
+        user.setPrivilegeClass(privilege);
+        userRepository.save(user);
+        return Result.SUCCESS;
+    }
+
+    @Override
+    @Transactional
+    public Result updateUserRole(String email, com.ietscroll.security.Role role, String callerEmail) {
+        UserEntity user = email != null ? userRepository.findByEmailIgnoreCase(email.trim()) : null;
         if (user == null) {
             throw new ResourceNotFoundException("User not found with email: " + email);
         }
 
-        // Only SENIOR_ADMIN can assign or revoke ADMIN or SENIOR_ADMIN privileges
-        if (privilege == PrivilegeClass.ADMIN || privilege == PrivilegeClass.SENIOR_ADMIN 
-                || user.getPrivilegeClass() == PrivilegeClass.ADMIN || user.getPrivilegeClass() == PrivilegeClass.SENIOR_ADMIN) {
-            UserEntity caller = callerEmail != null ? userRepository.findByEmail(callerEmail) : null;
-            if (caller == null || caller.getRole() != com.ietscroll.security.Role.SENIOR_ADMIN) {
-                throw new com.ietscroll.exception.BadRequestException("Only Senior Admin can assign, modify, or revoke Administrator roles.");
-            }
+        // Only SENIOR_ADMIN can change administrative roles
+        UserEntity caller = callerEmail != null ? userRepository.findByEmailIgnoreCase(callerEmail.trim()) : null;
+        if (caller == null || caller.getRole() != com.ietscroll.security.Role.SENIOR_ADMIN) {
+            throw new com.ietscroll.exception.BadRequestException("Only Senior Admin can assign, modify, or revoke Administrator roles.");
         }
 
-        user.setPrivilegeClass(privilege);
-        if (privilege == PrivilegeClass.SENIOR_ADMIN) {
-            user.setRole(com.ietscroll.security.Role.SENIOR_ADMIN);
-        } else if (privilege == PrivilegeClass.ADMIN) {
-            user.setRole(com.ietscroll.security.Role.ADMIN);
-        } else if (user.getRole() == com.ietscroll.security.Role.ADMIN) {
-            user.setRole(com.ietscroll.security.Role.STUDENT);
-        }
-
+        user.setRole(role);
         userRepository.save(user);
         return Result.SUCCESS;
     }

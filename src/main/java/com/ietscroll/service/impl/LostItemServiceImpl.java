@@ -86,7 +86,7 @@ public class LostItemServiceImpl implements LostItemService {
 		// Campus location policy: reports must be within or near college campus.
 		if (location.isBlank()) {
 			UserEntity owner = userRepo.findByEmail(email);
-			if (owner != null && owner.getPrivilegeClass() != PrivilegeClass.ADMIN) {
+			if (owner != null && owner.getRole() == com.ietscroll.security.Role.STUDENT) {
 				owner.setPrivilegeClass(PrivilegeClass.MAY_BE_SPAM);
 				userRepo.save(owner);
 			}
