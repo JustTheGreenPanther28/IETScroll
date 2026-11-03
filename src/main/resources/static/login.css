@@ -411,3 +411,24 @@ body {
 		min-height: 48px;
 	}
 }
+
+/* ── Dark scrollbar ── */
+* {
+	scrollbar-width: thin;
+	scrollbar-color: #334155 #080c14;
+}
+::-webkit-scrollbar { width: 7px; height: 7px; }
+::-webkit-scrollbar-track { background: #080c14; }
+::-webkit-scrollbar-thumb { background: #283450; border-radius: 9999px; }
+::-webkit-scrollbar-thumb:hover { background: #6366f1; }
+
+/* ── Browser autofill dark override ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus {
+	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+	-webkit-text-fill-color: #ffffff !important;
+	border-color: #6366f1 !important;
+	caret-color: #ffffff;
+	transition: background-color 5000s ease-in-out 0s;
+}

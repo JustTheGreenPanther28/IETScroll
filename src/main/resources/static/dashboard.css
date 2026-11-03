@@ -1090,8 +1090,35 @@ label.field-label {
 }
 
 /* ==========================================================================
-   UI/UX OVERHAUL - High-Contrast Visible Buttons, Dark Scrollbars, Polish
+   UI/UX OVERHAUL — High-Contrast Buttons, Dark Scrollbars, Polish, Autofill
    ========================================================================== */
+
+/* ── Image preview from file upload ── */
+.img-preview {
+	max-width: 200px;
+	max-height: 140px;
+	width: 100%;
+	height: auto;
+	border-radius: 10px;
+	border: 1.5px solid #334155;
+	object-fit: cover;
+	display: block;
+	margin-top: 10px;
+	box-shadow: 0 4px 14px rgba(0,0,0,0.5);
+}
+
+/* ── Fix browser autofill yellow/white overrides ── */
+input:-webkit-autofill,
+input:-webkit-autofill:hover,
+input:-webkit-autofill:focus,
+textarea:-webkit-autofill,
+select:-webkit-autofill {
+	-webkit-box-shadow: 0 0 0 1000px #0f172a inset !important;
+	-webkit-text-fill-color: #ffffff !important;
+	border-color: #6366f1 !important;
+	caret-color: #ffffff;
+	transition: background-color 5000s ease-in-out 0s;
+}
 
 /* ── Custom Dark Scrollbars (Standard for all elements) ── */
 * {
@@ -1422,3 +1449,325 @@ input:focus-visible {
 	opacity: 0.6;
 }
 .empty-state p { margin: 0; font-size: 0.95rem; font-weight: 500; }
+
+/* ==========================================================================
+   TEAM CARDS & MISCELLANEOUS EXTRA COMPONENTS
+   ========================================================================== */
+
+/* ── Team listing card ── */
+.team-card {
+	background: var(--card-bg);
+	border: 1.5px solid var(--card-border);
+	border-radius: 18px;
+	padding: 1.5rem 1.75rem;
+	margin-bottom: 1.1rem;
+	display: flex;
+	flex-direction: column;
+	gap: 0.85rem;
+	box-shadow: 0 6px 22px rgba(0,0,0,0.4);
+	transition: all 0.25s cubic-bezier(0.16, 1, 0.3, 1);
+}
+
+.team-card:hover {
+	border-color: var(--card-hover-border);
+	box-shadow: 0 10px 30px rgba(99, 102, 241, 0.18);
+	transform: translateY(-2px);
+}
+
+.team-card-title {
+	font-family: 'Sora', sans-serif;
+	font-size: 1.1rem;
+	font-weight: 700;
+	color: #ffffff;
+	display: flex;
+	align-items: center;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.team-card-meta {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 8px;
+	align-items: center;
+}
+
+.team-card-purpose {
+	color: #cbd5e1;
+	font-size: 0.92rem;
+	line-height: 1.6;
+}
+
+.skill-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 10px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	background: rgba(99, 102, 241, 0.15);
+	border: 1px solid rgba(99, 102, 241, 0.35);
+	color: #c7d2fe;
+}
+
+.privacy-badge-public {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 10px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	background: rgba(16, 185, 129, 0.18);
+	border: 1px solid rgba(16, 185, 129, 0.45);
+	color: #6ee7b7;
+}
+
+.privacy-badge-private {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 3px 10px;
+	border-radius: 6px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	background: rgba(244, 63, 94, 0.18);
+	border: 1px solid rgba(244, 63, 94, 0.45);
+	color: #fca5a5;
+}
+
+/* ── Join/Apply/Kick buttons in teams ── */
+.btn-team-join {
+	background: rgba(99, 102, 241, 0.18);
+	border: 1.5px solid rgba(99, 102, 241, 0.5);
+	color: #c7d2fe;
+	padding: 8px 18px;
+	border-radius: 10px;
+	font-size: 0.88rem;
+	font-weight: 700;
+	cursor: pointer;
+	transition: all 0.2s ease;
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+}
+
+.btn-team-join:hover {
+	background: var(--accent);
+	border-color: var(--accent);
+	color: #ffffff;
+	box-shadow: 0 4px 14px var(--accent-glow);
+}
+
+/* ── Resume result container ── */
+.resume-result-card {
+	background: #0d1525;
+	border: 1.5px solid #1e293b;
+	border-radius: 16px;
+	padding: 1.75rem;
+	white-space: pre-wrap;
+	font-size: 0.93rem;
+	line-height: 1.7;
+	color: #e2e8f0;
+	font-family: inherit;
+	box-shadow: 0 6px 24px rgba(0,0,0,0.4);
+}
+
+/* ── Stat badges inside cards ── */
+.stat-mini-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 10px;
+	border-radius: 8px;
+	font-size: 0.78rem;
+	font-weight: 700;
+}
+
+/* ── Member row in team ── */
+.member-row {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+	padding: 10px 0;
+	border-bottom: 1px solid #1e293b;
+	flex-wrap: wrap;
+}
+
+.member-row:last-child {
+	border-bottom: none;
+	padding-bottom: 0;
+}
+
+.member-avatar {
+	width: 36px;
+	height: 36px;
+	background: var(--accent-gradient);
+	border-radius: 10px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	color: #ffffff;
+	font-size: 0.9rem;
+	flex-shrink: 0;
+}
+
+/* ── Modal dark scrollbar override ── */
+.modal-body {
+	scrollbar-width: thin;
+	scrollbar-color: #3b4261 #0c111d;
+}
+
+.modal-body::-webkit-scrollbar {
+	width: 5px;
+}
+
+.modal-body::-webkit-scrollbar-track {
+	background: #0c111d;
+}
+
+.modal-body::-webkit-scrollbar-thumb {
+	background: #3b4261;
+	border-radius: 9999px;
+}
+
+/* ── Loading skeleton shimmers ── */
+@keyframes shimmer {
+	0%   { background-position: -500px 0; }
+	100% { background-position: 500px 0; }
+}
+
+.skeleton {
+	background: linear-gradient(90deg, #0f172a 25%, #1e293b 50%, #0f172a 75%);
+	background-size: 1000px 100%;
+	animation: shimmer 1.5s infinite linear;
+	border-radius: 8px;
+}
+
+/* ── Toast improvements — icon prefix ── */
+.toast-msg::before {
+	margin-right: 8px;
+	font-family: 'bootstrap-icons';
+}
+
+.toast-msg.success::before { content: '\F26B'; color: #34d399; }
+.toast-msg.error::before   { content: '\F33A'; color: #fda4af; }
+.toast-msg.info::before    { content: '\F431'; color: #67e8f9; }
+
+/* ── Badge-status variants (open/closed used in activity log) ── */
+.badge-status {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	font-size: 0.75rem;
+	padding: 4px 10px;
+	border-radius: 8px;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	flex-shrink: 0;
+}
+
+.badge-status.open {
+	background: rgba(16, 185, 129, 0.18);
+	color: #34d399;
+	border: 1px solid rgba(16, 185, 129, 0.45);
+}
+
+.badge-status.closed {
+	background: rgba(244, 63, 94, 0.18);
+	color: #fca5a5;
+	border: 1px solid rgba(244, 63, 94, 0.45);
+}
+
+/* ── Separator / divider ── */
+.section-divider {
+	border: none;
+	border-top: 1.5px solid #1e293b;
+	margin: 1.5rem 0;
+}
+
+/* ── Profile section layout improvements ── */
+#profile .stat-card {
+	transition: none;
+}
+
+#profile .stat-card:hover {
+	transform: none;
+	box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+}
+
+/* ── Highlight form inputs on hover ── */
+.form-control-dark:hover:not(:focus) {
+	border-color: #475569 !important;
+}
+
+/* ── Select elements (native) dark styling ── */
+select.form-control-dark {
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%2394a3b8' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 14px center;
+	padding-right: 38px !important;
+	cursor: pointer;
+}
+
+/* ── Tab row on mobile: always dark scrollbar ── */
+.tab-row::-webkit-scrollbar {
+	height: 4px;
+}
+
+.tab-row::-webkit-scrollbar-track {
+	background: #0f172a;
+}
+
+.tab-row::-webkit-scrollbar-thumb {
+	background: #334155;
+	border-radius: 9999px;
+}
+
+/* ── Page transition for sections ── */
+.section.active {
+	animation: sectionSlideIn 0.32s cubic-bezier(0.16, 1, 0.3, 1) both;
+}
+
+@keyframes sectionSlideIn {
+	from { opacity: 0; transform: translateY(10px); }
+	to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ── Focused form row (accessible glow within stat-card) ── */
+.stat-card:has(.form-control-dark:focus) {
+	border-color: rgba(99, 102, 241, 0.4);
+	box-shadow: 0 10px 30px rgba(99, 102, 241, 0.12), 0 0 0 1.5px rgba(99,102,241,0.2);
+}
+
+/* ── Chart canvas area dark background fix ── */
+canvas {
+	background: transparent;
+}
+
+/* ── Textarea resize only vertically ── */
+textarea.form-control-dark {
+	resize: vertical;
+	min-height: 100px;
+}
+
+/* ── Extra responsive: stack pagination on very small screens ── */
+@media (max-width: 400px) {
+	.pagination-row {
+		gap: 6px;
+	}
+	.btn-secondary-dark {
+		padding: 8px 14px !important;
+		font-size: 0.82rem !important;
+	}
+	.page-label {
+		font-size: 0.8rem;
+		padding: 6px 12px;
+	}
+}
