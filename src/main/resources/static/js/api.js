@@ -83,13 +83,39 @@ function updatePaginationButtons(prevId, nextId, page, itemCount, res) {
     if (nextBtn) nextBtn.disabled = isLastPage;
 }
 
-// ── Date/time formatter ───────────────────────────────────────────────────────
+// ── Date/time formatter (Indian Standard Time, 12-hour format with AM/PM) ───
 function formatNotifTime(isoString) {
+    if (!isoString) return 'Recently';
     try {
-        const d = new Date(isoString);
-        return d.toLocaleDateString(undefined, { month: 'short', day: 'numeric', year: 'numeric' })
-             + ' at '
-             + d.toLocaleTimeString(undefined, { hour: '2-digit', minute: '2-digit' });
+        let str = String(isoString).trim();
+        // If string does not specify timezone offset or UTC 'Z', append 'Z' so UTC timestamps from server parse properly
+        if (!str.endsWith('Z') && !/[+-]\d{2}:?\d{2}$/.test(str)) {
+            str += 'Z';
+        }
+        const d = new Date(str);
+        if (isNaN(d.getTime())) {
+            // fallback directly to unappended date parse
+            const fallbackD = new Date(isoString);
+            if (isNaN(fallbackD.getTime())) return isoString;
+            return fallbackD.toLocaleString('en-IN', {
+                timeZone: 'Asia/Kolkata',
+                month: 'short',
+                day: 'numeric',
+                year: 'numeric',
+                hour: 'numeric',
+                minute: '2-digit',
+                hour12: true
+            });
+        }
+        return d.toLocaleString('en-IN', {
+            timeZone: 'Asia/Kolkata',
+            month: 'short',
+            day: 'numeric',
+            year: 'numeric',
+            hour: 'numeric',
+            minute: '2-digit',
+            hour12: true
+        });
     } catch {
         return isoString || 'Recently';
     }
