@@ -200,6 +200,13 @@ label.field-label {
 	text-transform: uppercase;
 	vertical-align: middle;
 }
+.privilege-badge.badge-senior-admin {
+	background: linear-gradient(135deg, rgba(245, 158, 11, 0.3) 0%, rgba(239, 68, 68, 0.3) 100%);
+	color: #fde047;
+	border: 1.5px solid #f59e0b;
+	box-shadow: 0 0 10px rgba(245, 158, 11, 0.4);
+	font-weight: 800;
+}
 .privilege-badge.badge-trusted {
 	background: rgba(16, 185, 129, 0.2);
 	color: #34d399;

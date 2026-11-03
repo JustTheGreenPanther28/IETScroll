@@ -97,9 +97,9 @@ public class UserServiceImpl implements UserService {
 	    if (user.isBlocked()) {
 	        throw new LockedException("Account has been suspended by administrator.");
 	    }
-	    if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.ADMIN) {
-	        user.setRole(Role.ADMIN);
-	        user.setPrivilegeClass(PrivilegeClass.ADMIN);
+	    if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
+	        user.setRole(Role.SENIOR_ADMIN);
+	        user.setPrivilegeClass(PrivilegeClass.SENIOR_ADMIN);
 	        userRepo.save(user);
 	    }
 
@@ -163,9 +163,9 @@ public class UserServiceImpl implements UserService {
 		UserEntity user = userRepo.findByEmail(email);
 		if (user != null) {
 			user.setLastLoginAt(LocalDateTime.now());
-			if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.ADMIN) {
-				user.setRole(Role.ADMIN);
-				user.setPrivilegeClass(PrivilegeClass.ADMIN);
+			if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
+				user.setRole(Role.SENIOR_ADMIN);
+				user.setPrivilegeClass(PrivilegeClass.SENIOR_ADMIN);
 			}
 			userRepo.save(user);
 		}

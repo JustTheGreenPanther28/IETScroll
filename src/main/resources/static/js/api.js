@@ -125,10 +125,11 @@ function formatNotifTime(isoString) {
 function renderPrivilegeBadge(privilege) {
     const p = (privilege || 'NORMAL').toUpperCase();
     const map = {
-        TRUSTED:     { cls: 'badge-trusted', icon: 'bi-patch-check-fill' },
-        ADMIN:       { cls: 'badge-admin',   icon: 'bi-shield-fill-check' },
-        MAY_BE_SPAM: { cls: 'badge-spam',    icon: 'bi-exclamation-triangle-fill' },
-        NEW:         { cls: 'badge-new',     icon: 'bi-sparkles' },
+        SENIOR_ADMIN: { cls: 'badge-senior-admin', icon: 'bi-star-fill' },
+        TRUSTED:      { cls: 'badge-trusted', icon: 'bi-patch-check-fill' },
+        ADMIN:        { cls: 'badge-admin',   icon: 'bi-shield-fill-check' },
+        MAY_BE_SPAM:  { cls: 'badge-spam',    icon: 'bi-exclamation-triangle-fill' },
+        NEW:          { cls: 'badge-new',     icon: 'bi-sparkles' },
     };
     const { cls, icon } = map[p] || { cls: 'badge-normal', icon: 'bi-person' };
     return `<span class="privilege-badge ${cls}"><i class="bi ${icon}"></i> ${escapeHtml(p.replace(/_/g, ' '))}</span>`;

@@ -91,9 +91,10 @@ async function loadUsersTable() {
                 </td>
                 <td class="text-end">
                     <div style="display:inline-flex;gap:8px;align-items:center;flex-wrap:nowrap;justify-content:flex-end;">
-                        <select class="privilege-select" onchange="changeUserPrivilege('${safeEmail}', this.value)">
+                        <select class="privilege-select" onchange="changeUserPrivilege('${safeEmail}', this.value)" ${(!isSeniorAdmin() && (u.privilegeClass === 'ADMIN' || u.privilegeClass === 'SENIOR_ADMIN')) ? 'disabled' : ''}>
+                            ${isSeniorAdmin() ? `<option value="SENIOR_ADMIN" ${u.privilegeClass === 'SENIOR_ADMIN' ? 'selected' : ''}>👑 SENIOR ADMIN</option>` : ''}
+                            ${(isSeniorAdmin() || u.privilegeClass === 'ADMIN') ? `<option value="ADMIN" ${u.privilegeClass === 'ADMIN' ? 'selected' : ''}>🛡 ADMIN</option>` : ''}
                             <option value="TRUSTED" ${u.privilegeClass === 'TRUSTED' ? 'selected' : ''}>✦ TRUSTED</option>
-                            <option value="ADMIN" ${u.privilegeClass === 'ADMIN' ? 'selected' : ''}>🛡 ADMIN</option>
                             <option value="MAY_BE_SPAM" ${u.privilegeClass === 'MAY_BE_SPAM' ? 'selected' : ''}>⚠ SPAM?</option>
                             <option value="NEW" ${u.privilegeClass === 'NEW' ? 'selected' : ''}>★ NEW</option>
                             <option value="NORMAL" ${u.privilegeClass === 'NORMAL' ? 'selected' : ''}>● NORMAL</option>

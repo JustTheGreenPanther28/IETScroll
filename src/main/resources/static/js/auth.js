@@ -39,7 +39,12 @@ let currentUserPrivilege = null;
 
 // ── Role helpers ──────────────────────────────────────────────────────────────
 function isAdmin() {
-    return currentUserRole === 'ADMIN' || currentUserPrivilege === 'ADMIN';
+    return currentUserRole === 'ADMIN' || currentUserRole === 'SENIOR_ADMIN' 
+        || currentUserPrivilege === 'ADMIN' || currentUserPrivilege === 'SENIOR_ADMIN';
+}
+
+function isSeniorAdmin() {
+    return currentUserRole === 'SENIOR_ADMIN' || currentUserPrivilege === 'SENIOR_ADMIN';
 }
 
 // ── Logout ───────────────────────────────────────────────────────────────────

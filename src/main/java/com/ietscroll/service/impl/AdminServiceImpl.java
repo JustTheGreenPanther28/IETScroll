@@ -109,12 +109,30 @@ public class AdminServiceImpl implements AdminService {
 
     @Override
     @Transactional
-    public Result updateUserPrivilege(String email, PrivilegeClass privilege) {
+    public Result updateUserPrivilege(String email, PrivilegeClass privilege, String callerEmail) {
         UserEntity user = userRepository.findByEmail(email);
         if (user == null) {
             throw new ResourceNotFoundException("User not found with email: " + email);
         }
+
+        // Only SENIOR_ADMIN can assign or revoke ADMIN or SENIOR_ADMIN privileges
+        if (privilege == PrivilegeClass.ADMIN || privilege == PrivilegeClass.SENIOR_ADMIN 
+                || user.getPrivilegeClass() == PrivilegeClass.ADMIN || user.getPrivilegeClass() == PrivilegeClass.SENIOR_ADMIN) {
+            UserEntity caller = callerEmail != null ? userRepository.findByEmail(callerEmail) : null;
+            if (caller == null || caller.getRole() != com.ietscroll.security.Role.SENIOR_ADMIN) {
+                throw new com.ietscroll.exception.BadRequestException("Only Senior Admin can assign, modify, or revoke Administrator roles.");
+            }
+        }
+
         user.setPrivilegeClass(privilege);
+        if (privilege == PrivilegeClass.SENIOR_ADMIN) {
+            user.setRole(com.ietscroll.security.Role.SENIOR_ADMIN);
+        } else if (privilege == PrivilegeClass.ADMIN) {
+            user.setRole(com.ietscroll.security.Role.ADMIN);
+        } else if (user.getRole() == com.ietscroll.security.Role.ADMIN) {
+            user.setRole(com.ietscroll.security.Role.STUDENT);
+        }
+
         userRepository.save(user);
         return Result.SUCCESS;
     }

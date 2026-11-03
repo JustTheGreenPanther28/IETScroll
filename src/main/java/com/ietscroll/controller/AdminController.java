@@ -59,9 +59,10 @@ public class AdminController {
     }
 
     @PatchMapping("/users/{email}/privilege")
-    @Operation(summary = "Update user privilege tier", description = "Assigns privilege class (TRUSTED, ADMIN, MAY_BE_SPAM, NEW, NORMAL).")
-    public Result updatePrivilege(@PathVariable String email, @RequestParam PrivilegeClass privilege) {
-        return adminService.updateUserPrivilege(email, privilege);
+    @Operation(summary = "Update user privilege tier", description = "Assigns privilege class (TRUSTED, ADMIN, SENIOR_ADMIN, MAY_BE_SPAM, NEW, NORMAL). Only SENIOR_ADMIN can assign ADMIN or SENIOR_ADMIN roles.")
+    public Result updatePrivilege(@PathVariable String email, @RequestParam PrivilegeClass privilege, org.springframework.security.core.Authentication authentication) {
+        String callerEmail = authentication != null ? authentication.getName() : null;
+        return adminService.updateUserPrivilege(email, privilege, callerEmail);
     }
 
     @PatchMapping("/lost-item/{publicId}/close")

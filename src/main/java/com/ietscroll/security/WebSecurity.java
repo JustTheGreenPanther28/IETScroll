@@ -83,7 +83,7 @@ public class WebSecurity {
 						.requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
 						.requestMatchers(HttpMethod.POST, SecurityConstaints.EMAIL_VERIFICATION).permitAll()
 						.requestMatchers(HttpMethod.POST, SecurityConstaints.RESEND_OTP).permitAll()
-						.requestMatchers(SecurityConstaints.ADMIN_APIs).hasRole(Role.ADMIN.toString()).anyRequest()
+						.requestMatchers(SecurityConstaints.ADMIN_APIs).hasAnyRole(Role.ADMIN.toString(), Role.SENIOR_ADMIN.toString()).anyRequest()
 						.authenticated());
 
 		http.addFilterBefore(authFilter, UsernamePasswordAuthenticationFilter.class)
