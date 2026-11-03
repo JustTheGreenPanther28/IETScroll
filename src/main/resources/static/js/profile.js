@@ -41,7 +41,6 @@ async function loadProfile() {
         if (isAdmin()) {
             if (navUsers) navUsers.classList.remove('d-none');
             if (adminAnalytics) adminAnalytics.classList.remove('d-none');
-            loadAdminAnalytics();
         } else {
             if (navUsers) navUsers.classList.add('d-none');
             if (adminAnalytics) adminAnalytics.classList.add('d-none');

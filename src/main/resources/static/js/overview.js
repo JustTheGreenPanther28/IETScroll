@@ -66,7 +66,10 @@ function renderAdminCharts(stats) {
 
     const ctxReports = document.getElementById('reportsChart');
     if (ctxReports) {
-        if (reportsChartInstance) reportsChartInstance.destroy();
+        if (reportsChartInstance) {
+            reportsChartInstance.destroy();
+            reportsChartInstance = null;
+        }
         reportsChartInstance = new Chart(ctxReports, {
             type: 'bar',
             data: {
@@ -98,7 +101,10 @@ function renderAdminCharts(stats) {
 
     const ctxUsers = document.getElementById('usersGrowthChart');
     if (ctxUsers) {
-        if (userGrowthChartInstance) userGrowthChartInstance.destroy();
+        if (userGrowthChartInstance) {
+            userGrowthChartInstance.destroy();
+            userGrowthChartInstance = null;
+        }
         userGrowthChartInstance = new Chart(ctxUsers, {
             type: 'line',
             data: {

@@ -225,6 +225,9 @@ window.adminCloseReport = adminCloseReport;
     try {
         await loadProfile();
         await loadDashboardStats();
+        if (isAdmin()) {
+            await loadAdminAnalytics();
+        }
         await loadServerActivities();
         updateNotifBadges();
         wireImagePreview('lostItemImage', 'lostItemImagePreview');
