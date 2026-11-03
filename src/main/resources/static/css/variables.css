@@ -1,0 +1,36 @@
+/* static/css/variables.css - Design tokens & CSS custom properties */
+:root {
+	color-scheme: dark;
+	--bg-main: #080c14;
+	--sidebar-bg: #0c111d;
+	--sidebar-width: 260px;
+	
+	--accent: #6366f1;
+	--accent-hover: #4f46e5;
+	--accent-gradient: linear-gradient(135deg, #6366f1 0%, #8b5cf6 100%);
+	--accent-glow: rgba(99, 102, 241, 0.35);
+	
+	--card-bg: #111827;
+	--card-border: #1e293b;
+	--card-hover-border: #6366f1;
+	
+	--text-primary: #ffffff;
+	--text-secondary: #f1f5f9;
+	--text-muted: #94a3b8;
+	
+	--success: #10b981;
+	--success-bg: rgba(16, 185, 129, 0.15);
+	--success-border: rgba(16, 185, 129, 0.4);
+	
+	--danger: #f43f5e;
+	--danger-bg: rgba(244, 63, 94, 0.15);
+	--danger-border: rgba(244, 63, 94, 0.4);
+	
+	--warning: #f59e0b;
+	--warning-bg: rgba(245, 158, 11, 0.15);
+	--warning-border: rgba(245, 158, 11, 0.4);
+	
+	--info: #06b6d4;
+	--font-main: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+	--font-heading: 'Sora', sans-serif;
+}

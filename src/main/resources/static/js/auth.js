@@ -1,54 +1,50 @@
 // static/js/auth.js
-// Handles authentication verification, role verification & session guards
-
-const RENDER_BASE = 'https://student-community-platform-ietscroll.onrender.com';
-const BASE = (window.location.protocol === 'file:' || window.location.origin === 'null' || !window.location.origin)
-    ? RENDER_BASE
-    : (window.location.port === '4040' ? window.location.origin : RENDER_BASE);
+// Authentication guard, session validation, role helpers
+// Depends on: config.js (BASE defined there)
 
 const token = localStorage.getItem('iet_token');
 
-// Redirect to login if unauthenticated
+// Redirect immediately if no token present
 if (!token) {
     window.location.replace('login.html');
     throw new Error('Not authenticated — redirecting to login.');
 }
 
-// User state
-let currentUserEmail = null;
-let currentUserRole = null;
+// ── Shared user-state (mutated by profile.js after /api/v1/user resolves) ────
+let currentUserEmail     = null;
+let currentUserRole      = null;
 let currentUserPrivilege = null;
 
-// Parse role from JWT token payload safely as an early check
-(function checkTokenPayload() {
+// ── Early JWT decode (best-effort, before any API call) ──────────────────────
+(function validateTokenEarly() {
     try {
         const parts = token.split('.');
-        if (parts.length === 3) {
-            const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
-            if (payload.exp && Date.now() >= payload.exp * 1000) {
-                localStorage.removeItem('iet_token');
-                window.location.replace('login.html');
-                return;
-            }
-            if (payload.role) {
-                currentUserRole = payload.role;
-            }
-            if (payload.sub) {
-                currentUserEmail = payload.sub;
-            }
+        if (parts.length !== 3) return;
+
+        const payload = JSON.parse(atob(parts[1].replace(/-/g, '+').replace(/_/g, '/')));
+
+        // Token expired?
+        if (payload.exp && Date.now() >= payload.exp * 1000) {
+            localStorage.removeItem('iet_token');
+            window.location.replace('login.html');
+            return;
         }
-    } catch (e) {
-        // Fallback to API profile verification
+
+        if (payload.role) currentUserRole      = payload.role;
+        if (payload.sub)  currentUserEmail     = payload.sub;
+    } catch {
+        // Silent — profile.js will verify via API call
     }
 })();
 
+// ── Role helpers ──────────────────────────────────────────────────────────────
 function isAdmin() {
     return currentUserRole === 'ADMIN' || currentUserPrivilege === 'ADMIN';
 }
 
+// ── Logout ───────────────────────────────────────────────────────────────────
 function logout() {
-    // api() is defined in api.js which loads after auth.js — safe to call here
-    // since logout is only triggered by user action or 401, not at load time
+    // api() is loaded after auth.js, safe to call only on user action
     if (typeof api === 'function') {
         api('/api/v1/user/logout', { method: 'POST' }).catch(() => {});
     }
