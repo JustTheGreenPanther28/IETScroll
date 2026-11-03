@@ -11,4 +11,6 @@ public interface UserService extends UserDetailsService
 	UserDTO getUserByEmail(String email);
 	Result updateUsername(String email,String newUsername);
 	Result updateFullName(String email,String newFullName);
+	void recordLogin(String email);
+	void recordLogout(String email);
 }

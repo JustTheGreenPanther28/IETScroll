@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +22,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ietscroll.dto.LostItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.entity.LostItemEntity;
+import com.ietscroll.entity.UserEntity;
 import com.ietscroll.exception.BadRequestException;
 import com.ietscroll.exception.LimitExceededException;
 import com.ietscroll.general.enums.LostItemStatus;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.repository.LostItemRepository;
+import com.ietscroll.repository.UserRepository;
 import com.ietscroll.response.LostItemResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.CloudinaryService;
@@ -38,19 +43,28 @@ public class LostItemServiceImpl implements LostItemService {
 	private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
 
 	private final LostItemRepository lostItemRepo;
+	private final UserRepository userRepo;
 	private final SightEngineService sightEngineService;
 	private final CloudinaryService cloudinaryService;
 	private final SpamProtectionService spamProtectionService;
 	private final NvidiaVisionService nvidiaVisionService;
+	private final Executor moderationExecutor;
 
-	public LostItemServiceImpl(LostItemRepository lostItemRepo, SightEngineService sightEngineService,
-			CloudinaryService cloudinaryService, SpamProtectionService spamProtectionService,
-			NvidiaVisionService nvidiaVisionService) {
+	public LostItemServiceImpl(
+			LostItemRepository lostItemRepo,
+			UserRepository userRepo,
+			SightEngineService sightEngineService,
+			CloudinaryService cloudinaryService,
+			SpamProtectionService spamProtectionService,
+			NvidiaVisionService nvidiaVisionService,
+			@Qualifier("moderationExecutor") Executor moderationExecutor) {
 		this.lostItemRepo = lostItemRepo;
+		this.userRepo = userRepo;
 		this.sightEngineService = sightEngineService;
 		this.cloudinaryService = cloudinaryService;
 		this.spamProtectionService = spamProtectionService;
 		this.nvidiaVisionService = nvidiaVisionService;
+		this.moderationExecutor = moderationExecutor;
 	}
 
 	@Override
@@ -63,6 +77,18 @@ public class LostItemServiceImpl implements LostItemService {
 
 		String itemName = lostItemDTO.getLostItemname() != null ? lostItemDTO.getLostItemname().trim() : "";
 		String description = lostItemDTO.getDescription() != null ? lostItemDTO.getDescription().trim() : "";
+		String location = lostItemDTO.getPredictedLocation() != null ? lostItemDTO.getPredictedLocation().trim() : "";
+
+		// Campus location policy: reports must be within or near college campus.
+		// If location is missing or blank, mark user as MAY_BE_SPAM or reject
+		if (location.isBlank()) {
+			UserEntity owner = userRepo.findByEmail(email);
+			if (owner != null && owner.getPrivilegeClass() != PrivilegeClass.ADMIN) {
+				owner.setPrivilegeClass(PrivilegeClass.MAY_BE_SPAM);
+				userRepo.save(owner);
+			}
+			throw new BadRequestException("Item location must be specified and near the college campus only (e.g. Library, Canteen, Block A, Workshop). Reports without location are treated as SPAM.");
+		}
 
 		if (itemName.length() < 3) {
 			throw new BadRequestException("Please provide a valid item name (at least 3 characters).");
@@ -85,9 +111,10 @@ public class LostItemServiceImpl implements LostItemService {
 					"Maximum lost-item request a user can have is two, kindly close other request to create a new request.");
 		}
 
-		// ── STEP 1 & 2: Run Text and Vision verification concurrently for maximum speed ──
+		// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
 		CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
-				spamProtectionService.checkItemSubmission(itemName, description, lostItemDTO.getPredictedLocation())
+				spamProtectionService.checkItemSubmission(itemName, description, location),
+				moderationExecutor
 		);
 
 		CompletableFuture<Void> visionFuture = CompletableFuture.runAsync(() -> {
@@ -96,7 +123,7 @@ public class LostItemServiceImpl implements LostItemService {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}, moderationExecutor);
 
 		try {
 			CompletableFuture.allOf(textFuture, visionFuture).join();
@@ -112,7 +139,6 @@ public class LostItemServiceImpl implements LostItemService {
 
 		// Map has details about uploaded image
 		Map<?, ?> uploadedDetail = cloudinaryService.upload(image);
-		// Getting url from it
 		String url = (String) uploadedDetail.get("secure_url");
 
 		LostItemEntity lostItem = new LostItemEntity();
@@ -120,7 +146,7 @@ public class LostItemServiceImpl implements LostItemService {
 		lostItem.setDescription(description);
 		lostItem.setLostItemname(itemName);
 		lostItem.setOwnerEmail(email);
-		lostItem.setPredictedLocation(lostItemDTO.getPredictedLocation());
+		lostItem.setPredictedLocation(location);
 		lostItem.setPrize(lostItemDTO.getPrize());
 		lostItem.setCreatedAt(LocalDateTime.now());
 
@@ -154,7 +180,6 @@ public class LostItemServiceImpl implements LostItemService {
 
 	@Override
 	@Transactional
-
 	public Result closeLostItem(String email, String publicId) {
 		if (email == null || publicId == null) {
 			throw new BadRequestException("Invalid credentials");
@@ -182,6 +207,14 @@ public class LostItemServiceImpl implements LostItemService {
 			response.setPrize(lostItem.getPrize());
 			response.setCreatedAt(lostItem.getCreatedAt());
 			response.setContactTo(lostItem.getOwnerEmail());
+
+			UserEntity owner = userRepo.findByEmail(lostItem.getOwnerEmail());
+			if (owner != null && owner.getPrivilegeClass() != null) {
+				response.setOwnerPrivilege(owner.getPrivilegeClass().name());
+			} else {
+				response.setOwnerPrivilege("NORMAL");
+			}
+
 			return response;
 		});
 		return PagedResponseDTO.from(mapped);

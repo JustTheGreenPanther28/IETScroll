@@ -5,8 +5,6 @@ import java.util.List;
 import java.util.UUID;
 
 import org.modelmapper.ModelMapper;
-import org.springframework.ai.chat.client.ChatClient;
-import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,14 +15,11 @@ import com.ietscroll.dto.TeamDTO;
 import com.ietscroll.entity.Skills;
 import com.ietscroll.entity.Team;
 import com.ietscroll.entity.TeamFinderSkill;
-import com.ietscroll.entity.TeamJoinRequest;
 import com.ietscroll.entity.UserEntity;
 import com.ietscroll.exception.BadRequestException;
-import com.ietscroll.exception.ContentModerationException;
 import com.ietscroll.exception.DuplicateResourceException;
 import com.ietscroll.exception.ResourceNotFoundException;
 import com.ietscroll.general.enums.Privacy;
-import com.ietscroll.general.enums.TeamRequestStatus;
 import com.ietscroll.general.enums.TeamStatus;
 import com.ietscroll.repository.SkillRepository;
 import com.ietscroll.repository.TeamJoinRequestRepository;
@@ -99,42 +94,32 @@ public class TeamServiceImpl implements TeamService {
 
 		teamEntity.setNeededSkills(neededSkills);
 
-		teamEntity = teamRepo.save(teamEntity);
-
-		TeamJoinRequest teamJoinRequest = new TeamJoinRequest();
-		teamJoinRequest.setApplicant(user);
-		teamJoinRequest.setMessage("OWNER");
-		teamJoinRequest.setRequestedTeam(teamEntity);
-		teamJoinRequest.setStatus(TeamRequestStatus.ACCEPTED);
-
-		teamJoinRequestRepo.save(teamJoinRequest);
+		Team createdTeam = teamRepo.save(teamEntity);
 
 		TeamResponse teamResponse = new TeamResponse();
+		teamResponse.setCreatedAt(createdTeam.getCreatedAt());
+		teamResponse.setCreatedBy(createdTeam.getCreatedBy().getEmail());
+		teamResponse.setMaxMember(createdTeam.getMaxMember());
+		teamResponse.setPurpose(createdTeam.getPurpose());
+		teamResponse.setStatus(createdTeam.getStatus());
+		teamResponse.setPrivacy(createdTeam.getPrivacy());
+		teamResponse.setCurrentMember(createdTeam.getCurrentMember());
+		teamResponse.setPublicId(createdTeam.getPublicId());
+		if (user != null && user.getPrivilegeClass() != null) {
+			teamResponse.setCreatorPrivilege(user.getPrivilegeClass().name());
+		}
 
-		teamResponse.setCreatedAt(teamEntity.getCreatedAt());
-		teamResponse.setCreatedBy(teamEntity.getCreatedBy().getEmail());
-		teamResponse.setMaxMember(teamEntity.getMaxMember());
-		teamResponse.setPublicId(teamEntity.getPublicId());
-		teamResponse.setPurpose(teamEntity.getPurpose());
-		teamResponse.setStatus(teamEntity.getStatus());
-		teamResponse.setPrivacy(teamEntity.getPrivacy());
 		return teamResponse;
 	}
 
 	@Override
 	@Transactional
 	public Result closeTeam(String ownerEmail) {
-
-		Team team = teamRepo.findByStatusAndCreatedBy_Email(TeamStatus.OPEN, ownerEmail);
-		if (team == null) {
-			throw new ResourceNotFoundException("You don't have an active team to close");
+		if (ownerEmail == null) {
+			throw new BadRequestException("Invalid credentials");
 		}
-
-		teamJoinRequestRepo.deleteByTeamPublicId(team.getPublicId());
-
-		int count = teamRepo.closeTeam(ownerEmail);
-
-		return count == 1 ? Result.SUCCESS : Result.FAILED;
+		int result = teamRepo.closeTeam(ownerEmail);
+		return result == 1 ? Result.SUCCESS : Result.FAILED;
 	}
 
 	@Override
@@ -168,8 +153,10 @@ public class TeamServiceImpl implements TeamService {
 		response.setMaxMember(team.getMaxMember());
 		response.setPurpose(team.getPurpose());
 		response.setCurrentMember(team.getCurrentMember());
-
 		response.setPrivacy(team.getPrivacy());
+		if (team.getCreatedBy() != null && team.getCreatedBy().getPrivilegeClass() != null) {
+			response.setCreatorPrivilege(team.getCreatedBy().getPrivilegeClass().name());
+		}
 
 		return response;
 	}
@@ -183,8 +170,7 @@ public class TeamServiceImpl implements TeamService {
 		if (teams == null) {
 			throw new ResourceNotFoundException("No active teams rightnow");
 		}
-		return teams.map(
-				team -> {
+		return teams.map(team -> {
 			TeamResponse teamResponse = new TeamResponse();
 			teamResponse.setCreatedBy(team.getCreatedBy().getEmail());
 			teamResponse.setCreatedAt(team.getCreatedAt());
@@ -194,6 +180,11 @@ public class TeamServiceImpl implements TeamService {
 			teamResponse.setPurpose(team.getPurpose());
 			teamResponse.setStatus(team.getStatus());
 			teamResponse.setPrivacy(team.getPrivacy());
+			if (team.getCreatedBy() != null && team.getCreatedBy().getPrivilegeClass() != null) {
+				teamResponse.setCreatorPrivilege(team.getCreatedBy().getPrivilegeClass().name());
+			} else {
+				teamResponse.setCreatorPrivilege("NORMAL");
+			}
 			return teamResponse;
 		});
 	}
@@ -207,6 +198,9 @@ public class TeamServiceImpl implements TeamService {
 		}
 		TeamResponse teamResponse = modelMapper.map(team, TeamResponse.class);
 		teamResponse.setCreatedBy(onwerEmail);
+		if (team.getCreatedBy() != null && team.getCreatedBy().getPrivilegeClass() != null) {
+			teamResponse.setCreatorPrivilege(team.getCreatedBy().getPrivilegeClass().name());
+		}
 		return teamResponse;
 
 	}

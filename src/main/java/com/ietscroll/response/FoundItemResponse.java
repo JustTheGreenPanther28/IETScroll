@@ -21,6 +21,8 @@ public class FoundItemResponse {
 
 	private LocalDateTime createdAt;
 
+	private String reporterPrivilege = "NORMAL";
+
 	public UUID getPublicIdOfFoundItem() {
 		return publicIdOfFoundItem;
 	}

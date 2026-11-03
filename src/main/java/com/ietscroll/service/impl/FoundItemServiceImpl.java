@@ -8,7 +8,9 @@ import java.util.Map;
 import java.util.UUID;
 import java.util.concurrent.CompletableFuture;
 import java.util.concurrent.CompletionException;
+import java.util.concurrent.Executor;
 
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -20,10 +22,13 @@ import org.springframework.web.multipart.MultipartFile;
 import com.ietscroll.dto.FoundItemDTO;
 import com.ietscroll.dto.PagedResponseDTO;
 import com.ietscroll.entity.FoundItemEntity;
+import com.ietscroll.entity.UserEntity;
 import com.ietscroll.exception.BadRequestException;
 import com.ietscroll.exception.LimitExceededException;
 import com.ietscroll.general.enums.FoundItemStatus;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.repository.FoundItemRepository;
+import com.ietscroll.repository.UserRepository;
 import com.ietscroll.response.FoundItemResponse;
 import com.ietscroll.response.Result;
 import com.ietscroll.service.CloudinaryService;
@@ -36,20 +41,30 @@ import com.ietscroll.service.SpamProtectionService;
 public class FoundItemServiceImpl implements FoundItemService {
 
 	private final FoundItemRepository foundItemRepo;
+	private final UserRepository userRepo;
 	private final CloudinaryService cloudinaryService;
 	private final SightEngineService sightEngineService;
 	private final SpamProtectionService spamProtectionService;
 	private final NvidiaVisionService nvidiaVisionService;
+	private final Executor moderationExecutor;
+
 	private static final List<String> ALLOWED_TYPES = List.of("image/jpeg", "image/png", "image/webp", "image/gif");
 
-	public FoundItemServiceImpl(FoundItemRepository foundItemRepo, CloudinaryService cloudinaryService,
-			SightEngineService sightEngineService, SpamProtectionService spamProtectionService,
-			NvidiaVisionService nvidiaVisionService) {
+	public FoundItemServiceImpl(
+			FoundItemRepository foundItemRepo,
+			UserRepository userRepo,
+			CloudinaryService cloudinaryService,
+			SightEngineService sightEngineService,
+			SpamProtectionService spamProtectionService,
+			NvidiaVisionService nvidiaVisionService,
+			@Qualifier("moderationExecutor") Executor moderationExecutor) {
 		this.foundItemRepo = foundItemRepo;
+		this.userRepo = userRepo;
 		this.cloudinaryService = cloudinaryService;
 		this.sightEngineService = sightEngineService;
 		this.spamProtectionService = spamProtectionService;
 		this.nvidiaVisionService = nvidiaVisionService;
+		this.moderationExecutor = moderationExecutor;
 	}
 
 	@Override
@@ -82,6 +97,18 @@ public class FoundItemServiceImpl implements FoundItemService {
 
 		String itemName = foundItemDTo.getFoundItemName() != null ? foundItemDTo.getFoundItemName().trim() : "";
 		String description = foundItemDTo.getDescription() != null ? foundItemDTo.getDescription().trim() : "";
+		String location = foundItemDTo.getPredictedLocation() != null ? foundItemDTo.getPredictedLocation().trim() : "";
+
+		// Campus location policy: reports must be within or near college campus.
+		// If location is missing or blank, mark user as MAY_BE_SPAM or reject
+		if (location.isBlank()) {
+			UserEntity reporter = userRepo.findByEmail(email);
+			if (reporter != null && reporter.getPrivilegeClass() != PrivilegeClass.ADMIN) {
+				reporter.setPrivilegeClass(PrivilegeClass.MAY_BE_SPAM);
+				userRepo.save(reporter);
+			}
+			throw new BadRequestException("Found item location must be specified and near the college campus only (e.g. Workshop, Library, Canteen, Block B). Reports without location are treated as SPAM.");
+		}
 
 		if (itemName.length() < 3) {
 			throw new BadRequestException("Please provide a valid item name (at least 3 characters).");
@@ -104,9 +131,10 @@ public class FoundItemServiceImpl implements FoundItemService {
 					"Maximum found-item request of a user can have is three, kindly close other request to create a new request.");
 		}
 
-		// ── STEP 1 & 2: Run Text and Vision verification concurrently for maximum speed ──
+		// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
 		CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
-				spamProtectionService.checkItemSubmission(itemName, description, foundItemDTo.getPredictedLocation())
+				spamProtectionService.checkItemSubmission(itemName, description, location),
+				moderationExecutor
 		);
 
 		CompletableFuture<Void> visionFuture = CompletableFuture.runAsync(() -> {
@@ -115,7 +143,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 			} catch (IOException e) {
 				throw new RuntimeException(e);
 			}
-		});
+		}, moderationExecutor);
 
 		try {
 			CompletableFuture.allOf(textFuture, visionFuture).join();
@@ -126,54 +154,59 @@ public class FoundItemServiceImpl implements FoundItemService {
 			throw new RuntimeException(cause);
 		}
 
-		// ── STEP 3: Image safety & SightEngine double-verification ────────────
+		// ── STEP 3: SightEngine double-verification ────────────
 		sightEngineService.checkImage(image);
 
-		// Map has details about uploaded image
-		Map<?, ?> uploadedDetail = cloudinaryService.upload(image);
-		// Getting url from it
-		String url = (String) uploadedDetail.get("secure_url");
+		Map<?, ?> upload = cloudinaryService.upload(image);
+		String imageURL = (String) upload.get("secure_url");
 
-		FoundItemEntity foundItem = new FoundItemEntity();
-		foundItem.setImageURL(url);
-		foundItem.setDescription(description);
-		foundItem.setFoundItemName(itemName);
-		foundItem.setContactTo(email);
-		foundItem.setPredictedLocation(foundItemDTo.getPredictedLocation());
-		foundItem.setCreatedAt(LocalDateTime.now());
+		FoundItemEntity foundItemEntity = new FoundItemEntity();
+		foundItemEntity.setContactTo(email);
+		foundItemEntity.setDescription(description);
+		foundItemEntity.setFoundItemName(itemName);
+		foundItemEntity.setImageURL(imageURL);
+		foundItemEntity.setPredictedLocation(location);
+		foundItemEntity.setCreatedAt(LocalDateTime.now());
 
-		foundItemRepo.save(foundItem);
-
+		foundItemRepo.save(foundItemEntity);
 		return Result.SUCCESS;
 	}
 
 	@Override
 	public PagedResponseDTO<FoundItemResponse> getAllFoundItems(int page, int size) {
-
 		Pageable pageable = PageRequest.of(page, size, Sort.by("createdAt").descending());
+
 		Page<FoundItemResponse> mapped = foundItemRepo.findByStatus(FoundItemStatus.PENDING, pageable)
-				.map(foundItem -> {
+				.map(foundItemEntity -> {
 					FoundItemResponse response = new FoundItemResponse();
-					response.setDescription(foundItem.getDescription());
-					response.setImageURL(foundItem.getImageURL());
-					response.setPredictedLocation(foundItem.getPredictedLocation());
-					response.setFoundItemName(foundItem.getFoundItemName());
-					response.setPublicIdOfFoundItem(foundItem.getPublicIdOfFoundItem());
-					response.setCreatedAt(foundItem.getCreatedAt());
-					response.setContactTo(foundItem.getContactTo());
+					response.setPublicIdOfFoundItem(foundItemEntity.getPublicIdOfFoundItem());
+					response.setFoundItemName(foundItemEntity.getFoundItemName());
+					response.setDescription(foundItemEntity.getDescription());
+					response.setImageURL(foundItemEntity.getImageURL());
+					response.setPredictedLocation(foundItemEntity.getPredictedLocation());
+					response.setCreatedAt(foundItemEntity.getCreatedAt());
+					response.setContactTo(foundItemEntity.getContactTo());
+
+					UserEntity reporter = userRepo.findByEmail(foundItemEntity.getContactTo());
+					if (reporter != null && reporter.getPrivilegeClass() != null) {
+						response.setReporterPrivilege(reporter.getPrivilegeClass().name());
+					} else {
+						response.setReporterPrivilege("NORMAL");
+					}
+
 					return response;
 				});
+
 		return PagedResponseDTO.from(mapped);
 	}
 
 	@Override
 	@Transactional
-	public Result closeFoundItemRequest(String email, String publicId) {
+	public Result closeFoundItem(String email, String publicId) {
 		if (email == null || publicId == null) {
 			throw new BadRequestException("Invalid credentials");
 		}
 
-		// Converting String -> UUID
 		UUID publicUUID = UUID.fromString(publicId);
 
 		int rowsChanged = foundItemRepo.closeRequest(email, publicUUID);

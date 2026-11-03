@@ -937,3 +937,114 @@ label.field-label {
 		gap: 8px;
 	}
 }
+
+/* ============ PRIVILEGE BADGES ============ */
+.privilege-badge {
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	padding: 2px 8px;
+	border-radius: 999px;
+	font-size: 0.75rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+	vertical-align: middle;
+}
+.privilege-badge.badge-trusted {
+	background: rgba(16, 185, 129, 0.2);
+	color: #34d399;
+	border: 1px solid rgba(16, 185, 129, 0.5);
+}
+.privilege-badge.badge-admin {
+	background: rgba(239, 68, 68, 0.25);
+	color: #f87171;
+	border: 1px solid rgba(239, 68, 68, 0.6);
+	box-shadow: 0 0 8px rgba(239, 68, 68, 0.3);
+}
+.privilege-badge.badge-spam {
+	background: rgba(245, 158, 11, 0.25);
+	color: #fbbf24;
+	border: 1px solid rgba(245, 158, 11, 0.6);
+}
+.privilege-badge.badge-new {
+	background: rgba(6, 182, 212, 0.2);
+	color: #38bdf8;
+	border: 1px solid rgba(6, 182, 212, 0.5);
+}
+.privilege-badge.badge-normal {
+	background: rgba(148, 163, 184, 0.15);
+	color: #cbd5e1;
+	border: 1px solid rgba(148, 163, 184, 0.3);
+}
+
+/* ============ USERS TABLE & AUDIT ============ */
+.user-audit-table {
+	width: 100%;
+	border-collapse: separate;
+	border-spacing: 0 8px;
+}
+.user-audit-table th {
+	color: var(--text-muted);
+	font-size: 0.8rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	padding: 8px 14px;
+	border: none;
+}
+.user-audit-table td {
+	background: #111827;
+	padding: 12px 14px;
+	vertical-align: middle;
+	font-size: 0.88rem;
+	border-top: 1px solid var(--card-border);
+	border-bottom: 1px solid var(--card-border);
+}
+.user-audit-table tr td:first-child {
+	border-left: 1px solid var(--card-border);
+	border-radius: 8px 0 0 8px;
+}
+.user-audit-table tr td:last-child {
+	border-right: 1px solid var(--card-border);
+	border-radius: 0 8px 8px 0;
+}
+.user-audit-table tr:hover td {
+	background: #172033;
+}
+.user-status-pill {
+	display: inline-block;
+	padding: 2px 8px;
+	border-radius: 6px;
+	font-size: 0.72rem;
+	font-weight: 700;
+}
+.user-status-pill.active {
+	background: rgba(16, 185, 129, 0.2);
+	color: #10b981;
+}
+.user-status-pill.blocked {
+	background: rgba(244, 63, 94, 0.2);
+	color: #f43f5e;
+}
+
+/* ============ VIEWS AUDIT PILL & MODAL ============ */
+.views-pill-btn {
+	background: rgba(99, 102, 241, 0.15);
+	color: #a5b4fc;
+	border: 1px solid rgba(99, 102, 241, 0.35);
+	border-radius: 999px;
+	padding: 2px 10px;
+	font-size: 0.75rem;
+	font-weight: 600;
+	cursor: pointer;
+	display: inline-flex;
+	align-items: center;
+	gap: 4px;
+	transition: all 0.2s;
+}
+.views-pill-btn:hover {
+	background: rgba(99, 102, 241, 0.3);
+	color: #ffffff;
+	border-color: #6366f1;
+}

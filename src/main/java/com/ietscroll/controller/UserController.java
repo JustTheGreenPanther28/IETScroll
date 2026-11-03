@@ -25,7 +25,7 @@ import jakarta.validation.Valid;
 
 @RestController
 @RequestMapping("/api/v1/user")
-@Tag(name = "User Management", description = "Handles user registration, profile retrieval, and updates. Restricted to institute email.")
+@Tag(name = "User Management", description = "Endpoints for user registration and profile management")
 public class UserController {
 
 	private final UserService userService;
@@ -52,7 +52,8 @@ public class UserController {
 				.body(new UserResponse(createdUserDetailDTO.getPublicUserId(), createdUserDetailDTO.getUsername(),
 						createdUserDetailDTO.getEmail(), createdUserDetailDTO.getFullName(),
 						createdUserDetailDTO.getYearOfPassout(), createdUserDetailDTO.getCourse(),
-						createdUserDetailDTO.getBranch()));
+						createdUserDetailDTO.getBranch(), createdUserDetailDTO.getRole(),
+						createdUserDetailDTO.getPrivilegeClass(), createdUserDetailDTO.isBlocked()));
 	}
 
 	@Operation(summary = "Get user profile", description = "Fetch authenticated user's profile details.")
@@ -60,7 +61,17 @@ public class UserController {
 	public UserResponse getUser(Authentication authentication) {
 		UserDTO userDTO = userService.getUserByEmail(authentication.getName());
 		return new UserResponse(userDTO.getPublicUserId(), userDTO.getUsername(), userDTO.getEmail(),
-				userDTO.getFullName(), userDTO.getYearOfPassout(), userDTO.getCourse(), userDTO.getBranch());
+				userDTO.getFullName(), userDTO.getYearOfPassout(), userDTO.getCourse(), userDTO.getBranch(),
+				userDTO.getRole(), userDTO.getPrivilegeClass(), userDTO.isBlocked());
+	}
+
+	@Operation(summary = "Logout user", description = "Record logout timestamp for user activity audit.")
+	@PostMapping("/logout")
+	public Result logout(Authentication authentication) {
+		if (authentication != null && authentication.getName() != null) {
+			userService.recordLogout(authentication.getName());
+		}
+		return Result.SUCCESS;
 	}
 
 	@Operation(summary = "Update username", description = "Update the username of the authenticated user.")

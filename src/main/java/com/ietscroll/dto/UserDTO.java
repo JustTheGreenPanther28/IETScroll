@@ -20,6 +20,11 @@ public class UserDTO {
 	private String password;
 	private String encryptedPassword;
 	private Role role;
+	private PrivilegeClass privilegeClass;
+	private boolean isBlocked;
+	private LocalDateTime lastLoginAt;
+	private LocalDateTime lastLogoutAt;
+	private LocalDateTime createdAt;
 	
 	public int getUserId() {
 		return userId;
@@ -87,6 +92,36 @@ public class UserDTO {
 	public void setRole(Role role) {
 		this.role = role;
 	}
-	
-	
+
+	public PrivilegeClass getPrivilegeClass() {
+		return privilegeClass != null ? privilegeClass : PrivilegeClass.NORMAL;
+	}
+	public void setPrivilegeClass(PrivilegeClass privilegeClass) {
+		this.privilegeClass = privilegeClass;
+	}
+	public boolean isBlocked() {
+		return isBlocked;
+	}
+	public void setBlocked(boolean isBlocked) {
+		this.isBlocked = isBlocked;
+	}
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+	public LocalDateTime getLastLogoutAt() {
+		return lastLogoutAt;
+	}
+	public void setLastLogoutAt(LocalDateTime lastLogoutAt) {
+		this.lastLogoutAt = lastLogoutAt;
+	}
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
+	}
 }
+

@@ -23,6 +23,8 @@ public class TeamResponse {
 	private TeamStatus status;
 
 	private Privacy privacy;
+
+	private String creatorPrivilege = "NORMAL";
 	
 
 	public UUID getPublicId() {
@@ -89,4 +91,12 @@ public class TeamResponse {
 		this.currentMember = currentMember;
 	}
 
+	public String getCreatorPrivilege() {
+		return creatorPrivilege;
+	}
+
+	public void setCreatorPrivilege(String creatorPrivilege) {
+		this.creatorPrivilege = creatorPrivilege;
+	}
 }
+

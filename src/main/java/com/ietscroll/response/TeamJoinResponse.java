@@ -28,6 +28,8 @@ public class TeamJoinResponse {
 	private String message;
 	
     private LocalDateTime requestedAt;
+
+	private String applicantPrivilege = "NORMAL";
 	
 	public LocalDateTime getRequestedAt() {
 		return requestedAt;
@@ -109,4 +111,13 @@ public class TeamJoinResponse {
 	public void setMessage(String message) {
 		this.message = message;
 	}
+
+	public String getApplicantPrivilege() {
+		return applicantPrivilege;
+	}
+
+	public void setApplicantPrivilege(String applicantPrivilege) {
+		this.applicantPrivilege = applicantPrivilege;
+	}
 }
+

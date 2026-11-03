@@ -2,6 +2,7 @@ package com.ietscroll.controller;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.Authentication;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestPart;
@@ -26,9 +27,14 @@ public class ResumeCheckerController {
 	}
 
 	@PostMapping(path = "/quality")
-	@Operation(summary = "Analyze resume quality", description = "Evaluates resume using AI (LLM). Returns score, missing keywords, improvements, and overall quality insights.")
-	public ResponseEntity<QualityOfResume> getQuality(@RequestPart("file") MultipartFile file, @RequestPart String exp,
+	@Operation(summary = "Analyze resume quality", description = "Evaluates resume using AI (LLM). Limited to 3 times per month per student.")
+	public ResponseEntity<QualityOfResume> getQuality(
+			Authentication auth,
+			@RequestPart("file") MultipartFile file,
+			@RequestPart String exp,
 			@RequestPart String role) {
-		return ResponseEntity.status(HttpStatus.ACCEPTED).body(resumeCheckerService.getQuality(file, role, Integer.parseInt(exp)));
+		String userEmail = auth != null ? auth.getName() : null;
+		return ResponseEntity.status(HttpStatus.ACCEPTED)
+				.body(resumeCheckerService.getQualityForUser(userEmail, file, role, Integer.parseInt(exp)));
 	}
 }

@@ -89,6 +89,11 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 			response.setStatus(teamJoinRequest.getStatus());
 			response.setMessage(teamJoinRequest.getMessage());
 			response.setRequestedAt(teamJoinRequest.getRequestedAt());
+			if (teamJoinRequest.getApplicant() != null && teamJoinRequest.getApplicant().getPrivilegeClass() != null) {
+				response.setApplicantPrivilege(teamJoinRequest.getApplicant().getPrivilegeClass().name());
+			} else {
+				response.setApplicantPrivilege("NORMAL");
+			}
 			responses.add(response);
 		}
 

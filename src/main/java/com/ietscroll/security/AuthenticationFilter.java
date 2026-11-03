@@ -43,10 +43,11 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	}
 
 	@Override
-	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response,FilterChain chain, Authentication auth) {
+	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) {
 
-		String username = auth.getName();// username <- email
-		var user = userService.getUserByEmail(username);// role over here
+		String username = auth.getName(); // username <- email
+		userService.recordLogin(username);
+		var user = userService.getUserByEmail(username); // role over here
 		String token = jwtUtil.generateToken(username, user.getRole().name());
 
 		response.addHeader(SecurityConstaints.HEADER_STRING, SecurityConstaints.TOKEN_PREFIX + token);

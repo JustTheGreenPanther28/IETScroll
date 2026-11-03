@@ -23,6 +23,8 @@ public class LostItemResponse {
 	@Email
 	private String contactTo;
 
+	private String ownerPrivilege = "NORMAL";
+
 	public UUID getPublicIdOfLostRequest() {
 		return publicIdOfLostRequest;
 	}
@@ -71,13 +73,6 @@ public class LostItemResponse {
 		this.prize = prize;
 	}
 
-	@Override
-	public String toString() {
-		return "LostItemResponse [publicIdOfLostRequest=" + publicIdOfLostRequest + ", lostItemname=" + lostItemname
-				+ ", imageURLOfItem=" + imageURLOfItem + ", predictedLocation=" + predictedLocation + ", description="
-				+ description + ", prize=" + prize + "]";
-	}
-
 	public LocalDateTime getCreatedAt() {
 		return createdAt;
 	}
@@ -94,4 +89,18 @@ public class LostItemResponse {
 		this.contactTo = contactTo;
 	}
 
+	public String getOwnerPrivilege() {
+		return ownerPrivilege;
+	}
+
+	public void setOwnerPrivilege(String ownerPrivilege) {
+		this.ownerPrivilege = ownerPrivilege;
+	}
+
+	@Override
+	public String toString() {
+		return "LostItemResponse [publicIdOfLostRequest=" + publicIdOfLostRequest + ", lostItemname=" + lostItemname
+				+ ", imageURLOfItem=" + imageURLOfItem + ", predictedLocation=" + predictedLocation + ", description="
+				+ description + ", prize=" + prize + ", ownerPrivilege=" + ownerPrivilege + "]";
+	}
 }

@@ -1,16 +1,16 @@
 package com.ietscroll.service.impl;
 
+import java.time.LocalDateTime;
 import java.util.List;
 
 import org.modelmapper.ModelMapper;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.security.authentication.LockedException;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.core.userdetails.User;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
-//import org.springframework.security.core.userdetails.UserDetails;
-//import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -19,8 +19,10 @@ import com.ietscroll.entity.UserEntity;
 import com.ietscroll.exception.BadRequestException;
 import com.ietscroll.exception.DuplicateResourceException;
 import com.ietscroll.exception.ResourceNotFoundException;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.repository.UserRepository;
 import com.ietscroll.response.Result;
+import com.ietscroll.security.Role;
 import com.ietscroll.service.OTPService;
 import com.ietscroll.service.UserService;
 
@@ -50,7 +52,7 @@ public class UserServiceImpl implements UserService {
 	@Transactional
 	public UserDTO register(UserDTO userDTO) {
 
-		if (userDTO.getEmail() ==null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
+		if (userDTO.getEmail() == null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
 	        throw new BadRequestException("Only @ietdavv.edu.in email addresses are accepted");
 	    }
 		UserEntity found = userRepo.findByEmail(userDTO.getEmail());
@@ -69,6 +71,8 @@ public class UserServiceImpl implements UserService {
 		user.setBranch(userDTO.getBranch());
 		user.setCourse(userDTO.getCourse());
 		user.setYearOfPassout(userDTO.getYearOfPassout());
+		user.setCreatedAt(LocalDateTime.now());
+		user.setPrivilegeClass(PrivilegeClass.NEW);
 
 		UserEntity createdUser = userRepo.save(user);
 		otpService.GenerateOTP(user.getEmail());
@@ -76,15 +80,22 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
+	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-		
-		
-	    if (username ==null || !(username.endsWith("@ietdavv.edu.in") || username.equals(adminEmail))) {
+	    if (username == null || !(username.endsWith("@ietdavv.edu.in") || username.equals(adminEmail))) {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    UserEntity user = userRepo.findByEmail(username);
 	    if (user == null || !user.isVerified()) {
 	        throw new UsernameNotFoundException("Incorrect email");
+	    }
+	    if (user.isBlocked()) {
+	        throw new LockedException("Account has been suspended by administrator.");
+	    }
+	    if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.ADMIN) {
+	        user.setRole(Role.ADMIN);
+	        user.setPrivilegeClass(PrivilegeClass.ADMIN);
+	        userRepo.save(user);
 	    }
 
 	    return new User(
@@ -140,4 +151,29 @@ public class UserServiceImpl implements UserService {
 		return Result.SUCCESS;
 	}
 
+	@Override
+	@Transactional
+	public void recordLogin(String email) {
+		if (email == null) return;
+		UserEntity user = userRepo.findByEmail(email);
+		if (user != null) {
+			user.setLastLoginAt(LocalDateTime.now());
+			if (user.getEmail().equalsIgnoreCase(adminEmail) && user.getRole() != Role.ADMIN) {
+				user.setRole(Role.ADMIN);
+				user.setPrivilegeClass(PrivilegeClass.ADMIN);
+			}
+			userRepo.save(user);
+		}
+	}
+
+	@Override
+	@Transactional
+	public void recordLogout(String email) {
+		if (email == null) return;
+		UserEntity user = userRepo.findByEmail(email);
+		if (user != null) {
+			user.setLastLogoutAt(LocalDateTime.now());
+			userRepo.save(user);
+		}
+	}
 }

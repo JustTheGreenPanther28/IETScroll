@@ -98,7 +98,7 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
                 Verify the uploaded image against the item claim:
                 1. NO HUMAN FACES OR PERSONS: Reject any image depicting human faces, people, student portraits, or selfies (STRICT ANTI-RAGGING RULE: lost & found items must be physical inanimate objects only).
                 2. NO TARGETING OR CARICATURES: Reject anime characters, cartoon caricatures, memes, or graphics pointing towards, mocking, or ridiculing individuals.
-                3. REJECT software architecture diagrams, system flowcharts, code screenshots, hacking scripts, terminal commands, random text documents, or abstract graphics.
+                3. REJECT software architecture diagrams, system flowcharts, code screenshots, hacking scripts, terminal commands, random text documents, trees/outdoor landscapes unrelated to portable personal items, or abstract graphics.
                 4. Does the image reasonably match or show the claimed item "%s"?
                 5. Does the text contain low-effort spam/gibberish (e.g. "lost lost", "span lost", "asdf")?
 
@@ -129,6 +129,7 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
             return null;
         }
 
+        // Optimize and consistently transcode to JPEG for uniform MIME compatibility across providers
         byte[] optimizedBytes = optimizeImageForVision(file);
         String contentType = "image/jpeg";
 
@@ -185,17 +186,19 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
             int maxDim = 800;
             int width = original.getWidth();
             int height = original.getHeight();
-            if (width <= maxDim && height <= maxDim) {
-                return file.getBytes();
+
+            int newWidth = width;
+            int newHeight = height;
+            if (width > maxDim || height > maxDim) {
+                if (width > height) {
+                    newWidth = maxDim;
+                    newHeight = (int) ((double) height / width * maxDim);
+                } else {
+                    newHeight = maxDim;
+                    newWidth = (int) ((double) width / height * maxDim);
+                }
             }
-            int newWidth, newHeight;
-            if (width > height) {
-                newWidth = maxDim;
-                newHeight = (int) ((double) height / width * maxDim);
-            } else {
-                newHeight = maxDim;
-                newWidth = (int) ((double) width / height * maxDim);
-            }
+
             BufferedImage resized = new BufferedImage(newWidth, newHeight, BufferedImage.TYPE_INT_RGB);
             Graphics2D g = resized.createGraphics();
             g.setRenderingHint(RenderingHints.KEY_INTERPOLATION, RenderingHints.VALUE_INTERPOLATION_BILINEAR);
@@ -206,7 +209,7 @@ public class NvidiaVisionServiceImpl implements NvidiaVisionService {
             ImageIO.write(resized, "jpeg", baos);
             return baos.toByteArray();
         } catch (Exception e) {
-            log.warn("Image downscale for vision skipped ({}), using raw bytes", e.getMessage());
+            log.warn("Image transcode for vision failed ({}), falling back to raw bytes", e.getMessage());
             try {
                 return file.getBytes();
             } catch (IOException io) {

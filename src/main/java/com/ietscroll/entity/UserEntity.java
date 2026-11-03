@@ -1,11 +1,13 @@
 package com.ietscroll.entity;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.List;
 import java.util.UUID;
 
 import com.ietscroll.general.enums.Branch;
 import com.ietscroll.general.enums.Course;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.security.Role;
 
 import jakarta.persistence.Column;
@@ -58,13 +60,29 @@ public class UserEntity {
 	@Column(nullable = false)
 	@Enumerated(EnumType.STRING)
 	private Role role = Role.STUDENT;
-	
+
+	private boolean isBlocked = false;
+
+	@Enumerated(EnumType.STRING)
+	private PrivilegeClass privilegeClass = PrivilegeClass.NORMAL;
+
+	private LocalDateTime lastLoginAt;
+
+	private LocalDateTime lastLogoutAt;
+
+	private LocalDateTime createdAt = LocalDateTime.now();
+
 	@OneToMany(mappedBy="applicant")
 	private List<TeamJoinRequest> joinRequest;
 
 	@PrePersist
 	protected void onCreate() {
-		this.publicUserId = UUID.randomUUID();
+		if (this.publicUserId == null) {
+			this.publicUserId = UUID.randomUUID();
+		}
+		if (this.createdAt == null) {
+			this.createdAt = LocalDateTime.now();
+		}
 	}
 
 	public int getUserId() {
@@ -157,5 +175,45 @@ public class UserEntity {
 
 	public void setJoinRequest(List<TeamJoinRequest> joinRequest) {
 		this.joinRequest = joinRequest;
+	}
+
+	public boolean isBlocked() {
+		return isBlocked;
+	}
+
+	public void setBlocked(boolean isBlocked) {
+		this.isBlocked = isBlocked;
+	}
+
+	public PrivilegeClass getPrivilegeClass() {
+		return privilegeClass != null ? privilegeClass : PrivilegeClass.NORMAL;
+	}
+
+	public void setPrivilegeClass(PrivilegeClass privilegeClass) {
+		this.privilegeClass = privilegeClass;
+	}
+
+	public LocalDateTime getLastLoginAt() {
+		return lastLoginAt;
+	}
+
+	public void setLastLoginAt(LocalDateTime lastLoginAt) {
+		this.lastLoginAt = lastLoginAt;
+	}
+
+	public LocalDateTime getLastLogoutAt() {
+		return lastLogoutAt;
+	}
+
+	public void setLastLogoutAt(LocalDateTime lastLogoutAt) {
+		this.lastLogoutAt = lastLogoutAt;
+	}
+
+	public LocalDateTime getCreatedAt() {
+		return createdAt;
+	}
+
+	public void setCreatedAt(LocalDateTime createdAt) {
+		this.createdAt = createdAt;
 	}
 }
