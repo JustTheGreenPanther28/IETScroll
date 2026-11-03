@@ -92,7 +92,7 @@ public class ResumeCheckerServiceImpl implements ResumeCheckerService {
 			String currentYearMonth = LocalDate.now().format(DateTimeFormatter.ofPattern("yyyy-MM"));
 			resumeUsageAuditRepository.save(new ResumeUsageAudit(userEmail, currentYearMonth));
 			activityLogService.logActivity(userEmail, "RESUME", "Resume Review (" + role + ")", "UPLOADED",
-					"Resume evaluated. Score: " + (quality != null ? quality.getScore() : 0) + "/100");
+					"Resume evaluated. Score: " + (quality != null ? quality.getOverAllRating() : 0) + "/100");
 		}
 
 		return quality;

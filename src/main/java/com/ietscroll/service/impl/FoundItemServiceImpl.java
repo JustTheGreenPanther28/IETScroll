@@ -136,7 +136,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 		}
 
 		try {
-			// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
+			// Run Text and Vision verification concurrently using dedicated bounded executor
 			CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
 					spamProtectionService.checkItemSubmission(itemName, description, location),
 					moderationExecutor
@@ -160,7 +160,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 			throw new RuntimeException(cause);
 		}
 
-		// ── STEP 3: SightEngine double-verification ────────────
+		// SightEngine double-verification
 		try {
 			sightEngineService.checkImage(image);
 		} catch (Exception e) {
@@ -216,7 +216,7 @@ public class FoundItemServiceImpl implements FoundItemService {
 
 	@Override
 	@Transactional
-	public Result closeFoundItem(String email, String publicId) {
+	public Result closeFoundItemRequest(String email, String publicId) {
 		if (email == null || publicId == null) {
 			throw new BadRequestException("Invalid credentials");
 		}

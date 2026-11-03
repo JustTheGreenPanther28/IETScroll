@@ -1,10 +1,12 @@
 package com.ietscroll.dto;
 
+import java.time.LocalDateTime;
 import java.time.Year;
 import java.util.UUID;
 
 import com.ietscroll.general.enums.Branch;
 import com.ietscroll.general.enums.Course;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.security.Role;
 
 public class UserDTO {
@@ -124,4 +126,3 @@ public class UserDTO {
 		this.createdAt = createdAt;
 	}
 }
-

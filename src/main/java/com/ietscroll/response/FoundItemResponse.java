@@ -79,4 +79,12 @@ public class FoundItemResponse {
 		this.createdAt = createdAt;
 	}
 
+	public String getReporterPrivilege() {
+		return reporterPrivilege;
+	}
+
+	public void setReporterPrivilege(String reporterPrivilege) {
+		this.reporterPrivilege = reporterPrivilege;
+	}
+
 }
