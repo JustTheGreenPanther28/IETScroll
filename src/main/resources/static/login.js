@@ -40,7 +40,7 @@ const BASE = (window.location.protocol === 'file:' || window.location.origin ===
 			setError('password', '');
 
 			if (!email) {
-				setError('email', 'Must be a valid @ietdavv.edu.in email');
+				setError('email', 'Email is required');
 				ok = false;
 			}
 			if (!password) {

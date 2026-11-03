@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO register(UserDTO userDTO) {
 
-		if (userDTO.getEmail() == null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
-	        throw new BadRequestException("Only @ietdavv.edu.in email addresses are accepted");
+		if (userDTO.getEmail() == null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equalsIgnoreCase(adminEmail))) {
+	        throw new BadRequestException("Only @ietdavv.edu.in email addresses or admin email are accepted");
 	    }
 		UserEntity found = userRepo.findByEmail(userDTO.getEmail());
 		UserEntity found1 = userRepo.findByUsername(userDTO.getUsername());
@@ -87,7 +87,7 @@ public class UserServiceImpl implements UserService {
 	@Override
 	@Transactional
 	public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
-	    if (username == null || !(username.endsWith("@ietdavv.edu.in") || username.equals(adminEmail))) {
+	    if (username == null || !(username.endsWith("@ietdavv.edu.in") || username.equalsIgnoreCase(adminEmail))) {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    UserEntity user = userRepo.findByEmail(username);
@@ -112,8 +112,8 @@ public class UserServiceImpl implements UserService {
 
 	@Override
 	public UserDTO getUserByEmail(@NotNull @Email @NotBlank String email) {
-		if (email == null || !(email.endsWith("@ietdavv.edu.in") || email.equals(adminEmail))) {
-			throw new BadRequestException("Only @ietdavv.edu.in email addresses are accepted");
+		if (email == null || !(email.endsWith("@ietdavv.edu.in") || email.equalsIgnoreCase(adminEmail))) {
+			throw new BadRequestException("Only @ietdavv.edu.in email addresses or admin email are accepted");
 		}
 		UserEntity user = userRepo.findByEmail(email);
 		if (user == null) {
