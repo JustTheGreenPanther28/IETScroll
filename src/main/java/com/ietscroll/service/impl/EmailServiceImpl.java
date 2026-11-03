@@ -28,7 +28,7 @@ public class EmailServiceImpl implements EmailService {
     @Autowired(required = false)
     private JavaMailSender mailSender;
 
-    @Value("${BREVO_API_KEY:}")
+    @Value("${brevo.api.key:${BREVO_API_KEY:}}")
     private String brevoApiKey;
 
     private static final String FROM_EMAIL = "iet.scroll.in@gmail.com";

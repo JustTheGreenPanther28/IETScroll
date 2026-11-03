@@ -49,7 +49,6 @@ public class UserServiceImpl implements UserService {
 	}
 
 	@Override
-	@Transactional
 	public UserDTO register(UserDTO userDTO) {
 
 		if (userDTO.getEmail() == null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equals(adminEmail))) {
@@ -75,7 +74,13 @@ public class UserServiceImpl implements UserService {
 		user.setPrivilegeClass(PrivilegeClass.NEW);
 
 		UserEntity createdUser = userRepo.save(user);
-		otpService.GenerateOTP(user.getEmail());
+		try {
+			otpService.GenerateOTP(user.getEmail());
+		} catch (Exception e) {
+			// If sending email fails, clean up the pending user so they can retry registering
+			userRepo.delete(createdUser);
+			throw e;
+		}
 		return modelMapper.map(createdUser, UserDTO.class);
 	}
 
