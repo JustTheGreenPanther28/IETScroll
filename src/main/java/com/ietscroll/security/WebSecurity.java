@@ -76,7 +76,8 @@ public class WebSecurity {
 				auth -> auth.requestMatchers("/swagger-ui.html", "/swagger-ui/**", "/v3/api-docs/**").permitAll()
 						.requestMatchers("/", "/favicon.ico", "/index.html", "/style.css", "/login.html",
 								"/register.html", "/styleForSafety.css", "/safety.html", "/login.css", "/login.js",
-								"/register.css", "/register.js", "/dashboard.css", "/dashboard.js", "/dashboard.html")
+								"/register.css", "/register.js", "/dashboard.css", "/dashboard.js", "/dashboard.html",
+								"/js/**", "/css/**", "/images/**", "/assets/**")
 						.permitAll().requestMatchers("/actuator/health").permitAll()
 						.requestMatchers(HttpMethod.POST, SecurityConstaints.LOGIN).permitAll()
 						.requestMatchers(HttpMethod.POST, SecurityConstaints.SIGN_UP_URL).permitAll()
