@@ -5,6 +5,7 @@ import java.io.IOException;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 
 import com.fasterxml.jackson.databind.ObjectMapper;
@@ -48,10 +49,39 @@ public class AuthenticationFilter extends UsernamePasswordAuthenticationFilter {
 	protected void successfulAuthentication(HttpServletRequest request, HttpServletResponse response, FilterChain chain, Authentication auth) {
 
 		String username = auth.getName(); // username <- email
-		userService.recordLogin(username);
-		var user = userService.getUserByEmail(username); // role over here
-		String token = jwtUtil.generateToken(username, user.getRole().name());
+		try {
+			userService.recordLogin(username);
+		} catch (Exception e) {
+			// Do not fail authentication if login timestamp recording encounters a transient issue
+			System.err.println("Note: recordLogin notice: " + e.getMessage());
+		}
+
+		String role = "STUDENT";
+		if (auth.getAuthorities() != null && !auth.getAuthorities().isEmpty()) {
+			String authName = auth.getAuthorities().iterator().next().getAuthority();
+			role = authName.replace("ROLE_", "");
+		}
+
+		String token = jwtUtil.generateToken(username, role);
 
 		response.addHeader(SecurityConstaints.HEADER_STRING, SecurityConstaints.TOKEN_PREFIX + token);
+	}
+
+	@Override
+	protected void unsuccessfulAuthentication(HttpServletRequest request, HttpServletResponse response,
+			org.springframework.security.core.AuthenticationException failed) throws IOException {
+		SecurityContextHolder.clearContext();
+		response.setStatus(HttpServletResponse.SC_UNAUTHORIZED);
+		response.setContentType("application/json");
+		response.setCharacterEncoding("UTF-8");
+
+		String msg = "Invalid email or password.";
+		if (failed instanceof org.springframework.security.authentication.LockedException) {
+			response.setStatus(HttpServletResponse.SC_FORBIDDEN);
+			msg = failed.getMessage();
+		}
+
+		response.getWriter().write("{\"error\": \"Authentication Failed\", \"message\": \"" + msg + "\"}");
+		response.getWriter().flush();
 	}
 }
