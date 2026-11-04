@@ -96,7 +96,11 @@ const BASE = (window.location.protocol === 'file:' || window.location.origin ===
 							errorMsg = data.message;
 						}
 					} catch {}
-					showAlert('fail', errorMsg);
+					if (res.status === 403) {
+						showAlert('fail', errorMsg || 'Your account has been suspended by the administrator due to policy violations. Please contact the platform admin.');
+					} else {
+						showAlert('fail', errorMsg);
+					}
 				}
 			} catch {
 				showAlert('fail', 'Could not reach the server. Please try again.');

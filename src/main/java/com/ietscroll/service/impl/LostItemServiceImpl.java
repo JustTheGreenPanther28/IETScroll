@@ -102,11 +102,7 @@ public class LostItemServiceImpl implements LostItemService {
 			throw new BadRequestException("Please provide a detailed description (at least 20 characters) describing the item's appearance, color, brand, or condition.");
 		}
 
-		if (image == null || image.isEmpty()) {
-			throw new BadRequestException("Add Image of the lost product!");
-		}
-
-		if (!ALLOWED_TYPES.contains(image.getContentType())) {
+		if (image != null && !image.isEmpty() && !ALLOWED_TYPES.contains(image.getContentType())) {
 			throw new BadRequestException("Kindly add valid image type!");
 		}
 
@@ -115,20 +111,30 @@ public class LostItemServiceImpl implements LostItemService {
 					"Maximum lost-item request a user can have is two, kindly close other request to create a new request.");
 		}
 
+		// Determine submitter privilege for AI moderation tiering
+		UserEntity submitter = userRepo.findByEmail(email);
+		PrivilegeClass privilege = (submitter != null && submitter.getPrivilegeClass() != null)
+				? submitter.getPrivilegeClass() : PrivilegeClass.NORMAL;
+
 		try {
 			// ── STEP 1 & 2: Run Text and Vision verification concurrently using dedicated bounded executor ──
 			CompletableFuture<Void> textFuture = CompletableFuture.runAsync(() ->
-					spamProtectionService.checkItemSubmission(itemName, description, location),
+					spamProtectionService.checkItemSubmission(itemName, description, location, privilege),
 					moderationExecutor
 			);
 
-			CompletableFuture<Void> visionFuture = CompletableFuture.runAsync(() -> {
-				try {
-					nvidiaVisionService.checkImageRelevance(image, itemName, description);
-				} catch (IOException e) {
-					throw new RuntimeException(e);
-				}
-			}, moderationExecutor);
+			CompletableFuture<Void> visionFuture;
+			if (image != null && !image.isEmpty() && privilege != PrivilegeClass.TRUSTED) {
+				visionFuture = CompletableFuture.runAsync(() -> {
+					try {
+						nvidiaVisionService.checkImageRelevance(image, itemName, description);
+					} catch (IOException e) {
+						throw new RuntimeException(e);
+					}
+				}, moderationExecutor);
+			} else {
+				visionFuture = CompletableFuture.completedFuture(null);
+			}
 
 			CompletableFuture.allOf(textFuture, visionFuture).join();
 		} catch (CompletionException ce) {
@@ -140,17 +146,22 @@ public class LostItemServiceImpl implements LostItemService {
 			throw new RuntimeException(cause);
 		}
 
-		// ── STEP 3: SightEngine double-verification ────────────
-		try {
-			sightEngineService.checkImage(image);
-		} catch (Exception e) {
-			activityLogService.logActivity(email, "LOST", itemName, "REJECTED_BY_MODERATION", e.getMessage());
-			throw e;
+		// ── STEP 3: SightEngine double-verification (only if image present & not TRUSTED) ──
+		if (image != null && !image.isEmpty() && privilege != PrivilegeClass.TRUSTED) {
+			try {
+				sightEngineService.checkImage(image);
+			} catch (Exception e) {
+				activityLogService.logActivity(email, "LOST", itemName, "REJECTED_BY_MODERATION", e.getMessage());
+				throw e;
+			}
 		}
 
-		// Map has details about uploaded image
-		Map<?, ?> uploadedDetail = cloudinaryService.upload(image);
-		String url = (String) uploadedDetail.get("secure_url");
+		// Upload image if provided
+		String url = null;
+		if (image != null && !image.isEmpty()) {
+			Map<?, ?> uploadedDetail = cloudinaryService.upload(image);
+			url = (String) uploadedDetail.get("secure_url");
+		}
 
 		LostItemEntity lostItem = new LostItemEntity();
 		lostItem.setImageURL(url);

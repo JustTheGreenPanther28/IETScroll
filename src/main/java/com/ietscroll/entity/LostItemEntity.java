@@ -26,7 +26,7 @@ public class LostItemEntity {
 	@Column(nullable = false, length = 25)
 	private String lostItemname;
 
-	@Column(columnDefinition = "TEXT", nullable = false, unique = true)
+	@Column(columnDefinition = "TEXT", nullable = true)
 	private String imageURL;
 
 	@Column(nullable = true, length = 50)

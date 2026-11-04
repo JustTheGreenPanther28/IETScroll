@@ -97,13 +97,17 @@ async function submitFoundItem() {
     if (desc.length < 20) {
         return toast('Please provide a detailed description (at least 20 characters)', 'error');
     }
-    const imgError = validateImageFile(imageFile);
-    if (imgError) return toast(imgError, 'error');
+    if (imageFile) {
+        const imgError = validateImageFile(imageFile);
+        if (imgError) return toast(imgError, 'error');
+    }
 
     const data = { foundItemName: name, description: desc, predictedLocation: location };
     const fd = new FormData();
     fd.append('data', JSON.stringify(data));
-    fd.append('image', imageFile);
+    if (imageFile) {
+        fd.append('image', imageFile);
+    }
 
     // Non-blocking UX: immediately inform the user, clear form, switch to "My Found Reports"
     toast('Your request has been submitted. Once analysis of your request is complete, we will take action.', 'info');

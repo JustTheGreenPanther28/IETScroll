@@ -232,4 +232,34 @@ public class TeamJoinRequestServiceImpl implements TeamRequestService {
 
 		return applications;
 	}
+
+	@Override
+	@Transactional
+	public Result leaveTeam(String userEmail, UUID teamId) {
+		if (userEmail == null || userEmail.isBlank() || teamId == null) {
+			throw new RuntimeException("Invalid request");
+		}
+
+		Team team = teamRepo.findByPublicId(teamId);
+		if (team == null) {
+			throw new RuntimeException("Team does not exist");
+		}
+
+		if (team.getCreatedBy() != null && userEmail.equalsIgnoreCase(team.getCreatedBy().getEmail())) {
+			throw new RuntimeException("Team creators cannot leave their own team. You can close the team instead.");
+		}
+
+		int rows = teamJoinRequestRepo.kickApplicant(userEmail, teamId);
+		if (rows >= 1) {
+			if (team.getCurrentMember() > 1) {
+				team.setCurrentMember(team.getCurrentMember() - 1);
+				teamRepo.save(team);
+			}
+			activityLogService.logActivity(userEmail, "TEAM_LEAVE", "Left Team (" + team.getPurpose() + ")", "CLOSED",
+					"You left the team: " + team.getPurpose());
+			return Result.SUCCESS;
+		}
+
+		return Result.FAILED;
+	}
 }

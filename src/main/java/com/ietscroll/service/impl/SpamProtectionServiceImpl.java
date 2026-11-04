@@ -9,6 +9,7 @@ import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 
 import com.ietscroll.exception.ContentModerationException;
+import com.ietscroll.general.enums.PrivilegeClass;
 import com.ietscroll.service.SpamProtectionService;
 
 /**
@@ -101,6 +102,42 @@ public class SpamProtectionServiceImpl implements SpamProtectionService {
 
         checkAntiRaggingAndHierarchy(combined);
         checkNemotronSafety(combined);
+    }
+
+    @Override
+    public void checkItemSubmission(String name, String description, String location, PrivilegeClass privilege) {
+        // Fast emoji checks for all privilege levels
+        if (name != null && EMOJI_PATTERN.matcher(name).find()) {
+            throw new ContentModerationException("Emojis are not permitted in item names. Please write without emojis.");
+        }
+        if (description != null && EMOJI_PATTERN.matcher(description).find()) {
+            throw new ContentModerationException("Emojis are not permitted in item descriptions. Please write without emojis.");
+        }
+        if (location != null && EMOJI_PATTERN.matcher(location).find()) {
+            throw new ContentModerationException("Emojis are not permitted in locations. Please write without emojis.");
+        }
+
+        // TRUSTED users: emoji check only — skip AI pipeline
+        if (privilege == PrivilegeClass.TRUSTED) {
+            log.debug("Privilege=TRUSTED: skipping AI moderation for item submission.");
+            return;
+        }
+
+        // Build combined text for AI checks
+        StringBuilder sb = new StringBuilder();
+        if (name != null && !name.isBlank()) sb.append("Item Name: ").append(name.trim()).append("\n");
+        if (description != null && !description.isBlank()) sb.append("Description: ").append(description.trim()).append("\n");
+        if (location != null && !location.isBlank()) sb.append("Predicted Location: ").append(location.trim());
+        String combined = sb.toString().trim();
+        if (combined.isEmpty()) return;
+
+        // NORMAL / NEW: anti-ragging check only
+        checkAntiRaggingAndHierarchy(combined);
+
+        // MAY_BE_SPAM: full pipeline including Nemotron safety
+        if (privilege == PrivilegeClass.MAY_BE_SPAM) {
+            checkNemotronSafety(combined);
+        }
     }
 
     private void checkAntiRaggingAndHierarchy(String text) {

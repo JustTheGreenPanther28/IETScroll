@@ -145,8 +145,8 @@ function renderPrivilegeBadge(privilege) {
 }
 
 // ── Image file validation ─────────────────────────────────────────────────────
-function validateImageFile(file) {
-    if (!file) return 'Please choose an image file.';
+function validateImageFile(file, optional = false) {
+    if (!file) return optional ? null : 'Please choose an image file.';
     const allowed = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
     if (!allowed.includes(file.type)) return 'Invalid file type. Allowed: JPG, PNG, WEBP, GIF.';
     if (file.size > 5 * 1024 * 1024) return 'File is too large. Maximum allowed size is 5 MB.';

@@ -1,5 +1,7 @@
 package com.ietscroll.service;
 
+import com.ietscroll.general.enums.PrivilegeClass;
+
 /**
  * Checks text content for spam / harmful content.
  * Throws ContentModerationException if content is unsafe.
@@ -25,4 +27,20 @@ public interface SpamProtectionService {
      * @param location item predicted location
      */
     void checkItemSubmission(String name, String description, String location);
+
+    /**
+     * Privilege-aware item submission check. The depth of AI moderation
+     * scales with the user's trust level:
+     * <ul>
+     *   <li>{@code TRUSTED}     — emoji check only (skip AI calls)</li>
+     *   <li>{@code NORMAL/NEW}  — emoji check + anti-ragging LLM</li>
+     *   <li>{@code MAY_BE_SPAM} — full pipeline (emoji + anti-ragging + Nemotron safety)</li>
+     * </ul>
+     *
+     * @param name        item name
+     * @param description item description
+     * @param location    item predicted location
+     * @param privilege   submitting user's privilege class (null treated as NORMAL)
+     */
+    void checkItemSubmission(String name, String description, String location, PrivilegeClass privilege);
 }

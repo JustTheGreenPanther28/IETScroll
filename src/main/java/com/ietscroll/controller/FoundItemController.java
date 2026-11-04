@@ -43,7 +43,7 @@ public class FoundItemController {
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	@Operation(summary = "Create a found item", description = "Uploads a found item with image. The image is validated using moderation APIs and stored in Cloudinary. Maximum 3 active requests per user.")
 	public ResponseEntity<Result> createFoundItemPost(Authentication authentication,
-			@RequestPart("data") String foundItemJSON, @RequestPart("image") MultipartFile image) throws IOException {
+			@RequestPart("data") String foundItemJSON, @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		FoundItemRequest foundItemRequest = mapper.readValue(foundItemJSON, FoundItemRequest.class);

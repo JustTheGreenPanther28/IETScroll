@@ -42,7 +42,7 @@ public class LostItemController {
 	@Operation(summary = "Report a lost item", description = "Creates a lost item request with image upload, moderation check, and storage. Limited to 2 active requests per user.")
 	@PostMapping(consumes = { MediaType.MULTIPART_FORM_DATA_VALUE })
 	public ResponseEntity<Result> createLostItemPost(Authentication authentication,
-			@RequestPart("data") String lostItemJSON, @RequestPart("image") MultipartFile image) throws IOException {
+			@RequestPart("data") String lostItemJSON, @RequestPart(value = "image", required = false) MultipartFile image) throws IOException {
 
 		ObjectMapper mapper = new ObjectMapper();
 		LostItemRequest lostItemRequest = mapper.readValue(lostItemJSON, LostItemRequest.class);

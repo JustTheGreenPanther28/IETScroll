@@ -20,4 +20,6 @@ public interface TeamRequestService {
 	Result rejectMember(String ownerEmail, String joinerEmail);
 
 	Result kickMember(String ownerEmail, String memberEmail);
+
+	Result leaveTeam(String userEmail, UUID teamId);
 }

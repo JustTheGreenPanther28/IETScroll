@@ -51,8 +51,8 @@ public class UserServiceImpl implements UserService {
 	@Override
 	public UserDTO register(UserDTO userDTO) {
 
-		if (userDTO.getEmail() == null || !(userDTO.getEmail().endsWith("@ietdavv.edu.in") || userDTO.getEmail().equalsIgnoreCase(adminEmail))) {
-	        throw new BadRequestException("Only @ietdavv.edu.in email addresses or admin email are accepted");
+		if (userDTO.getEmail() == null || userDTO.getEmail().isBlank()) {
+	        throw new BadRequestException("A valid email address is required");
 	    }
 		UserEntity found = userRepo.findByEmail(userDTO.getEmail());
 		UserEntity found1 = userRepo.findByUsername(userDTO.getUsername());
@@ -96,7 +96,7 @@ public class UserServiceImpl implements UserService {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    if (user.isBlocked()) {
-	        throw new LockedException("Account has been suspended by administrator.");
+	        throw new LockedException("Your account has been suspended by the administrator due to policy violations. Please contact the platform admin.");
 	    }
 	    String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
 	    if (!cleanAdminEmail.isBlank() && user.getEmail().equalsIgnoreCase(cleanAdminEmail) && user.getRole() != Role.SENIOR_ADMIN) {

@@ -316,12 +316,20 @@ async function loadTeamApplications() {
             let statusBadge = '<span class="badge-status open">WAITING</span>';
             if (a.status === 'ACCEPTED') statusBadge = '<span class="badge-status badge-accepted">ACCEPTED</span>';
             if (a.status === 'REJECTED') statusBadge = '<span class="badge-status closed">REJECTED</span>';
+            if (a.status === 'REMOVED') statusBadge = '<span class="badge-status closed">LEFT / REMOVED</span>';
+
+            const leaveBtn = (a.status === 'ACCEPTED' && a.teamId)
+                ? `<button class="btn-danger-soft btn-sm ms-2" onclick="leaveTeam('${escapeHtml(a.teamId)}')"><i class="bi bi-box-arrow-right me-1"></i> Leave Team</button>`
+                : '';
 
             card.innerHTML = `
                 <div class="flex-grow-1">
                     <div class="item-title d-flex align-items-center justify-content-between mb-1">
                         <span>Application to Team</span>
-                        ${statusBadge}
+                        <div class="d-flex align-items-center">
+                            ${statusBadge}
+                            ${leaveBtn}
+                        </div>
                     </div>
                     <div class="item-desc mb-2">${escapeHtml(a.yourMessage || 'No application message')}</div>
                     <div class="text-muted small">Sent: ${formatNotifTime(a.requestedAt)}</div>
@@ -331,5 +339,17 @@ async function loadTeamApplications() {
         });
     } catch (e) {
         container.innerHTML = `<div class="empty-state text-danger">${escapeHtml(e.message)}</div>`;
+    }
+}
+
+async function leaveTeam(teamId) {
+    if (!confirm('Are you sure you want to leave this team?')) return;
+    try {
+        await api(`/api/v1/request-team/leave/${encodeURIComponent(teamId)}`, { method: 'PATCH' });
+        toast('You have successfully left the team.');
+        loadTeamApplications();
+        if (typeof loadTeamMine === 'function') loadTeamMine();
+    } catch (e) {
+        toast(e.message, 'error');
     }
 }
