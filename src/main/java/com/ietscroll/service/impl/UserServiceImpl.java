@@ -91,10 +91,6 @@ public class UserServiceImpl implements UserService {
 	        throw new UsernameNotFoundException("Incorrect email");
 	    }
 	    String cleanUsername = username.trim().toLowerCase();
-	    String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
-	    if (!(cleanUsername.endsWith("@ietdavv.edu.in") || cleanUsername.equalsIgnoreCase(cleanAdminEmail))) {
-	        throw new UsernameNotFoundException("Incorrect email");
-	    }
 	    UserEntity user = userRepo.findByEmailIgnoreCase(cleanUsername);
 	    if (user == null || !user.isVerified()) {
 	        throw new UsernameNotFoundException("Incorrect email");
@@ -102,7 +98,8 @@ public class UserServiceImpl implements UserService {
 	    if (user.isBlocked()) {
 	        throw new LockedException("Account has been suspended by administrator.");
 	    }
-	    if (user.getEmail().equalsIgnoreCase(cleanAdminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
+	    String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
+	    if (!cleanAdminEmail.isBlank() && user.getEmail().equalsIgnoreCase(cleanAdminEmail) && user.getRole() != Role.SENIOR_ADMIN) {
 	        user.setRole(Role.SENIOR_ADMIN);
 	        userRepo.save(user);
 	    }
@@ -120,10 +117,6 @@ public class UserServiceImpl implements UserService {
 			throw new BadRequestException("Email is required");
 		}
 		String cleanEmail = email.trim().toLowerCase();
-		String cleanAdminEmail = adminEmail != null ? adminEmail.trim().toLowerCase() : "";
-		if (!(cleanEmail.endsWith("@ietdavv.edu.in") || cleanEmail.equalsIgnoreCase(cleanAdminEmail))) {
-			throw new BadRequestException("Only @ietdavv.edu.in email addresses or admin email are accepted");
-		}
 		UserEntity user = userRepo.findByEmailIgnoreCase(cleanEmail);
 		if (user == null) {
 			throw new ResourceNotFoundException("User doesn't exist");
