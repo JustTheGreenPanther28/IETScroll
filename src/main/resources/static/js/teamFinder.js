@@ -65,34 +65,124 @@ async function loadTeamMine() {
     const container = document.getElementById('teamMineDetails');
     if (!container) return;
     container.innerHTML = '<div class="spinner-inline"></div>';
+
+    let ownedTeam = null;
+    let joinedApps = [];
+
+    // 1. Fetch team created by user
     try {
-        const team = await api('/api/v1/team/me');
-        container.innerHTML = '';
-        if (!team) {
-            container.innerHTML = `<div class="empty-state"><i class="bi bi-inbox"></i>You don't have an active team yet. Form one in Create Team!</div>`;
-            return;
+        ownedTeam = await api('/api/v1/team/me');
+    } catch {}
+
+    // 2. Fetch applications to see teams user has joined
+    try {
+        const apps = await api('/api/v1/request-team/my-application');
+        if (apps && Array.isArray(apps)) {
+            joinedApps = apps.filter(a => a.status === 'ACCEPTED');
         }
-        const card = document.createElement('div');
-        card.className = 'stat-card';
-        card.innerHTML = `
+    } catch {}
+
+    container.innerHTML = '';
+
+    if (!ownedTeam && (!joinedApps || joinedApps.length === 0)) {
+        container.innerHTML = `
+            <div class="empty-state">
+                <i class="bi bi-people mb-2" style="font-size: 2rem;"></i>
+                <div class="fw-semibold text-white">No active team memberships</div>
+                <div class="text-muted small mb-3">You haven''t created a team yet, and aren''t currently a member of any other team.</div>
+                <div class="d-flex gap-2 justify-content-center">
+                    <button class="btn-accent btn-sm" onclick="switchTeamTab(''new'', document.querySelectorAll(''#team .tab-btn'')[2])"><i class="bi bi-plus-circle me-1"></i> Create a Team</button>
+                    <button class="btn-secondary-dark btn-sm" onclick="switchTeamTab(''browse'', document.querySelectorAll(''#team .tab-btn'')[0])"><i class="bi bi-grid me-1"></i> Explore Teams</button>
+                </div>
+            </div>`;
+        return;
+    }
+
+    // A) If user is an Owner
+    if (ownedTeam) {
+        const ownerCard = document.createElement('div');
+        ownerCard.className = 'stat-card mb-4';
+        ownerCard.innerHTML = `
             <div class="d-flex justify-content-between align-items-start mb-3 flex-wrap gap-2">
                 <div>
-                    <h5 class="fw-bold text-white mb-1">${escapeHtml(team.purpose)}</h5>
-                    <div class="text-muted small">Created: ${formatNotifTime(team.createdAt)} · Members: ${team.currentMember}/${team.maxMember}</div>
+                    <span class="badge-status badge-accepted mb-1 d-inline-block">TEAM LEADER</span>
+                    <h5 class="fw-bold text-white mb-1">${escapeHtml(ownedTeam.purpose)}</h5>
+                    <div class="text-muted small">Created: ${formatNotifTime(ownedTeam.createdAt)} · Members: ${ownedTeam.currentMember}/${ownedTeam.maxMember} · Privacy: ${escapeHtml(ownedTeam.privacy || 'PUBLIC')}</div>
                 </div>
                 <button class="btn-danger-soft btn-sm" onclick="closeMyTeam()"><i class="bi bi-x-circle me-1"></i> Close Team</button>
             </div>
             <div class="mb-3">
                 <label class="field-label">Update Team Size (3–20)</label>
                 <div class="d-flex gap-2">
-                    <input type="number" class="form-control-dark" id="updateTeamSizeInput" min="3" max="20" value="${team.maxMember}">
+                    <input type="number" class="form-control-dark" style="max-width: 150px;" id="updateTeamSizeInput" min="3" max="20" value="${ownedTeam.maxMember}">
                     <button class="btn-accent" onclick="updateTeamSize()">Update Size</button>
                 </div>
             </div>
+            <div class="mt-4">
+                <h6 class="fw-bold text-white mb-2"><i class="bi bi-people-fill me-2 text-info"></i>Team Members</h6>
+                <div id="mineMembersList"><div class="spinner-inline"></div></div>
+            </div>
         `;
-        container.appendChild(card);
-    } catch (e) {
-        container.innerHTML = `<div class="empty-state"><i class="bi bi-people"></i>You are not currently running a team.</div>`;
+        container.appendChild(ownerCard);
+
+        // Load members list directly into the team card
+        api('/api/v1/request-team/team-members').then(members => {
+            const listEl = document.getElementById('mineMembersList');
+            if (!listEl) return;
+            listEl.innerHTML = '';
+            if (!members || !members.length) {
+                listEl.innerHTML = `<div class="text-muted small py-2"><i class="bi bi-info-circle me-1"></i> No other members joined yet. Check the <b>Join Requests</b> tab to approve applicants.</div>`;
+                return;
+            }
+            members.forEach(m => {
+                const row = document.createElement('div');
+                row.className = 'item-card py-2 px-3 mb-2 d-flex align-items-center justify-content-between';
+                const privBadge = m.applicantPrivilege ? renderPrivilegeBadge(m.applicantPrivilege) : '';
+                row.innerHTML = `
+                    <div class="flex-grow-1">
+                        <div class="fw-semibold text-white d-flex align-items-center gap-2">
+                            <span>${escapeHtml(m.applicantFullName || m.applicantUsername || m.applicantEmail)}</span>
+                            ${privBadge}
+                        </div>
+                        <div class="text-muted small">${escapeHtml(m.applicantEmail)} · ${escapeHtml(m.applicantCourse || '')} ${escapeHtml(m.applicantCouse || '')}</div>
+                    </div>
+                    <button class="btn-danger-soft btn-sm" onclick="kickTeamMember('${escapeHtml(m.applicantEmail)}')"><i class="bi bi-person-x me-1"></i> Remove Member</button>
+                `;
+                listEl.appendChild(row);
+            });
+        }).catch(() => {
+            const listEl = document.getElementById('mineMembersList');
+            if (listEl) listEl.innerHTML = `<div class="text-muted small">Could not load members.</div>`;
+        });
+    }
+
+    // B) If user is an Accepted Member of other teams
+    if (joinedApps && joinedApps.length > 0) {
+        const joinedHeader = document.createElement('h6');
+        joinedHeader.className = 'fw-bold text-white mb-3 mt-4';
+        joinedHeader.innerHTML = '<i class="bi bi-check-circle-fill me-2 text-success"></i>Teams You Have Joined';
+        container.appendChild(joinedHeader);
+
+        joinedApps.forEach(ja => {
+            const jCard = document.createElement('div');
+            jCard.className = 'item-card mb-3';
+            jCard.innerHTML = `
+                <div class="flex-grow-1">
+                    <div class="d-flex align-items-center justify-content-between mb-1">
+                        <div class="fw-bold text-white fs-6">Member in Team</div>
+                        <span class="badge-status badge-accepted">ACTIVE MEMBER</span>
+                    </div>
+                    <div class="text-muted small mb-2">Application message: "${escapeHtml(ja.yourMessage || 'N/A')}"</div>
+                    <div class="text-muted small">Joined: ${formatNotifTime(ja.requestedAt)}</div>
+                </div>
+                <div class="ms-3">
+                    <button class="btn-danger-soft btn-sm" onclick="leaveTeam('${escapeHtml(ja.teamId)}')">
+                        <i class="bi bi-box-arrow-right me-1"></i> Leave Team
+                    </button>
+                </div>
+            `;
+            container.appendChild(jCard);
+        });
     }
 }
 
