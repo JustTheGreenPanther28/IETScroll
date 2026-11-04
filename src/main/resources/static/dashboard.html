@@ -177,64 +177,132 @@
 			</div>
 
 			<!-- ============ USERS MANAGEMENT SECTION (ADMIN) ============ -->
+			<!-- ============ USERS AUDIT & GOVERNANCE ============ -->
 			<div id="users" class="section">
-				<div class="stat-card mb-4">
-					<div class="d-flex align-items-center justify-content-between mb-3 flex-wrap gap-2">
-						<div>
-							<h5 class="fw-bold text-white mb-1"><i class="bi bi-people-fill me-2 text-primary"></i>Campus User Governance & Activity Audit</h5>
-							<p class="text-muted small mb-0">Search users, audit login/logout timestamps, inspect report histories, toggle login blocks, and assign privilege tiers.</p>
+				<!-- Google Admin Header -->
+				<div class="google-admin-header d-flex align-items-center justify-content-between mb-4 flex-wrap gap-3">
+					<div class="d-flex align-items-center gap-3">
+						<div class="google-header-icon">
+							<i class="bi bi-people-fill"></i>
 						</div>
-						<button class="btn-accent btn-sm" onclick="loadUsersTable()"><i class="bi bi-arrow-clockwise me-1"></i> Refresh</button>
+						<div>
+							<div class="d-flex align-items-center gap-2">
+								<h4 class="fw-bold text-white mb-0">Directory & User Governance</h4>
+								<span class="google-badge-console"><i class="bi bi-shield-check"></i> Admin Console</span>
+							</div>
+							<p class="text-muted small mb-0 mt-1">Manage directory accounts, assign security roles, inspect login audits, and enforce security policies.</p>
+						</div>
 					</div>
+					<div class="d-flex align-items-center gap-2">
+						<button class="google-btn-outline" onclick="loadUsersTable(true)" title="Refresh User Directory">
+							<i class="bi bi-arrow-clockwise"></i> Refresh
+						</button>
+					</div>
+				</div>
 
-					<div class="row g-3 mb-4">
-						<div class="col-md-5">
-							<div class="input-group">
-								<span class="input-group-text bg-dark border-secondary border-opacity-25 text-muted"><i class="bi bi-search"></i></span>
-								<input type="text" class="form-control-dark" id="userSearchInput" placeholder="Search by username, email, full name..." onkeyup="debounceUserSearch()">
+				<!-- Google Metric KPI Tiles -->
+				<div class="google-kpi-grid">
+					<div class="google-kpi-card blue">
+						<div class="google-kpi-info">
+							<div class="kpi-label">Directory Total</div>
+							<div class="kpi-value" id="gStatTotalUsers">—</div>
+						</div>
+						<div class="google-kpi-icon"><i class="bi bi-people-fill"></i></div>
+					</div>
+					<div class="google-kpi-card green">
+						<div class="google-kpi-info">
+							<div class="kpi-label">Active Accounts</div>
+							<div class="kpi-value" id="gStatActiveUsers">—</div>
+						</div>
+						<div class="google-kpi-icon"><i class="bi bi-check-circle-fill"></i></div>
+					</div>
+					<div class="google-kpi-card red">
+						<div class="google-kpi-info">
+							<div class="kpi-label">Suspended Users</div>
+							<div class="kpi-value" id="gStatBlockedUsers">—</div>
+						</div>
+						<div class="google-kpi-icon"><i class="bi bi-slash-circle-fill"></i></div>
+					</div>
+					<div class="google-kpi-card purple">
+						<div class="google-kpi-info">
+							<div class="kpi-label">Administrative Staff</div>
+							<div class="kpi-value" id="gStatAdminUsers">—</div>
+						</div>
+						<div class="google-kpi-icon"><i class="bi bi-shield-shaded"></i></div>
+					</div>
+				</div>
+
+				<!-- Google Material Search & Filter Toolbar -->
+				<div class="google-toolbar mb-4">
+					<div class="row g-3 align-items-center">
+						<div class="col-lg-6 col-md-5">
+							<div class="google-search-bar">
+								<i class="bi bi-search"></i>
+								<input type="text" id="userSearchInput" placeholder="Search directory by name, email, or username..." onkeyup="debounceUserSearch()">
+								<button type="button" class="google-clear-btn" id="userSearchClear" onclick="clearUserSearch()" style="display:none;"><i class="bi bi-x-circle-fill"></i></button>
 							</div>
 						</div>
-						<div class="col-md-4">
-							<select class="form-control-dark" id="userPrivilegeFilter" onchange="loadUsersTable()">
-								<option value="">All Privilege Classes</option>
-								<option value="TRUSTED">TRUSTED</option>
-								<option value="NORMAL">NORMAL</option>
-								<option value="NEW">NEW</option>
-								<option value="MAY_BE_SPAM">MAY BE SPAM</option>
-							</select>
+						<div class="col-lg-3 col-md-4 col-sm-6">
+							<div class="google-select-wrapper">
+								<i class="bi bi-funnel-fill select-icon"></i>
+								<select class="google-select" id="userPrivilegeFilter" onchange="loadUsersTable()">
+									<option value="">All Trust Tiers</option>
+									<option value="TRUSTED">✦ TRUSTED</option>
+									<option value="NORMAL">● NORMAL</option>
+									<option value="NEW">★ NEW</option>
+									<option value="MAY_BE_SPAM">⚠ MAY BE SPAM</option>
+								</select>
+							</div>
 						</div>
-						<div class="col-md-3">
-							<select class="form-control-dark" id="userBlockFilter" onchange="loadUsersTable()">
-								<option value="">All Account Statuses</option>
-								<option value="false">Active Only</option>
-								<option value="true">Blocked Only</option>
-							</select>
+						<div class="col-lg-3 col-md-3 col-sm-6">
+							<div class="google-select-wrapper">
+								<i class="bi bi-shield-lock select-icon"></i>
+								<select class="google-select" id="userBlockFilter" onchange="loadUsersTable()">
+									<option value="">All Account Statuses</option>
+									<option value="false">Active Only</option>
+									<option value="true">Suspended Only</option>
+								</select>
+							</div>
 						</div>
 					</div>
+				</div>
 
+				<!-- Google Directory Table Card -->
+				<div class="google-table-card">
 					<div class="table-scroll-wrapper">
 						<table class="user-audit-table">
 							<thead>
 								<tr>
-									<th>User / Email</th>
-									<th>Course & Branch</th>
-									<th>Role & Privilege</th>
+									<th>User / Account</th>
+									<th>Degree & Branch</th>
+									<th>System Role</th>
+									<th>Trust Tier</th>
 									<th>Status</th>
-									<th>Activity Timestamps</th>
-									<th>Reports Created</th>
-									<th class="text-end">Admin Actions</th>
+									<th>Last Activity</th>
+									<th>Campus Posts</th>
+									<th class="text-end">Governance</th>
 								</tr>
 							</thead>
 							<tbody id="usersAuditTableBody">
-								<tr><td colspan="7" class="text-center py-4 text-muted"><div class="spinner-inline"></div> Loading users...</td></tr>
+								<tr><td colspan="8" class="text-center py-4 text-muted"><div class="spinner-inline"></div> Loading directory...</td></tr>
 							</tbody>
 						</table>
 					</div>
 
-					<div class="pagination-row mt-3">
-						<button class="btn-secondary-dark" id="userPrevBtn" onclick="changeUserPage(-1)"><i class="bi bi-chevron-left me-1"></i> Prev</button>
-						<span class="page-label" id="userPageLabel">Page 1</span>
-						<button class="btn-secondary-dark" id="userNextBtn" onclick="changeUserPage(1)">Next <i class="bi bi-chevron-right ms-1"></i></button>
+					<!-- Google Pagination Bar -->
+					<div class="google-pagination-bar">
+						<div class="d-flex align-items-center gap-2">
+							<span id="userPageSummary">Showing directory entries</span>
+						</div>
+						<div class="d-flex align-items-center gap-2">
+							<span class="page-label me-2" id="userPageLabel">Page 1</span>
+							<button class="google-page-btn" id="userPrevBtn" onclick="changeUserPage(-1)" title="Previous Page" aria-label="Previous Page">
+								<i class="bi bi-chevron-left"></i>
+							</button>
+							<button class="google-page-btn" id="userNextBtn" onclick="changeUserPage(1)" title="Next Page" aria-label="Next Page">
+								<i class="bi bi-chevron-right"></i>
+							</button>
+						</div>
 					</div>
 				</div>
 			</div>

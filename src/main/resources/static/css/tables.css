@@ -1,9 +1,230 @@
-/* static/css/tables.css - User audit tables, scroll wrappers, and table action buttons */
+/* static/css/tables.css - Google Admin Console styled User Governance & Tables */
+
+/* ==========================================================================
+   Google Admin Dashboard Design Tokens & Components
+   ========================================================================== */
+
+.google-admin-header {
+	background: linear-gradient(135deg, rgba(26, 115, 232, 0.08) 0%, rgba(132, 48, 206, 0.05) 100%);
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+	padding: 20px 24px;
+	backdrop-filter: blur(8px);
+}
+
+.google-header-icon {
+	width: 48px;
+	height: 48px;
+	border-radius: 14px;
+	background: rgba(138, 180, 248, 0.15);
+	color: #8ab4f8;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.5rem;
+	border: 1px solid rgba(138, 180, 248, 0.3);
+	box-shadow: 0 4px 12px rgba(26, 115, 232, 0.2);
+}
+
+.google-badge-console {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	font-size: 0.72rem;
+	font-weight: 700;
+	text-transform: uppercase;
+	letter-spacing: 0.06em;
+	padding: 3px 10px;
+	border-radius: 9999px;
+	background: rgba(138, 180, 248, 0.14);
+	color: #8ab4f8;
+	border: 1px solid rgba(138, 180, 248, 0.35);
+}
+
+.google-btn-outline {
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.15);
+	color: #e3e3e3;
+	border-radius: 9999px;
+	padding: 8px 18px;
+	font-size: 0.85rem;
+	font-weight: 600;
+	display: inline-flex;
+	align-items: center;
+	gap: 8px;
+	cursor: pointer;
+	transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+}
+.google-btn-outline:hover {
+	background: rgba(138, 180, 248, 0.15);
+	border-color: #8ab4f8;
+	color: #8ab4f8;
+	transform: translateY(-1px);
+}
+
+/* ── Google Metric KPI Cards ────────────────────────────────────────────── */
+.google-kpi-grid {
+	display: grid;
+	grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+	gap: 16px;
+	margin-bottom: 24px;
+}
+
+.google-kpi-card {
+	background: #131722;
+	border: 1px solid rgba(255, 255, 255, 0.07);
+	border-radius: 16px;
+	padding: 18px 20px;
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	transition: all 0.25s ease;
+	position: relative;
+	overflow: hidden;
+}
+.google-kpi-card::before {
+	content: '';
+	position: absolute;
+	top: 0;
+	left: 0;
+	width: 4px;
+	height: 100%;
+}
+.google-kpi-card.blue::before   { background: #8ab4f8; }
+.google-kpi-card.green::before  { background: #81c995; }
+.google-kpi-card.red::before    { background: #f28b82; }
+.google-kpi-card.purple::before { background: #c58af9; }
+
+.google-kpi-card:hover {
+	transform: translateY(-2px);
+	border-color: rgba(255, 255, 255, 0.15);
+	box-shadow: 0 8px 24px rgba(0, 0, 0, 0.35);
+}
+
+.google-kpi-info .kpi-label {
+	font-size: 0.78rem;
+	font-weight: 600;
+	text-transform: uppercase;
+	letter-spacing: 0.05em;
+	color: #9aa0a6;
+	margin-bottom: 4px;
+}
+.google-kpi-info .kpi-value {
+	font-size: 1.85rem;
+	font-weight: 800;
+	color: #ffffff;
+	line-height: 1.1;
+}
+
+.google-kpi-icon {
+	width: 44px;
+	height: 44px;
+	border-radius: 12px;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-size: 1.35rem;
+}
+.google-kpi-card.blue .google-kpi-icon   { background: rgba(138, 180, 248, 0.14); color: #8ab4f8; }
+.google-kpi-card.green .google-kpi-icon  { background: rgba(129, 201, 149, 0.14); color: #81c995; }
+.google-kpi-card.red .google-kpi-icon    { background: rgba(242, 139, 130, 0.14); color: #f28b82; }
+.google-kpi-card.purple .google-kpi-icon { background: rgba(197, 138, 249, 0.14); color: #c58af9; }
+
+/* ── Google Toolbar & Filter Chips ──────────────────────────────────────── */
+.google-toolbar {
+	background: #111827;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 16px;
+	padding: 14px 18px;
+}
+
+.google-search-bar {
+	position: relative;
+	display: flex;
+	align-items: center;
+	width: 100%;
+}
+.google-search-bar i.bi-search {
+	position: absolute;
+	left: 16px;
+	color: #9aa0a6;
+	font-size: 0.95rem;
+	pointer-events: none;
+}
+.google-search-bar input {
+	width: 100%;
+	background: #1e2433;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 9999px;
+	padding: 10px 42px 10px 42px;
+	color: #ffffff;
+	font-size: 0.9rem;
+	outline: none;
+	transition: all 0.2s ease;
+}
+.google-search-bar input:focus {
+	border-color: #8ab4f8;
+	background: #242c3d;
+	box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.25);
+}
+.google-clear-btn {
+	position: absolute;
+	right: 12px;
+	background: transparent;
+	border: none;
+	color: #9aa0a6;
+	cursor: pointer;
+	padding: 4px;
+	font-size: 0.95rem;
+}
+.google-clear-btn:hover { color: #ffffff; }
+
+.google-select-wrapper {
+	position: relative;
+	display: flex;
+	align-items: center;
+}
+.google-select-wrapper .select-icon {
+	position: absolute;
+	left: 14px;
+	color: #8ab4f8;
+	font-size: 0.85rem;
+	pointer-events: none;
+}
+.google-select {
+	width: 100%;
+	background: #1e2433;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	border-radius: 9999px;
+	padding: 10px 36px 10px 38px;
+	color: #e2e8f0;
+	font-size: 0.85rem;
+	font-weight: 600;
+	cursor: pointer;
+	outline: none;
+	appearance: none;
+	-webkit-appearance: none;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa0a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+	background-repeat: no-repeat;
+	background-position: right 14px center;
+	transition: all 0.2s ease;
+}
+.google-select:focus {
+	border-color: #8ab4f8;
+	box-shadow: 0 0 0 3px rgba(138, 180, 248, 0.25);
+}
+
+/* ── Google Directory Table Container ───────────────────────────────────── */
+.google-table-card {
+	background: #0f141f;
+	border: 1px solid rgba(255, 255, 255, 0.08);
+	border-radius: 18px;
+	overflow: hidden;
+	box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+}
+
 .table-scroll-wrapper {
 	overflow-x: auto;
-	border-radius: 14px;
-	background: #0d131f;
-	border: 1.5px solid #1e293b;
 	scrollbar-color: #3b4261 #0d131f;
 }
 .table-scroll-wrapper::-webkit-scrollbar-track {
@@ -12,69 +233,174 @@
 
 .user-audit-table {
 	width: 100%;
-	border-collapse: separate;
-	border-spacing: 0 8px;
-	min-width: 960px;
+	border-collapse: collapse;
+	min-width: 1020px;
 }
 
 .user-audit-table thead tr th {
-	background: #080c14;
-	color: #94a3b8;
-	font-size: 0.78rem;
+	background: #0b0f17;
+	color: #9aa0a6;
+	font-size: 0.74rem;
 	font-weight: 700;
 	text-transform: uppercase;
 	letter-spacing: 0.08em;
-	padding: 12px 16px;
+	padding: 14px 18px;
+	border-bottom: 1px solid rgba(255, 255, 255, 0.08);
 	white-space: nowrap;
 }
-.user-audit-table thead tr th:first-child { border-radius: 8px 0 0 8px; }
-.user-audit-table thead tr th:last-child  { border-radius: 0 8px 8px 0; }
+
+.user-audit-table tbody tr {
+	border-bottom: 1px solid rgba(255, 255, 255, 0.06);
+	transition: background 0.15s ease;
+}
+.user-audit-table tbody tr:hover {
+	background: rgba(138, 180, 248, 0.04);
+}
 
 .user-audit-table td {
-	background: #111827;
-	padding: 14px 16px;
+	padding: 14px 18px;
 	vertical-align: middle;
 	font-size: 0.88rem;
-	border-top: 1.5px solid #1e293b;
-	border-bottom: 1.5px solid #1e293b;
 	color: #e2e8f0;
-	transition: background 0.15s;
-}
-.user-audit-table tr td:first-child {
-	border-left: 1.5px solid #1e293b;
-	border-radius: 10px 0 0 10px;
-}
-.user-audit-table tr td:last-child {
-	border-right: 1.5px solid #1e293b;
-	border-radius: 0 10px 10px 0;
-}
-.user-audit-table tr:hover td {
-	background: #172033;
-	border-color: #3b4d6b;
 }
 
-.user-audit-table .user-name-cell {
+/* User Identity Cell */
+.user-identity-wrap {
+	display: flex;
+	align-items: center;
+	gap: 12px;
+}
+.google-avatar {
+	width: 38px;
+	height: 38px;
+	border-radius: 50%;
+	display: flex;
+	align-items: center;
+	justify-content: center;
+	font-weight: 700;
+	font-size: 1rem;
+	color: #ffffff;
+	flex-shrink: 0;
+	box-shadow: 0 2px 6px rgba(0, 0, 0, 0.25);
+}
+.user-identity-text {
+	display: flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.user-identity-name {
 	font-weight: 700;
 	color: #ffffff;
-	font-size: 0.95rem;
+	font-size: 0.92rem;
+	display: flex;
+	align-items: center;
+	gap: 6px;
 }
-.user-audit-table .user-email-cell {
-	color: #94a3b8;
-	font-size: 0.82rem;
-	margin-top: 2px;
+.user-identity-sub {
+	color: #9aa0a6;
+	font-size: 0.8rem;
+	display: flex;
+	align-items: center;
+	gap: 6px;
+}
+.user-identity-sub .email-copy-btn {
+	background: transparent;
+	border: none;
+	color: #64748b;
+	cursor: pointer;
+	padding: 0;
+	font-size: 0.78rem;
+}
+.user-identity-sub .email-copy-btn:hover { color: #8ab4f8; }
+
+/* Academic Chip */
+.academic-chip {
+	display: inline-flex;
+	flex-direction: column;
+	gap: 2px;
+}
+.academic-degree {
+	color: #e2e8f0;
+	font-weight: 600;
+	font-size: 0.86rem;
+}
+.academic-branch {
+	color: #8ab4f8;
+	font-size: 0.76rem;
+	font-weight: 500;
 }
 
+/* Google-style Role Chips */
+.google-role-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 5px;
+	padding: 4px 10px;
+	border-radius: 9999px;
+	font-size: 0.74rem;
+	font-weight: 700;
+	letter-spacing: 0.03em;
+	white-space: nowrap;
+}
+.google-role-chip.senior-admin {
+	background: rgba(197, 138, 249, 0.16);
+	color: #d7aefb;
+	border: 1px solid rgba(197, 138, 249, 0.4);
+}
+.google-role-chip.admin {
+	background: rgba(138, 180, 248, 0.16);
+	color: #8ab4f8;
+	border: 1px solid rgba(138, 180, 248, 0.4);
+}
+.google-role-chip.student {
+	background: rgba(255, 255, 255, 0.06);
+	color: #c4c7c5;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+}
+
+/* Google-style Status Dots */
+.google-status-chip {
+	display: inline-flex;
+	align-items: center;
+	gap: 6px;
+	font-size: 0.78rem;
+	font-weight: 700;
+	letter-spacing: 0.04em;
+	text-transform: uppercase;
+}
+.google-status-chip .status-dot {
+	width: 8px;
+	height: 8px;
+	border-radius: 50%;
+}
+.google-status-chip.active {
+	color: #81c995;
+}
+.google-status-chip.active .status-dot {
+	background: #81c995;
+	box-shadow: 0 0 8px rgba(129, 201, 149, 0.7);
+}
+.google-status-chip.blocked {
+	color: #f28b82;
+}
+.google-status-chip.blocked .status-dot {
+	background: #f28b82;
+	box-shadow: 0 0 8px rgba(242, 139, 130, 0.7);
+}
+
+/* Timestamp Lines */
 .ts-line {
 	display: flex;
 	align-items: center;
 	gap: 6px;
-	font-size: 0.82rem;
-	color: #94a3b8;
+	font-size: 0.8rem;
+	color: #9aa0a6;
 	white-space: nowrap;
 }
-.ts-line i { color: #818cf8; font-size: 0.85rem; }
-.ts-line.logout i { color: #fb7185; }
+.ts-line i { color: #8ab4f8; font-size: 0.85rem; }
+.ts-line.logout i { color: #f28b82; }
 
+/* Activity Badges */
 .report-count-cell {
 	display: flex;
 	align-items: center;
@@ -85,105 +411,122 @@
 	display: inline-flex;
 	align-items: center;
 	gap: 5px;
-	font-size: 0.78rem;
+	font-size: 0.74rem;
 	font-weight: 700;
-	padding: 4px 9px;
-	border-radius: 6px;
+	padding: 3px 8px;
+	border-radius: 9999px;
 	white-space: nowrap;
 }
 .report-mini-badge.lost {
-	background: rgba(245, 158, 11, 0.2);
-	color: #fcd34d;
-	border: 1px solid rgba(245, 158, 11, 0.5);
+	background: rgba(253, 214, 99, 0.14);
+	color: #fdd663;
+	border: 1px solid rgba(253, 214, 99, 0.35);
 }
 .report-mini-badge.found {
-	background: rgba(16, 185, 129, 0.2);
-	color: #6ee7b7;
-	border: 1px solid rgba(16, 185, 129, 0.5);
+	background: rgba(129, 201, 149, 0.14);
+	color: #81c995;
+	border: 1px solid rgba(129, 201, 149, 0.35);
 }
 .report-mini-badge.team {
-	background: rgba(99, 102, 241, 0.2);
-	color: #c7d2fe;
-	border: 1px solid rgba(99, 102, 241, 0.5);
+	background: rgba(138, 180, 248, 0.14);
+	color: #8ab4f8;
+	border: 1px solid rgba(138, 180, 248, 0.35);
 }
 
-.tbl-action-btn {
-	padding: 7px 14px !important;
-	border-radius: 8px !important;
-	font-size: 0.82rem !important;
-	font-weight: 700 !important;
+/* Google Action Controls */
+.google-select-pill {
+	background: #1e2433 !important;
+	border: 1px solid rgba(255, 255, 255, 0.14) !important;
+	color: #ffffff !important;
+	border-radius: 9999px !important;
+	padding: 5px 28px 5px 12px !important;
+	font-size: 0.78rem !important;
+	font-weight: 600 !important;
+	cursor: pointer !important;
+	outline: none !important;
+	transition: all 0.2s !important;
+	appearance: none !important;
+	-webkit-appearance: none !important;
+	background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 12 12'%3E%3Cpath fill='%239aa0a6' d='M6 8L1 3h10z'/%3E%3C/svg%3E") !important;
+	background-repeat: no-repeat !important;
+	background-position: right 10px center !important;
+}
+.google-select-pill:focus {
+	border-color: #8ab4f8 !important;
+	box-shadow: 0 0 0 2px rgba(138, 180, 248, 0.25) !important;
+}
+.google-select-pill option {
+	background: #111827 !important;
+	color: #ffffff !important;
+}
+
+.google-action-btn {
+	padding: 5px 12px !important;
+	border-radius: 9999px !important;
+	font-size: 0.78rem !important;
+	font-weight: 600 !important;
 	cursor: pointer !important;
 	transition: all 0.2s ease !important;
 	display: inline-flex !important;
 	align-items: center !important;
-	gap: 6px !important;
+	gap: 5px !important;
 	white-space: nowrap !important;
-	box-shadow: 0 2px 6px rgba(0,0,0,0.3) !important;
 }
-.tbl-action-btn.block {
-	background: rgba(244, 63, 94, 0.18) !important;
-	border: 1.5px solid #f43f5e !important;
-	color: #fda4af !important;
+.google-action-btn.block {
+	background: rgba(242, 139, 130, 0.12) !important;
+	border: 1px solid rgba(242, 139, 130, 0.4) !important;
+	color: #f28b82 !important;
 }
-.tbl-action-btn.block:hover {
-	background: #f43f5e !important;
-	border-color: #f43f5e !important;
+.google-action-btn.block:hover {
+	background: #ea4335 !important;
+	border-color: #ea4335 !important;
 	color: #ffffff !important;
-	box-shadow: 0 0 14px rgba(244, 63, 94, 0.6) !important;
+	box-shadow: 0 2px 8px rgba(234, 67, 53, 0.4) !important;
 }
-.tbl-action-btn.unblock {
-	background: rgba(16, 185, 129, 0.18) !important;
-	border: 1.5px solid #10b981 !important;
-	color: #6ee7b7 !important;
+.google-action-btn.unblock {
+	background: rgba(129, 201, 149, 0.12) !important;
+	border: 1px solid rgba(129, 201, 149, 0.4) !important;
+	color: #81c995 !important;
 }
-.tbl-action-btn.unblock:hover {
-	background: #10b981 !important;
-	border-color: #10b981 !important;
+.google-action-btn.unblock:hover {
+	background: #34a853 !important;
+	border-color: #34a853 !important;
 	color: #ffffff !important;
-	box-shadow: 0 0 14px rgba(16, 185, 129, 0.6) !important;
+	box-shadow: 0 2px 8px rgba(52, 168, 83, 0.4) !important;
 }
 
-.privilege-select {
-	background: #0f172a !important;
-	border: 1.5px solid #475569 !important;
-	color: #ffffff !important;
-	border-radius: 8px !important;
-	padding: 6px 10px !important;
-	font-size: 0.82rem !important;
-	font-weight: 700 !important;
-	cursor: pointer !important;
-	outline: none !important;
-	transition: all 0.2s !important;
-	min-width: 120px !important;
+/* Google-style Pagination Footer */
+.google-pagination-bar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	padding: 14px 20px;
+	background: #0b0f17;
+	border-top: 1px solid rgba(255, 255, 255, 0.08);
+	font-size: 0.82rem;
+	color: #9aa0a6;
+	flex-wrap: wrap;
+	gap: 12px;
 }
-.privilege-select:focus {
-	border-color: #818cf8 !important;
-	box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.3) !important;
-}
-.privilege-select option {
-	background: #1e293b !important;
-	color: #ffffff !important;
-	font-weight: 600 !important;
-}
-
-.user-status-pill {
+.google-page-btn {
+	width: 34px;
+	height: 34px;
+	border-radius: 50%;
 	display: inline-flex;
 	align-items: center;
-	gap: 4px;
-	padding: 3px 10px;
-	border-radius: 99px;
-	font-size: 0.72rem;
-	font-weight: 700;
-	letter-spacing: 0.04em;
-	text-transform: uppercase;
+	justify-content: center;
+	background: rgba(255, 255, 255, 0.04);
+	border: 1px solid rgba(255, 255, 255, 0.1);
+	color: #e2e8f0;
+	cursor: pointer;
+	transition: all 0.2s ease;
 }
-.user-status-pill.active {
-	background: rgba(16,185,129,0.18);
-	color: #10b981;
-	border: 1px solid rgba(16,185,129,0.4);
+.google-page-btn:hover:not(:disabled) {
+	background: rgba(138, 180, 248, 0.15);
+	border-color: #8ab4f8;
+	color: #8ab4f8;
 }
-.user-status-pill.blocked {
-	background: rgba(244,63,94,0.18);
-	color: #f43f5e;
-	border: 1px solid rgba(244,63,94,0.4);
+.google-page-btn:disabled {
+	opacity: 0.35;
+	cursor: not-allowed;
 }

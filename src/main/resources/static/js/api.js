@@ -125,12 +125,12 @@ function formatNotifTime(isoString) {
 function renderRoleBadge(role) {
     const r = (role || 'STUDENT').toUpperCase();
     if (r === 'SENIOR_ADMIN') {
-        return `<span class="privilege-badge badge-senior-admin"><i class="bi bi-star-fill"></i> SENIOR ADMIN</span>`;
+        return `<span class="google-role-chip senior-admin"><i class="bi bi-crown-fill text-warning"></i> Senior Admin</span>`;
     }
     if (r === 'ADMIN') {
-        return `<span class="privilege-badge badge-admin"><i class="bi bi-shield-fill-check"></i> ADMIN</span>`;
+        return `<span class="google-role-chip admin"><i class="bi bi-shield-lock-fill"></i> Admin</span>`;
     }
-    return '';
+    return `<span class="google-role-chip student"><i class="bi bi-person"></i> Student</span>`;
 }
 
 function renderPrivilegeBadge(privilege) {
