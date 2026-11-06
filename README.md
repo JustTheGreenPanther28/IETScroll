@@ -1,274 +1,281 @@
 # IETScroll
 
-**A student community platform for the Institute of Engineering and Technology, DAVV (IET DAVV).**
+**A student community platform for the Institute of Engineering and Technology, DAVV (IET DAVV), Indore.**
 
-IETScroll brings student workflows together in one web application: campus lost and found, project/team formation, and AI-assisted resume feedback. The repository contains a Spring Boot backend and an HTML/CSS/JavaScript frontend served by the same application.
+IETScroll brings three student workflows into one web app: campus **lost and found**, **team formation** for projects and hackathons, and **AI resume feedback**. It also ships with an admin console, a layered content-moderation pipeline, and a campus anti-ragging policy page. The backend is Spring Boot; the frontend is plain HTML/CSS/JavaScript served by the same application.
 
-> This README documents the implementation visible in the source code. It does not treat planned features as completed functionality.
+> This is a student project and is not officially affiliated with IET DAVV.
+> This README describes what the source code does today. Planned work is not presented as finished, and known gaps are listed in [Known issues](#known-issues).
 
-## Live deployments
+## Deployments
 
-Both deployment URLs provided for IETScroll:
+The code references two Render deployments:
 
-- **IET Scroll:** https://iet-scroll.onrender.com/
-- **Student Community Platform – IETScroll:** https://student-community-platform-ietscroll.onrender.com/
+- https://iet-scroll.onrender.com/ (Swagger server entry)
+- https://student-community-platform-ietscroll.onrender.com/ (frontend API base and `app.self-url`)
 
-The current source configuration uses the second URL as the frontend API base and as the configured application URL. Both links are listed here as active project deployments; availability may change depending on hosting status.
+Local development serves everything on `http://localhost:4040`. The frontend picks its API base automatically: same origin when the port is `4040`, the Render URL otherwise.
 
 ## Features
 
-### 1. Institute-based accounts
-- Registration accepts the `@ietdavv.edu.in` email domain, plus a configurable administrator email.
-- Passwords are hashed using BCrypt.
-- Email OTP verification activates the account before login is allowed.
-- OTPs have a 10-minute validity window. The service enforces a 60-second resend cooldown when generating another OTP, invalidates previous OTPs, and tracks failed verification attempts.
-- Login issues a signed JWT with a 24-hour lifetime. The dashboard sends it in the `Authorization: Bearer <token>` request header.
-- Students can view and update their profile name and username.
+### Accounts and roles
+- Register with username, full name, email, course, branch, and passout year. Passwords are hashed with BCrypt. The register form requires 8+ characters; the API itself sets no password rule.
+- Email OTP verification before first login: 6 digits, generated with `SecureRandom`, valid 10 minutes, one-time use, 60-second cooldown between requests, locked out after 5 wrong attempts.
+- Login (`POST /login`) returns a 24-hour JWT in the `Authorization` response header.
+- Roles: `STUDENT`, `ADMIN`, `SENIOR_ADMIN`. The account matching the `ADMIN_EMAIL` setting is promoted to `SENIOR_ADMIN` on login.
+- Privilege tiers: `NEW` (default at registration), `NORMAL`, `TRUSTED`, `MAY_BE_SPAM`. Tiers decide how much moderation a user's posts go through (see below).
+- Blocked accounts cannot log in (HTTP 403 with a suspension message).
+- Profile page, username and full-name updates, logout timestamp tracking.
 
-### 2. Campus lost and found
-- Report lost or found physical items with a description, predicted location, and photo.
-- Lost-item reports can include an optional reward.
-- Submissions undergo basic validation and per-user limits, text moderation, an NVIDIA vision-model relevance check, and Sightengine image-safety checks.
-- Photos are hosted on Cloudinary. PostgreSQL stores report metadata and image URLs.
-- Browse paginated posts, view your own active posts, see the contact email associated with a post, and close your own reports.
-- Current limits: at most **2 open lost-item reports** and **3 pending found-item reports** per user.
+### Lost and found
+- Report lost items (optional reward) or found items, each with name, description, campus location, and an optional photo.
+- Rules enforced by the service: location is required, name at least 3 characters, description at least 20 characters, image types `jpeg/png/webp/gif`.
+- Limits per user: **2 open lost reports**, **3 pending found reports**.
+- A submission with no location is rejected and the student is automatically moved to `MAY_BE_SPAM`.
+- Browse open reports (paginated, newest first), view your own, close your own. Each card shows the poster's privilege badge.
+- **Views audit:** when a student opens someone else's report, the view is recorded once per viewer; the list of viewers (name and email) can be fetched per report.
+- Photos are uploaded to Cloudinary (`IETSCROLL_Lost_Items` folder); PostgreSQL stores the URL and metadata.
 
-### 3. Team Finder
-- Create one active team at a time, with a purpose, privacy setting, maximum size, and optional required skills.
-- Browse active public teams and request to join a team with a message.
-- Team owners can view pending applications and accepted membership records, accept or reject applicants, remove members, update the maximum team size, and close their team.
-- Team-purpose text is checked by moderation services before it is saved.
+### Team Finder
+- One open team per owner. A team has a purpose, privacy (`PUBLIC` or `PRIVATE`), maximum size (up to 20), and optional needed skills.
+- Public open teams are listed; private teams are not listed but can still be applied to by team ID.
+- Students apply with a message. Owners see pending applications and members, then accept, reject, or remove, change the team size, or close the team.
+- The team purpose is moderated before saving (emoji ban, anti-ragging check, content-safety check) for every user, regardless of tier.
+- Skills are stored against teams, but there is no skill-matching or ranking logic.
 
-Required skills are stored with teams, but the inspected source does not implement automatic applicant ranking or a skill-match recommendation algorithm.
+### AI resume checker
+- Upload a PDF, DOC, or DOCX (max 5 MB), plus target role and years of experience.
+- File type is detected from content with Apache Tika, text is extracted, and the model scores it against a rubric in `prompts/ResumeDefaultSystemPrompt.st` (contact, summary, experience, skills, education, formatting, keywords and projects).
+- The resume text is wrapped in markers and the prompt tells the model to treat it as data, to reduce prompt injection.
+- Structured result: overall rating, content and project ratings, top 5 matched skills, top 10 missing keywords, improvement advice, and one suggested project.
+- Limit: **3 analyses per user per calendar month**, tracked in `resume_usage_audit`.
+- Feedback is advisory only.
 
-### 4. AI resume checker
-- Submit a resume with a target role and years of experience.
-- Apache Tika detects the document type from file content before text extraction.
-- The backend accepts detected PDF, Microsoft Word (`.doc`), and Word Open XML (`.docx`) documents up to **5 MB**.
-- An NVIDIA-hosted language model returns a structured assessment including an overall score, content and project scores, matched skills, missing keywords, improvement advice, and a suggested project.
-- Resume text is delimited in the prompt and framed as data to reduce prompt-injection risk.
+### Moderation pipeline
 
-AI-generated feedback is advisory; it is not a hiring decision or a guarantee of ATS performance.
+| Check | Applies to | Behavior |
+|---|---|---|
+| Emoji ban | All item text; team purpose | Hard reject, all tiers including `TRUSTED` |
+| Anti-ragging LLM (senior-junior dynamics, branch superiority, batch hierarchy, harassment) | Item text for `NEW`, `NORMAL`, `MAY_BE_SPAM`; team purpose for everyone | Reject on `VIOLATION`; **allows the post if the model call errors** |
+| Content-safety LLM | Item text for `MAY_BE_SPAM`; team purpose for everyone | Reject unless response says safe; **allows the post if the model call errors** |
+| Vision relevance (does the photo match the claim, no faces, no memes) | Item photos, non-`TRUSTED` | Runs in parallel with the text checks; **fails closed** on error or empty answer |
+| Sightengine (nudity, weapons, gore, violence, self-harm, alcohol, drugs, offensive symbols) | Item photos, non-`TRUSTED` | Rejects above set thresholds; **skipped if Sightengine errors or quota runs out** |
 
-### 5. Text and image moderation
-- Text checks include an emoji restriction, campus anti-ragging/hierarchy rules, and an external language-model safety check.
-- Item images are checked for relevance to the claimed object and sent to Sightengine for safety classification.
-- Some current handlers log external moderation errors and allow processing to continue. See the limitations section for details.
+`TRUSTED` users skip all AI checks and only face the emoji rule. Every accepted or rejected submission is written to the user's activity log.
 
-## Technology stack
+### Admin console
+Visible to `ADMIN` and `SENIOR_ADMIN` (all `/api/v1/admin/**` routes):
+- Search and filter users (text, privilege tier, blocked state), with their post counts.
+- Block or unblock a user. Blocking suspends that user's open lost items, found items, and teams; unblocking restores them.
+- Change a user's privilege tier.
+- Change a user's role. Only `SENIOR_ADMIN` may do this.
+- Close any lost item, found item, or team.
+- Analytics: totals for users, blocked users, lost reports, found reports, teams, plus 30-day daily growth series (charted with Chart.js).
+
+### Activity log and safety page
+- Each student has a server-side activity history (latest 50 events: uploads, moderation rejections, team requests, resume reviews) that they can clear. A notification list is also kept in browser `localStorage`.
+- `safety.html` is a static page covering the anti-ragging policy, privacy guidance, and the platform's disclaimer.
+
+## Tech stack
 
 | Area | Technology |
 |---|---|
-| Language | Java 17 |
-| Backend | Spring Boot 3.3.2, Spring Web MVC |
-| Persistence | Spring Data JPA, Hibernate |
-| Database | PostgreSQL; configuration is set up for Supabase |
-| Security | Spring Security, JWT (JJWT), BCrypt |
-| Frontend | HTML5, CSS3, vanilla JavaScript, Bootstrap 5.3.3 |
-| AI integration | Spring AI with NVIDIA-hosted language models |
-| Document extraction | Apache Tika / Spring AI Tika document reader |
-| Image hosting | Cloudinary |
-| Image moderation | NVIDIA vision integration and Sightengine |
-| Email | Brevo REST API when configured, with SMTP fallback |
-| API documentation | Springdoc OpenAPI / Swagger UI |
-| Build and packaging | Maven Wrapper and Dockerfile |
+| Language / runtime | Java 17 |
+| Backend | Spring Boot 3.3.2 (Web MVC, Data JPA, Security, Actuator, Validation, Mail) |
+| Database | PostgreSQL (configured for Supabase), HikariCP tuned for a cloud pooler |
+| Auth | Spring Security, JJWT 0.13.0, BCrypt |
+| AI | Spring AI 1.0.0 (OpenAI-compatible client pointed at NVIDIA's API) |
+| Models (from `application.properties` and `AIConfiguration`) | `nvidia/nemotron-3.5-bolt-e4b` (anti-ragging and resume), `nvidia/nemotron-3.5-content-safety` (safety), `meta/llama-3.2-11b-vision-instruct` (vision) |
+| Document parsing | Apache Tika via `spring-ai-tika-document-reader` |
+| Image hosting / moderation | Cloudinary 1.38.0, Sightengine |
+| Email | Brevo REST API if `BREVO_API_KEY` is set, otherwise SMTP |
+| API docs | springdoc-openapi 2.5.0 (Swagger UI) |
+| Frontend | HTML, CSS, vanilla JS, Bootstrap 5.3, Bootstrap Icons, Chart.js |
+| Packaging | Maven Wrapper, multi-stage Dockerfile |
 
 ## Architecture
 
 ```mermaid
 flowchart TD
-    B[Browser: HTML, CSS, JavaScript] -->|REST requests and JWT| C[Spring Boot application]
-    C --> S[Spring Security and JWT filters]
-    C --> U[User, OTP, team, lost-and-found, resume services]
-    U --> R[Spring Data JPA repositories]
+    B[Browser: HTML / CSS / JS] -->|REST + JWT| F[Spring Security filters]
+    F --> C[Controllers]
+    C --> S[Services]
+    S --> R[JPA repositories]
     R --> P[(PostgreSQL / Supabase)]
-    U --> N[NVIDIA language and vision APIs]
-    U --> I[Sightengine moderation]
-    U --> L[Cloudinary image storage]
-    U --> E[Brevo API or SMTP]
+    S --> M[Moderation: NVIDIA LLM + vision, Sightengine]
+    S --> A[Resume AI: NVIDIA LLM + Tika]
+    S --> L[Cloudinary]
+    S --> E[Brevo API or SMTP]
+    S --> X[Bounded moderation thread pool]
 ```
 
-IETScroll is structured as a **modular monolithic application**, not a set of independently deployed microservices. Static frontend files are under `src/main/resources/static` and are served by Spring Boot. Controllers define the API, services implement business logic and external integrations, repositories access the database, and JPA entities represent persisted records.
+It is a modular monolith. Static files live in `src/main/resources/static` and are served by Spring Boot. Item submissions run the text and vision checks in parallel on a dedicated pool (4 core, 12 max threads, queue of 50, caller-runs when saturated).
+
+**Request flow for a lost/found post:** validate input and limits, then run text and vision moderation in parallel (depth depends on the user's privilege tier), then Sightengine, then Cloudinary upload, then save and log.
 
 ## Repository structure
 
 ```text
 src/main/java/com/ietscroll/
-├── configuration/   # AI, Cloudinary, Swagger configuration
-├── controller/      # REST controllers
-├── dto/              # Data-transfer objects
-├── entity/           # JPA entities
-├── exception/        # API exceptions and global error handling
-├── general/enums/    # Branches, courses, statuses, privacy
-├── repository/       # Spring Data repositories and queries
-├── request/          # Incoming request models
-├── response/         # API response models
-├── security/         # Authentication filters, JWT, role configuration
-├── service/          # Service interfaces and integrations
-├── service/impl/     # Business logic
-└── util/             # Supporting utilities
+├── configuration/   # AI clients, Cloudinary, moderation thread pool, Swagger
+├── controller/      # REST controllers (admin, items, team, OTP, resume, activity, views, user)
+├── dto/  request/  response/
+├── entity/          # JPA entities (users, items, teams, OTP, audit and log tables)
+├── exception/       # API exceptions + GlobalExceptionHandler
+├── general/enums/   # Branch, Course, statuses, Privacy, PrivilegeClass
+├── repository/      # Spring Data repositories and custom queries
+├── security/        # JWT util, auth/authorization filters, WebSecurity, Role
+├── service/ + impl/ # Business logic and integrations
+└── util/            # Sightengine threshold evaluator, multipart helper
 
 src/main/resources/
 ├── application.properties
-├── prompts/          # System prompts for AI tasks
-└── static/           # Landing page, login, registration, dashboard, CSS and JS
+├── prompts/         # System prompts (content check, resume rubric)
+└── static/          # index, login, register, dashboard, safety pages; js/ and css/
 ```
 
 ## Getting started
 
 ### Prerequisites
-- JDK 17
-- PostgreSQL database; the committed configuration is written for Supabase
-- API credentials for the external integrations you intend to use
-- Git; Maven can be run through the included Maven Wrapper
+JDK 17, a PostgreSQL database (Supabase works), and credentials for the external services you want to use. Maven is bundled via `mvnw`.
 
-### 1. Clone the repository
-
+### 1. Clone
 ```bash
-git clone https://github.com/JustTheGreenPanther28/Student_Community_Platform-IETScroll.git
-cd Student_Community_Platform-IETScroll
+git clone https://github.com/JustTheGreenPanther28/IETScroll.git
+cd IETScroll
 ```
 
-### 2. Configure environment variables
+### 2. Configure
+Set environment variables, or put them in `src/main/resources/application-local.properties` (imported automatically if present and gitignored). **Never commit secrets.**
 
-Set these in your shell or IDE run configuration before starting the application. **Do not commit credentials or API keys.**
+| Variable | Purpose |
+|---|---|
+| `SUPABASE_DB_URL` | JDBC URL for PostgreSQL |
+| `SUPABASE_DB_PASSWORD` | Database password |
+| `JWT_SECRET` | HMAC signing secret, 32+ random bytes |
+| `NVIDIA_API_KEY` (or `NVIDIA_MISTRAL_KEY` / `NVIDIA_LLAMA_KEY`) | NVIDIA API access; one is enough |
+| `CLOUDINARY_CLOUD_NAME`, `CLOUDINARY_API_KEY`, `CLOUDINARY_API_SECRET` | Image hosting |
+| `SIGHTENGINE_API_USER`, `SIGHTENGINE_API_SECRET` | Image moderation |
+| `BREVO_API_KEY` | OTP email via Brevo REST (preferred on hosts that block SMTP) |
+| `BREVO_USERNAME`, `BREVO_PASSWORD` | SMTP fallback when no API key is set |
+| `ADMIN_EMAIL` | Account promoted to `SENIOR_ADMIN` on login |
 
-| Variable | Used for | Notes |
-|---|---|---|
-| `ADMIN_EMAIL` | Registration exception / admin email | Email allowed in addition to the institute domain |
-| `SUPABASE_DB_URL` | Database | JDBC PostgreSQL URL; the current property appends `?prepareThreshold=0`, so provide a URL without an existing query string |
-| `SUPABASE_DB_PASSWORD` | Database | Database password |
-| `JWT_SECRET` | Authentication | Use a strong random HMAC secret of at least 32 bytes |
-| `NVIDIA_API_KEY` | AI services | Preferred key variable in the current configuration |
-| `NVIDIA_MISTRAL_KEY` | AI services | Fallback key variable used by nested property expressions |
-| `NVIDIA_LLAMA_KEY` | AI services | Fallback key variable used by nested property expressions |
-| `CLOUDINARY_CLOUD_NAME` | Image hosting | Cloudinary cloud name |
-| `CLOUDINARY_API_KEY` | Image hosting | Cloudinary API key |
-| `CLOUDINARY_API_SECRET` | Image hosting | Cloudinary API secret |
-| `SIGHTENGINE_API_USER` | Image moderation | Sightengine API user |
-| `SIGHTENGINE_API_SECRET` | Image moderation | Sightengine API secret |
-| `BREVO_API_KEY` | Email | Preferred path: Brevo REST API |
-| `BREVO_USERNAME` | SMTP fallback | Spring Mail username |
-| `BREVO_PASSWORD` | SMTP fallback | Spring Mail password |
+The database username in `application.properties` is hard-coded to a specific Supabase project; change it for your own database. `ADMIN_EMAIL` has a hard-coded fallback in the code, so always set it explicitly in your own deployment.
 
-Provide at least one NVIDIA key variable for the configured AI integrations. External-provider access, quota, model availability, and account settings depend on those providers.
-
-**Database note:** `spring.datasource.username` is currently hard-coded in `application.properties` for a specific Supabase project. Update it for your own database or move it to an environment variable before deploying elsewhere.
-
-### 3. Run locally
-
-The default application port in `application.properties` is **4040**.
-
-macOS/Linux:
-
+### 3. Run
 ```bash
 ./mvnw clean package -DskipTests
 java -jar target/IETScroll-0.0.1-SNAPSHOT.jar
 ```
+Windows: `mvnw.cmd` and `target\IETScroll-0.0.1-SNAPSHOT.jar`. Then open http://localhost:4040/.
 
-Windows:
+First start creates tables through Hibernate (`ddl-auto=update`) and runs a small startup script that resets role and privilege constraints and makes image columns nullable.
 
-```bat
-mvnw.cmd clean package -DskipTests
-java -jar target\IETScroll-0.0.1-SNAPSHOT.jar
+### 4. Docker
+```bash
+docker build -t ietscroll .
+docker run -p 4040:4040 --env-file .env ietscroll
 ```
+The app listens on `4040`; the Dockerfile's `EXPOSE 8080` is informational only, so map the right port. The JVM is capped with `-Xmx400m`.
 
-Open **http://localhost:4040/**. The landing page, login, registration, dashboard, and API are served by the same Spring Boot application.
-
-### 4. API documentation and health
-
-- Swagger UI: http://localhost:4040/swagger-ui/index.html
-- OpenAPI document: http://localhost:4040/v3/api-docs
-- Health endpoint: http://localhost:4040/actuator/health
+### 5. Docs and health
+- Swagger UI: `/swagger-ui/index.html`, OpenAPI JSON: `/v3/api-docs`
+- Health: `/actuator/health` (only exposed endpoint)
 
 ## API reference
 
-Unless specified otherwise, endpoints require a JWT in the `Authorization: Bearer <token>` request header. Registration, OTP verification, login, Swagger resources, public static pages, and the health endpoint are configured as public.
+All endpoints need `Authorization: Bearer <token>` except: `POST /login`, `POST /api/v1/user/register`, `POST /api/v1/otp/verify`, Swagger, `/actuator/health`, and the static pages.
 
-### Authentication and users
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/user/register` | Register an account and initiate OTP verification |
-| `POST` | `/api/v1/otp/verify` | Verify OTP and activate account |
-| `POST` | `/login` | Authenticate with email/password; JWT is returned in the `Authorization` response header |
-| `GET` | `/api/v1/user` | Get the authenticated user's profile |
-| `PATCH` | `/api/v1/user/username/{newUsername}` | Update username |
-| `PATCH` | `/api/v1/user/fullname/{fullname}` | Update full name |
-
-### Lost items
+**Auth and users**
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/v1/lost-item` | Create a lost-item report; multipart fields: `data` (JSON) and `image` (file) |
-| `GET` | `/api/v1/lost-item?page=0&size=10` | Browse open lost-item reports |
-| `GET` | `/api/v1/lost-item/me` | Get the authenticated user's open reports |
-| `PATCH` | `/api/v1/lost-item/close?lostItemId=<public-uuid>` | Close an owned report |
+| POST | `/api/v1/user/register` | Register and send OTP |
+| POST | `/api/v1/otp/verify` | Verify OTP, activate account |
+| POST | `/login` | JSON `{email, password}`; token in `Authorization` response header |
+| GET | `/api/v1/user` | Current profile |
+| POST | `/api/v1/user/logout` | Record logout time |
+| PATCH | `/api/v1/user/username/{newUsername}` | Change username |
+| PATCH | `/api/v1/user/fullname/{fullname}` | Change full name |
 
-### Found items
-
-| Method | Endpoint | Description |
-|---|---|---|
-| `POST` | `/api/v1/found-item` | Create a found-item report; multipart fields: `data` (JSON) and `image` (file) |
-| `GET` | `/api/v1/found-item?page=0&size=10` | Browse pending found-item reports |
-| `GET` | `/api/v1/found-item/me` | Get the authenticated user's pending reports |
-| `PATCH` | `/api/v1/found-item/close?foundItemId=<public-uuid>` | Close an owned report |
-
-### Team Finder and applications
+**Lost items** (`/api/v1/lost-item`) and **found items** (`/api/v1/found-item`)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/v1/team` | Create a team |
-| `GET` | `/api/v1/team?page=0&size=10` | Browse active public teams |
-| `GET` | `/api/v1/team/me` | Get the authenticated user's active team |
-| `PATCH` | `/api/v1/team/close` | Close the current team |
-| `PATCH` | `/api/v1/team/team-size?teamSize=5` | Update maximum team size |
-| `POST` | `/api/v1/request-team` | Apply to join a team; JSON includes `teamId` and `message` |
-| `GET` | `/api/v1/request-team/requests` | List pending requests for the owner's team |
-| `GET` | `/api/v1/request-team/team-members` | List accepted membership records |
-| `PATCH` | `/api/v1/request-team/accept/{applicantEmail}` | Accept an applicant |
-| `PATCH` | `/api/v1/request-team/reject/{applicantEmail}` | Reject an applicant |
-| `PATCH` | `/api/v1/request-team/remove/{applicantEmail}` | Remove a team member |
-| `GET` | `/api/v1/request-team/my-application` | View submitted applications |
+| POST | `/` | Create; multipart parts `data` (JSON) and optional `image` |
+| GET | `/?page=0&size=10` | Browse open (lost) / pending (found) reports |
+| GET | `/me` | Your active reports |
+| PATCH | `/close?lostItemId=` / `?foundItemId=` | Close your report |
 
-### Resume checker
+**Teams** (`/api/v1/team`) and **join requests** (`/api/v1/request-team`)
 
 | Method | Endpoint | Description |
 |---|---|---|
-| `POST` | `/api/v1/ietscroll/resume/quality` | Analyze resume; multipart fields: `file`, `exp` (years), and `role` |
+| POST | `/api/v1/team` | Create team (`purpose`, `teamSize`, `privacy`, `skillIds`) |
+| GET | `/api/v1/team?page=&size=` | Public open teams |
+| GET | `/api/v1/team/me` | Your open team |
+| PATCH | `/api/v1/team/close` | Close your team |
+| PATCH | `/api/v1/team/team-size?teamSize=` | Change max size |
+| POST | `/api/v1/request-team` | Apply (`teamId`, `message`) |
+| GET | `/api/v1/request-team/requests` | Pending applications to your team |
+| GET | `/api/v1/request-team/team-members` | Accepted members |
+| PATCH | `/api/v1/request-team/accept/{email}`, `/reject/{email}`, `/remove/{email}` | Manage applicants and members |
+| GET | `/api/v1/request-team/my-application` | Applications you submitted |
 
-The current response model can include `overAllRating`, `rateContentQuality`, `rateProjects`, `topFiveSkillsMatched`, `topTenKeywordsMissed`, `improvement`, and `suggestedUnqiueProject`. The spelling of the last field reflects the current Java class.
+**Other**
 
-## Known limitations and security notes
+| Method | Endpoint | Description |
+|---|---|---|
+| POST | `/api/v1/ietscroll/resume/quality` | Multipart `file`, `exp`, `role` |
+| GET / DELETE | `/api/v1/user/activities` | Read or clear your activity log |
+| POST / GET | `/api/v1/report-views/{reportId}` | Record a view (`?type=LOST\|FOUND`) / list viewers |
 
-The following are observations from the source code, not claims that these issues have been exploited.
+**Admin** (`/api/v1/admin`, `ADMIN` or `SENIOR_ADMIN`)
 
-- **CORS:** Configuration permits wildcard origin patterns while credentials are enabled. Restrict origins to the intended frontend deployment(s) before production use.
-- **JWT storage:** The browser stores the token in `localStorage`; an XSS vulnerability could expose it. Consider secure `HttpOnly` cookies with appropriate CSRF protections.
-- **JWT lifecycle:** Tokens expire after 24 hours. Refresh-token and immediate revocation endpoints were not found in the reviewed source.
-- **Moderation failure behavior:** Some external AI and image-moderation handlers log provider errors and continue processing. Decide explicitly whether moderation should fail closed or use a documented fallback.
-- **Item image validation:** The backend checks the client-supplied MIME type but does not perform the same byte-level detection used for resumes. The frontend's 8 MB image limit is not mirrored by an explicit size limit in the item services.
-- **Rate limiting:** Bucket4j is present as a dependency, but no general Bucket4j rate limiter was found in the inspected implementation. OTP generation has a cooldown and OTP verification tracks failed attempts. An OTP resend endpoint is not mapped in the current `OTPController`.
-- **Team membership:** Acceptance checks capacity before incrementing the member count; concurrent requests may race. Private-team authorization should also be enforced in the join-request service, not only by filtering public team listings.
-- **Database schema:** Hibernate is configured with `spring.jpa.hibernate.ddl-auto=update`. Use a controlled database migration strategy for production deployments.
-- **Container port:** `application.properties` specifies port 4040, while the Dockerfile exposes 8080. Align the application and hosting configuration before relying on container deployment.
-- **Automated tests:** A comprehensive test suite was not visible in the reviewed source tree. Add tests for authentication, OTP edge cases, item limits/status transitions, team membership/capacity, and external-service failures.
-- **Admin functionality:** The security configuration includes an `ADMIN` role route pattern, but a full admin controller/dashboard was not found in the inspected source.
+| Method | Endpoint | Description |
+|---|---|---|
+| GET | `/users?query=&privilege=&isBlocked=&page=&size=` | Search users |
+| POST | `/users/{email}/block`, `/users/{email}/unblock` | Block or unblock |
+| PATCH | `/users/{email}/role?role=` | Change role (`SENIOR_ADMIN` only) |
+| PATCH | `/users/{email}/privilege?privilege=` | Change privilege tier |
+| PATCH | `/lost-item/{id}/close`, `/found-item/{id}/close`, `/team/{id}/close` | Close any item or team |
+| GET | `/analytics` | Totals and 30-day growth series |
+
+Errors return `{ timestamp, message }`; database and unexpected exceptions are sanitised so SQL or stack details do not reach the client.
+
+## Known issues
+
+These come from reading the source at the time of writing; none were reproduced by running the app. They are ordered by how likely a user is to hit them.
+
+**Frontend and backend disagree**
+- **Team size is sent under the wrong name.** The UI posts `maxMember`; the API reads `teamSize`. The controller does not use `@Valid`, so the value falls back to `0`, and accepting an applicant then fails with a "maximum team size" error until the owner calls the team-size endpoint.
+- **Endpoints the UI calls that do not exist:** `GET /api/v1/skill` (the skills dropdown stays empty; there is no skills controller or seed data), `PATCH /api/v1/request-team/kick/{email}` (the API route is `/remove/`), `PATCH /api/v1/request-team/leave/{teamId}` (the service method exists, no route), and `GET /api/v1/request-team/my-applications` (the API route is `/my-application`).
+- **The resume result panel reads fields the API does not return.** The UI expects `score`, `overallQuality`, `strongPoints`, `missingKeywords`, `suggestions`; the API returns `overAllRating`, `rateContentQuality`, `rateProjects`, `topFiveSkillsMatched`, `topTenKeywordsMissed`, `improvement`, `suggestedUnqiueProject`. The prompt also caps the rating at 10 while the UI shows `/100`.
+- **Upload size.** No `spring.servlet.multipart.*` limits are configured, so Spring Boot's default of 1 MB per file applies, below the 5 MB resume limit in the service and larger than most phone photos.
+- **No OTP resend.** The path is whitelisted in security config but no controller exists. Registering again with the same email returns a duplicate error, so an unverified account whose OTP expired has no recovery path.
+- **The college email domain is not enforced.** `CollegeDefaults` holds `@ietdavv.edu.in` but nothing uses it; any valid email can register.
+
+**Security and hardening**
+- Blocking, role changes, and demotions do not affect tokens already issued; the filter trusts the JWT for up to 24 hours without a database check.
+- Any `ADMIN` can block any user, including a `SENIOR_ADMIN`. Only role changes check for `SENIOR_ADMIN`.
+- Any logged-in student can list the names and emails of everyone who viewed any report (`requesterEmail` is accepted but not used). Confirm this is intended.
+- CORS allows every origin with credentials enabled. The JWT lives in `localStorage`.
+- Moderation fails open for the text LLM checks and Sightengine (see the table above). The longer image-safety prompt in `NvidiaVisionServiceImpl.checkImage` is never called.
+- Item images are validated by the client-supplied content type only.
+- Resume `role` is inserted into the system prompt, and a non-numeric `exp` causes a server error.
+- Rate limiting: Bucket4j is a dependency but unused. There is no throttling on `/login`.
+
+**Maintenance**
+- `recordView` loads every lost or found item with `findAll()` and filters in memory; list endpoints also look up the poster once per row.
+- `acceptMember` checks capacity and then increments without locking, so concurrent accepts can overshoot. `TeamStatus.FULL` is never set.
+- Schema management relies on `ddl-auto=update` plus DDL run at every startup; consider migrations (Flyway or Liquibase).
+- No tests exist (`src/test` is absent and the test starter is not a dependency).
+- `@EnableScheduling` has nothing scheduled, and `spring-boot-starter-websocket` sits in `dependencyManagement` without being a dependency.
 
 ## Contributing
-
-1. Create a focused branch for your change.
-2. Keep provider secrets out of source control.
-3. Add or update tests for behavior changes.
-4. Document API changes and test the affected workflow locally before opening a pull request.
-
-## Links
-
-- **Repository:** https://github.com/JustTheGreenPanther28/Student_Community_Platform-IETScroll
-- **Live deployment 1:** https://iet-scroll.onrender.com/
-- **Live deployment 2:** https://student-community-platform-ietscroll.onrender.com/
-- **Swagger UI (configured deployment):** https://student-community-platform-ietscroll.onrender.com/swagger-ui/index.html
+1. Branch from `main` with a focused change.
+2. Keep secrets out of commits.
+3. Add tests for behavior changes, and update this README when endpoints or limits change.
 
 ## License
-
-No license file was identified in the reviewed repository. Add an explicit license before granting reuse or redistribution permissions.
+No license file is present. Add one before inviting reuse.
